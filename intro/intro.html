@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Все объявления — интро</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #16181D; --accent: #FF4F3A; --paper: #FFFFFF; --muted: #8A8F99; --line: #E6E8EC; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: "Manrope", "Helvetica Neue", Arial, sans-serif; display: flex; flex-direction: column; overflow: hidden; }
+  #intro { flex: 1; min-height: 0; position: relative; background: var(--paper); cursor: pointer; transition: opacity .45s ease; }
+  #intro.site { position: fixed; inset: 0; z-index: 9999; }
+  #intro.gone { opacity: 0; pointer-events: none; }
+  #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .msg { font-family: "Manrope", "Helvetica Neue", Arial, sans-serif; font-weight: 700; font-size: 21px; fill: #fff; }
+
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 16px 14px; border-top: 1px solid var(--line); font-size: 14px; }
+  .bar button { font: inherit; font-weight: 700; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .bar button:hover { border-color: var(--ink); }
+  .bar button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .bar button:focus-visible, .bar input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .rates { display: flex; gap: 6px; }
+  .scrub { flex: 1 1 220px; display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .scrub input { flex: 1; min-width: 0; accent-color: var(--accent); }
+  .time { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 6ch; }
+</style>
+</head>
+<body>
+<div id="intro" title="Нажмите, чтобы проиграть заново">
+  <svg id="scene" viewBox="-63 -90 760 394" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Все объявления">
+    <g id="world">
+      <g id="word" fill="#16181D"></g>
+      <g id="ticks" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M0 6 L4 10 L11 1"/><path d="M6 6 L10 10 L17 1"/>
+      </g>
+      <g id="mark" stroke-linejoin="round" stroke-width="10">
+        <path id="bB" fill="#16181D" stroke="#16181D"/>
+        <path id="bA" fill="#FF4F3A" stroke="#FF4F3A"/>
+      </g>
+      <g id="dotsA" fill="#fff"><circle r="4.5"/><circle r="4.5"/><circle r="4.5"/></g>
+      <g id="dotsB" fill="#fff"><circle r="4.5"/><circle r="4.5"/><circle r="4.5"/></g>
+      <text id="tA" class="msg">Ещё актуально?</text>
+      <text id="tB" class="msg">Да, забирайте!</text>
+    </g>
+  </svg>
+</div>
+<div class="bar" id="bar">
+  <button id="play">Повторить</button>
+  <div class="rates" role="group" aria-label="Скорость">
+    <button data-rate="0.25" aria-pressed="false">0.25×</button>
+    <button data-rate="0.5" aria-pressed="false">0.5×</button>
+    <button data-rate="1" aria-pressed="true">1×</button>
+  </div>
+  <div class="scrub"><input type="range" id="scrub" min="0" step="0.001" value="0" aria-label="Таймлайн"><span class="time" id="time">0.00 с</span></div>
+</div>
+
+<script>
+/*
+  Интро «Диалог».
+  Покупатель пишет «Ещё актуально?», продавец отвечает «Да, забирайте!» —
+  два облачка переписки съезжаются и складываются в букву «В» логотипа,
+  камера отъезжает, и из-за знака выходит надпись.
+
+  На сайте: откройте страницу с ?site (или поставьте SITE_MODE = true) —
+  панель скрывается, интро лежит поверх страницы, по окончании плавно
+  исчезает и шлёт событие "intro:done" на window. Клик — пропустить.
+*/
+(() => {
+  const SITE_MODE = new URLSearchParams(location.search).has("site");
+  const GLYPHS = [{"d": "M175.1 78V38H193.8Q196 38 197.7 38.3Q199.4 38.5 200.5 38.9Q203.2 39.7 205.5 42Q207.7 44.4 207.7 48.9Q207.7 51.6 206.9 53.2Q206 54.9 204.6 55.9Q204 56.4 203.3 56.8Q202.6 57.1 202 57.3Q203.5 57.5 204.8 58.1Q206.8 59 208.3 60.9Q209.7 62.8 209.7 66.5Q209.7 70.5 207.8 73.3Q205.9 76.2 202 77.3Q200.6 77.6 198.8 77.8Q197 78 195.1 78ZM185.3 70.4H194.3Q195.1 70.4 196 70.2Q196.8 70 197.5 69.8Q198.5 69.3 199 68.3Q199.5 67.2 199.5 66.1Q199.5 64.5 198.8 63.6Q198.1 62.8 197.2 62.4Q196.5 62.1 195.7 62Q194.9 61.9 194.3 61.9H185.3ZM185.3 54.2H191.5Q192.6 54.2 193.7 54Q194.8 53.9 195.5 53.6Q196.4 53.1 196.9 52.2Q197.4 51.2 197.4 50Q197.4 48.7 196.8 47.6Q196.3 46.5 195.1 46.2Q194.3 45.9 193 45.8Q191.8 45.8 191.5 45.8H185.3Z", "x": 191.0, "l": 0}, {"d": "M233.8 79.1Q227.5 79.1 223.1 76.3Q218.7 73.6 216.3 68.8Q213.9 64 213.9 58Q213.9 52 216.4 47.2Q218.8 42.4 223.3 39.7Q227.8 36.9 233.9 36.9Q241 36.9 245.8 40.5Q250.5 44.1 251.9 50.2L241.8 52.9Q240.9 49.8 238.7 48.1Q236.5 46.3 233.8 46.3Q230.6 46.3 228.5 47.9Q226.5 49.4 225.5 52Q224.6 54.7 224.6 58Q224.6 63.2 226.9 66.5Q229.2 69.7 233.8 69.7Q237.2 69.7 238.9 68.2Q240.7 66.6 241.6 63.7L251.9 65.9Q250.2 72.2 245.4 75.7Q240.7 79.1 233.8 79.1Z", "x": 232.5, "l": 0}, {"d": "M276.9 79.1Q270.7 79.1 266 76.5Q261.4 73.8 258.7 69.2Q256.1 64.5 256.1 58.5Q256.1 52 258.6 47.1Q261.2 42.3 265.8 39.6Q270.3 36.9 276.3 36.9Q282.6 36.9 287 39.9Q291.4 42.9 293.5 48.2Q295.6 53.6 294.9 60.8H285V57.1Q285 51 283.1 48.3Q281.1 45.7 276.7 45.7Q271.6 45.7 269.1 48.8Q266.7 51.9 266.7 58Q266.7 63.6 269.1 66.7Q271.6 69.7 276.3 69.7Q279.2 69.7 281.3 68.4Q283.4 67.1 284.6 64.7L294.6 67.6Q292.4 73 287.5 76.1Q282.6 79.1 276.9 79.1ZM263.6 60.8V53.4H290.1V60.8Z", "x": 275.6, "l": 0}, {"d": "M193.2 173.1Q187.1 173.1 182.6 170.4Q178 167.7 175.5 163Q173 158.2 173 152Q173 145.8 175.6 141Q178.1 136.3 182.7 133.6Q187.2 130.9 193.2 130.9Q199.2 130.9 203.8 133.6Q208.3 136.3 210.9 141.1Q213.4 145.8 213.4 152Q213.4 158.2 210.9 163Q208.3 167.7 203.7 170.4Q199.2 173.1 193.2 173.1ZM193.2 163.7Q198 163.7 200.4 160.4Q202.8 157.2 202.8 152Q202.8 146.7 200.4 143.5Q197.9 140.3 193.2 140.3Q189.9 140.3 187.8 141.8Q185.7 143.3 184.6 145.9Q183.6 148.5 183.6 152Q183.6 157.4 186 160.5Q188.5 163.7 193.2 163.7Z", "x": 193.2, "l": 1}, {"d": "M236.9 173.2Q231.1 173.1 227.1 170.6Q223.1 168.1 220.9 163.7Q218.6 159.3 218 153.4Q217.7 150.3 217.9 146.3Q218.1 142.4 218.7 138.6Q219.4 134.8 220.6 132Q221.8 129.5 223.7 127.4Q225.6 125.2 227.7 123.8Q230.1 122 233 121.1Q235.8 120.1 239 119.6Q242.1 119.1 245.5 118.7Q248.9 118.3 252.4 117.6L253.3 126.5Q251.2 127 248.5 127.3Q245.8 127.6 242.9 127.8Q240.1 128.1 237.5 128.7Q234.9 129.3 233 130.5Q230.4 132.1 229.1 134.9Q227.7 137.7 227.5 140.6Q229.8 137.3 233.1 136Q236.4 134.8 239.7 134.8Q244.9 134.8 248.7 137.3Q252.5 139.8 254.6 144.1Q256.6 148.4 256.6 153.6Q256.6 159.5 254.1 163.9Q251.5 168.3 247.1 170.8Q242.6 173.3 236.9 173.2ZM237.4 163.8Q241.6 163.8 243.8 161.1Q246 158.5 246 154Q246 149.5 243.8 146.9Q241.5 144.2 237.4 144.2Q233.1 144.2 230.9 146.9Q228.7 149.5 228.7 154Q228.7 158.7 231 161.3Q233.2 163.8 237.4 163.8Z", "x": 237.2, "l": 1}, {"d": "M265.5 172V139.8H259.5V132H275.5V144.8H282Q283.6 144.8 285.8 144.8Q288.1 144.9 289.5 145.2Q293 146 295.4 147.7Q297.8 149.4 299.1 152.1Q300.3 154.8 300.3 158.5Q300.3 163.8 297.6 167Q294.8 170.3 289.6 171.5Q288.1 171.8 285.9 171.9Q283.6 172 282 172ZM275.5 164.2H283.1Q283.7 164.2 284.5 164.2Q285.4 164.1 286.2 163.9Q287.7 163.4 288.9 161.9Q290.1 160.4 290.1 158.5Q290.1 156.3 288.9 154.9Q287.7 153.4 286 152.9Q285.3 152.7 284.5 152.6Q283.7 152.5 283.1 152.5H275.5Z", "x": 280.7, "l": 1}, {"d": "M330.5 172V159.3H324Q322.8 159.3 320.6 159.2Q318.5 159.2 316.6 158.8Q311.8 158 308.7 154.7Q305.7 151.4 305.7 145.7Q305.7 140.2 308.6 136.9Q311.5 133.5 316.4 132.6Q318.4 132.2 320.5 132.1Q322.7 132 324 132H340.5V172ZM304.7 172 313.8 157.2H324.1L315.2 172ZM322.9 151.5H330.5V139.8H322.9Q322.3 139.8 321.5 139.9Q320.7 140 319.8 140.2Q318.8 140.5 317.9 141.3Q317 142.1 316.5 143.2Q315.9 144.3 315.9 145.7Q315.9 147.8 317.2 149.2Q318.4 150.7 320 151.1Q320.8 151.4 321.5 151.4Q322.3 151.5 322.9 151.5Z", "x": 323.7, "l": 1}, {"d": "M349.3 172V132H368.1Q370.3 132 371.9 132.3Q373.6 132.5 374.7 132.9Q377.5 133.7 379.7 136Q382 138.4 382 142.9Q382 145.6 381.1 147.2Q380.3 148.9 378.9 149.9Q378.2 150.4 377.5 150.8Q376.9 151.1 376.2 151.3Q377.7 151.5 379 152.1Q381 153 382.5 154.9Q384 156.8 384 160.5Q384 164.5 382 167.3Q380.1 170.2 376.2 171.3Q374.9 171.6 373.1 171.8Q371.3 172 369.3 172ZM359.5 164.4H368.6Q369.4 164.4 370.2 164.2Q371 164 371.7 163.8Q372.8 163.3 373.2 162.3Q373.7 161.2 373.7 160.1Q373.7 158.5 373 157.6Q372.3 156.8 371.5 156.4Q370.8 156.1 369.9 156Q369.1 155.9 368.6 155.9H359.5ZM359.5 148.2H365.7Q366.9 148.2 367.9 148Q369 147.9 369.7 147.6Q370.6 147.1 371.1 146.2Q371.6 145.2 371.6 144Q371.6 142.7 371.1 141.6Q370.5 140.6 369.3 140.2Q368.5 139.9 367.3 139.8Q366 139.8 365.7 139.8H359.5Z", "x": 365.2, "l": 1}, {"d": "M386.2 172V163.6Q388.3 164 389.5 163.6Q390.7 163.1 391.3 161.7Q391.9 160.3 392.4 157.9Q393 154.8 393.4 150.5Q393.9 146.2 394.2 141.5Q394.6 136.7 394.8 132H425V172H415V141.4H403.6Q403.5 143.4 403.2 146Q403 148.7 402.7 151.6Q402.4 154.4 402.1 157Q401.8 159.6 401.4 161.5Q400.5 166.2 398.8 168.9Q397 171.6 394 172.4Q391 173.1 386.2 172Z", "x": 407.4, "l": 1}, {"d": "M452.4 173.1Q446.3 173.1 441.6 170.5Q436.9 167.8 434.3 163.2Q431.7 158.5 431.7 152.5Q431.7 146 434.2 141.1Q436.8 136.3 441.4 133.6Q445.9 130.9 451.9 130.9Q458.1 130.9 462.6 133.9Q467 136.8 469.1 142.2Q471.2 147.6 470.5 154.8H460.6V151.1Q460.6 145 458.6 142.3Q456.7 139.7 452.3 139.7Q447.2 139.7 444.7 142.8Q442.3 145.9 442.3 152Q442.3 157.6 444.7 160.7Q447.2 163.7 451.9 163.7Q454.8 163.7 456.9 162.4Q459 161.1 460.1 158.7L470.2 161.6Q468 167 463.1 170.1Q458.2 173.1 452.4 173.1ZM439.2 154.8V147.4H465.7V154.8Z", "x": 451.2, "l": 1}, {"d": "M477.3 172V132H487.4V147.3H503.8V132H513.8V172H503.8V156.7H487.4V172Z", "x": 495.6, "l": 1}, {"d": "M558.3 132V172H548.7V147.6L530.6 172H522.6V132H532.3V155.6L550.4 132Z", "x": 540.5, "l": 1}, {"d": "M590.7 172V159.3H584.3Q583 159.3 580.8 159.2Q578.7 159.2 576.8 158.8Q572 158 569 154.7Q565.9 151.4 565.9 145.7Q565.9 140.2 568.8 136.9Q571.8 133.5 576.6 132.6Q578.6 132.2 580.8 132.1Q582.9 132 584.3 132H600.8V172ZM564.9 172 574 157.2H584.3L575.5 172ZM583.1 151.5H590.7V139.8H583.1Q582.5 139.8 581.7 139.9Q580.9 140 580 140.2Q579 140.5 578.1 141.3Q577.2 142.1 576.7 143.2Q576.1 144.3 576.1 145.7Q576.1 147.8 577.4 149.2Q578.6 150.7 580.2 151.1Q581 151.4 581.8 151.4Q582.6 151.5 583.1 151.5Z", "x": 584.0, "l": 1}];
+
+  const $ = id => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+  const intro = $("intro"), world = $("world"), mark = $("mark"), bA = $("bA"), bB = $("bB");
+  const tA = $("tA"), tB = $("tB"), ticks = $("ticks");
+  const dotsA = [...$("dotsA").children], dotsB = [...$("dotsB").children];
+
+  const letters = GLYPHS.map(g => {
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", g.d); $("word").appendChild(p);
+    return { ...g, n: p };
+  });
+
+  /* ---------- математика ---------- */
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const mix = (a, b, p) => a + (b - a) * p;
+  const outCubic = p => 1 - Math.pow(1 - p, 3);
+  const inOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+  // мягкая пружина: один небольшой перелёт и успокоение
+  const spring = (p, f = 3.2, d = 7) => p <= 0 ? 0 : p >= 1 ? 1 : 1 - Math.exp(-d * p) * Math.cos(f * Math.PI * p) * (1 - p) - p * Math.exp(-d);
+  const mixHex = (h1, h2, p) => {
+    const a = parseInt(h1.slice(1), 16), b = parseInt(h2.slice(1), 16), c = s => Math.round(mix((a >> s) & 255, (b >> s) & 255, p));
+    return `rgb(${c(16)},${c(8)},${c(0)})`;
+  };
+  const lerpObj = (A, B, p) => { const o = {}; for (const k in A) o[k] = mix(A[k], B[k], p); return o; };
+
+  // Облачко: внутренний контур, скругляется обводкой 10px (как в логотипе).
+  // rl/rr — радиусы левой/правой стороны, tail — хвостик снизу слева (0..1).
+  function bubble({ x, y, w, h, rl, rr, tail }) {
+    rr = clamp(rr, 0, Math.min(h, w) / 2); rl = clamp(rl, 0, Math.min(h / 2, w - rr));
+    const f = v => v.toFixed(2);
+    let d = `M${f(x + rl)} ${f(y)}H${f(x + w - rr)}A${f(rr)} ${f(rr)} 0 0 1 ${f(x + w)} ${f(y + rr)}V${f(y + h - rr)}A${f(rr)} ${f(rr)} 0 0 1 ${f(x + w - rr)} ${f(y + h)}`;
+    if (tail > .001) d += `H${f(x + mix(rl, 25, tail))}L${f(x)} ${f(y + h + 22 * tail)}V${f(y + rl)}`;
+    else d += `H${f(x + rl)}A${f(rl)} ${f(rl)} 0 0 1 ${f(x)} ${f(y + h - rl)}V${f(y + rl)}`;
+    return d + `A${f(rl)} ${f(rl)} 0 0 1 ${f(x + rl)} ${f(y)}Z`;
+  }
+
+  /* ---------- раскладка ---------- */
+  const CX = 317, CY = 107;          // центр композиции (= центр логотипа)
+  const MC = { x: 89, y: 110 };      // центр знака
+  const RIGHT = 470, LEFT = 164;     // края «переписки»
+  const PAD = 20;
+  let wA = 220, wB = 220;            // ширина облачков под текст — уточняется после загрузки шрифта
+  function measure() {
+    wA = tA.getComputedTextLength() + PAD * 2;
+    wB = tB.getComputedTextLength() + PAD * 2;
+  }
+  // Финальные формы — точь-в-точь из логотипа
+  const FIN_A = { x: 25, y: 9,   w: 111, h: 76, rl: 0, rr: 38, tail: 0 };
+  const FIN_B = { x: 25, y: 101, w: 123, h: 88, rl: 0, rr: 44, tail: 1 };
+
+  /* ---------- таймлайн, с ---------- */
+  const T = {
+    popA: [.15, .5],  typeA: [.3, 1.05], openA: [1.0, 1.45], textA: [1.18, 1.45],
+    tick: 1.4, read: 1.8,
+    popB: [1.6, 1.95], liftA: [1.6, 2.0], typeB: [1.75, 2.35], openB: [2.3, 2.75], textB: [2.48, 2.75],
+    hush: [2.95, 3.12], fold: [3.0, 3.62], foldLag: .07, camIn: [2.95, 3.55], snap: 3.6,
+    camOut: [3.72, 4.5], word: 3.86,
+  };
+  const TOTAL = 5.0;
+
+  /* ---------- кадр ---------- */
+  function render(t) {
+    // камера
+    const ci = inOut(seg(t, ...T.camIn)), co = inOut(seg(t, ...T.camOut));
+    const drift = 1 + .04 * seg(t, 0, 3);                // лёгкий наезд во время переписки
+    const zIn = mix(drift, 1.35, ci);
+    const z = mix(zIn, 1, co);
+    const cx = mix(mix(CX, MC.x, ci), CX, co), cy = mix(mix(CY, MC.y, ci), CY, co);
+    world.setAttribute("transform", `translate(${CX} ${CY}) scale(${z}) translate(${-cx} ${-cy})`);
+
+    // --- облачко A (покупатель, справа) ---
+    const oA = spring(seg(t, ...T.openA));
+    const hA = mix(40, 52, oA), wAc = mix(64, wA, oA), rA = mix(20, 18, oA);
+    const cyA = mix(CY, CY - 36, inOut(seg(t, ...T.liftA)));
+    const chatA = { x: RIGHT - wAc, y: cyA - hA / 2, w: wAc, h: hA, rl: rA, rr: rA, tail: 0 };
+    const fA = spring(seg(t, T.fold[0], T.fold[1]));
+    const shA = lerpObj(chatA, FIN_A, fA);
+    bA.setAttribute("d", bubble(shA));
+    const pA = spring(seg(t, ...T.popA), 3.4, 6);          // появление: пружинка от правого нижнего угла
+    bA.setAttribute("transform", t < T.popA[1] ? `translate(${RIGHT} ${cyA + hA / 2}) scale(${pA}) translate(${-RIGHT} ${-(cyA + hA / 2)})` : "");
+    bA.style.display = t < T.popA[0] ? "none" : "";
+
+    // --- облачко B (продавец, слева, с хвостиком) ---
+    const oB = spring(seg(t, ...T.openB));
+    const hB = mix(40, 52, oB), wBc = mix(64, wB, oB), rB = mix(20, 18, oB);
+    const cyB = CY + 36;
+    const chatB = { x: LEFT, y: cyB - hB / 2, w: wBc, h: hB, rl: rB, rr: rB, tail: .55 };
+    const fB = spring(seg(t, T.fold[0] + T.foldLag, T.fold[1] + T.foldLag));
+    const shB = lerpObj(chatB, FIN_B, fB);
+    bB.setAttribute("d", bubble(shB));
+    const pB = spring(seg(t, ...T.popB), 3.4, 6);
+    bB.setAttribute("transform", t < T.popB[1] ? `translate(${LEFT} ${cyB + hB / 2}) scale(${pB}) translate(${-LEFT} ${-(cyB + hB / 2)})` : "");
+    bB.style.display = t < T.popB[0] ? "none" : "";
+
+    // «печатает…»
+    const dots = (list, box, from, until, p0) => list.forEach((c, i) => {
+      const on = seg(t, from, from + .12) * (1 - seg(t, until - .12, until));
+      const jump = Math.max(0, Math.sin((t - from) * Math.PI * 3.4 - i * .95));
+      c.setAttribute("cx", box.x + box.w / 2 + (i - 1) * 14);
+      c.setAttribute("cy", box.y + box.h / 2 - 5 * jump);
+      c.setAttribute("opacity", on * (.55 + .45 * jump));
+      c.setAttribute("transform", `translate(${box.x + box.w / 2} ${box.y + box.h / 2}) scale(${p0}) translate(${-(box.x + box.w / 2)} ${-(box.y + box.h / 2)})`);
+    });
+    dots(dotsA, chatA, T.typeA[0], T.openA[0] + .1, pA);
+    dots(dotsB, chatB, T.typeB[0], T.openB[0] + .1, pB);
+
+    // текст сообщений
+    const hush = 1 - seg(t, ...T.hush);
+    const txt = (n, box, win) => {
+      const p = outCubic(seg(t, ...win));
+      n.setAttribute("x", box.x + PAD); n.setAttribute("y", box.y + box.h / 2 + 7.5 + (1 - p) * 6);
+      n.setAttribute("opacity", p * hush);
+    };
+    txt(tA, chatA, T.textA); txt(tB, chatB, T.textB);
+
+    // галочки «прочитано»
+    const tk = outCubic(seg(t, T.tick, T.tick + .25));
+    ticks.setAttribute("transform", `translate(${RIGHT - 17} ${cyA + hA / 2 + 10 + (1 - tk) * 4})`);
+    ticks.setAttribute("opacity", tk * hush);
+    ticks.setAttribute("stroke", mixHex("#B9BDC6", "#FF4F3A", seg(t, T.read, T.read + .2)));
+
+    // щелчок сборки: знак чуть сжимается и отпружинивает
+    const ds = t - T.snap;
+    const k = ds > 0 ? 1 - .045 * Math.exp(-ds * 9) * Math.sin(ds * 24) : 1;
+    mark.setAttribute("transform", `translate(${MC.x} ${MC.y}) scale(${k}) translate(${-MC.x} ${-MC.y})`);
+
+    // надпись выходит из-за знака слева направо
+    for (const g of letters) {
+      const d = T.word + (g.x - 170) / 470 * .55 + g.l * .06;
+      const p = seg(t, d, d + .5), e = outCubic(p);
+      g.n.setAttribute("transform", `translate(${-26 * (1 - e)} ${10 * (1 - e)})`);
+      g.n.setAttribute("opacity", clamp(p * 2.2));
+    }
+
+    scrub.value = t; timeEl.textContent = t.toFixed(2) + " с";
+  }
+
+  /* ---------- плеер ---------- */
+  const scrub = $("scrub"), timeEl = $("time"), playBtn = $("play");
+  scrub.max = TOTAL;
+  let t = 0, rate = 1, raf = 0, last = 0, playing = false;
+  function finish() {
+    playing = false; playBtn.textContent = "Повторить";
+    if (SITE_MODE) {
+      setTimeout(() => {
+        intro.classList.add("gone");
+        setTimeout(() => { intro.remove(); window.dispatchEvent(new Event("intro:done")); }, 480);
+      }, 350);
+    }
+  }
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    t = Math.min(TOTAL, t + dt * rate); render(t);
+    if (t < TOTAL) raf = requestAnimationFrame(frame); else finish();
+  }
+  function play(from) {
+    cancelAnimationFrame(raf); if (from !== undefined) t = from; if (t >= TOTAL) t = 0;
+    playing = true; playBtn.textContent = "Пауза"; last = performance.now(); raf = requestAnimationFrame(frame);
+  }
+  function pause() { cancelAnimationFrame(raf); playing = false; playBtn.textContent = t >= TOTAL ? "Повторить" : "Играть"; }
+
+  if (SITE_MODE) {
+    $("bar").remove(); intro.classList.add("site"); intro.removeAttribute("title");
+    intro.addEventListener("click", () => { cancelAnimationFrame(raf); t = TOTAL; render(t); finish(); });
+  } else {
+    intro.addEventListener("click", () => play(0));
+    playBtn.addEventListener("click", () => playing ? pause() : play(t >= TOTAL ? 0 : undefined));
+    scrub.addEventListener("input", () => { pause(); t = +scrub.value; render(t); });
+    document.querySelectorAll("[data-rate]").forEach(b => b.addEventListener("click", () => {
+      rate = +b.dataset.rate; document.querySelectorAll("[data-rate]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    }));
+    addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(t >= TOTAL ? 0 : undefined); } });
+  }
+
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  measure(); render(reduce ? TOTAL : 0);
+  const ready = document.fonts ? document.fonts.load('700 21px Manrope') : Promise.resolve();
+  const still = new URLSearchParams(location.search).get("t");
+  const go = () => { measure(); if (still !== null) { pause(); t = +still; render(t); return; } if (reduce) { t = TOTAL; render(t); finish(); } else setTimeout(() => play(0), 250); };
+  ready.then(go, go);
+})();
+</script>
+</body>
+</html>
