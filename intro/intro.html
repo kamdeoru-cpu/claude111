@@ -12,7 +12,7 @@
   #intro { flex: 1; min-height: 0; position: relative; background: var(--paper); cursor: pointer; transition: opacity .4s ease; }
   #intro.site { position: fixed; inset: 0; z-index: 9999; }
   #intro.gone { opacity: 0; pointer-events: none; }
-  #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #scene, #bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
   .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 16px 14px; border-top: 1px solid var(--line); font-size: 14px; }
   .bar button { font: inherit; font-weight: 700; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
@@ -27,6 +27,7 @@
 </head>
 <body>
 <div id="intro" title="Нажмите, чтобы проиграть заново">
+  <canvas id="bg" aria-hidden="true"></canvas>
   <svg id="scene" viewBox="-63 -90 760 394" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Все объявления">
     <defs>
       <clipPath id="cA"><circle id="rA" cx="5" cy="43" r="0"/></clipPath>
@@ -68,6 +69,10 @@
   Последняя волна не гаснет, а заливается и становится чашей буквы, щёлкает
   хвостик, знак отъезжает влево, надпись поднимается из-под строки.
 
+  Фон — едва заметная доска из точек (каждая точка — чьё-то объявление).
+  Звук от знака прокатывается по ней кольцами: точки на миг подсвечиваются
+  и расступаются, а под конец тут и там вспыхивают «новые объявления».
+
   На сайте: ?site (или SITE_MODE = true) — без панели, поверх страницы,
   в конце исчезает и шлёт "intro:done" на window. Клик — пропустить.
 */
@@ -100,6 +105,73 @@
     s, t0, n: mk("path", { stroke: SRC[s].col }, wavesG),
   }));
   const WAVE_DUR = .62, WAVE_R = 250;
+
+
+  /* ---------- размер знака и фон ---------- */
+  const svg = $("scene"), cv = $("bg"), ctx = cv.getContext("2d");
+  let W = 0, H = 0, DPR = 1, S = 1, VX = 0, VY = 0, dots = [], twinkles = [];
+  const LOGO_W = 634, LOGO_H = 214, LOGO_CY = 107;
+  function layout() {
+    const r = intro.getBoundingClientRect(); W = r.width; H = r.height;
+    if (!W || !H) return;
+    DPR = Math.min(2, devicePixelRatio || 1);
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    // логотип — примерно 40% ширины на десктопе, 72% на телефоне, не выше 30% высоты
+    const fw = W < 700 ? .72 : .4;
+    S = Math.min(W * fw / LOGO_W, H * .3 / LOGO_H);
+    VX = CX - W / 2 / S; VY = LOGO_CY - H / 2 / S;
+    svg.setAttribute("viewBox", `${VX} ${VY} ${W / S} ${H / S}`);
+    // сетка точек на весь экран
+    const G = W < 700 ? 22 : 26;
+    const lx = W / 2, ly = H / 2, hw = LOGO_W * S / 2 + 40, hh = LOGO_H * S / 2 + 40;
+    dots = [];
+    for (let y = (H % G) / 2; y < H; y += G) for (let x = (W % G) / 2; x < W; x += G) {
+      // у центра точки приглушены, чтобы знак дышал; к краям растворяются
+      const q = Math.max(Math.abs(x - lx) / hw, Math.abs(y - ly) / hh);
+      const edge = Math.hypot((x - lx) / (W / 2), (y - ly) / (H / 2));
+      const a = clamp((q - .75) / .6) * clamp(1.35 - edge * .75);
+      if (a > .02) dots.push({ x, y, a, h: Math.random() });
+    }
+    // «новые объявления» — редкие вспышки ближе к концу
+    const pool = dots.filter(d => d.a > .6);
+    twinkles = Array.from({ length: Math.min(22, pool.length) }, (_, i) => ({ d: pool[Math.floor(Math.random() * pool.length)], t0: .95 + i * .055 + Math.random() * .1 }));
+    render(t);
+  }
+  const RINGS = [{ t0: .14, c: [255, 79, 58] }, { t0: .24, c: [22, 24, 29] }, { t0: .4, c: [255, 79, 58] }];
+  const BASE = [196, 201, 209];
+  function drawBg(t, dx) {
+    if (!W) return;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const appear = outCubic(seg(t, 0, .45));
+    const ox = (25 + dx - VX) * S, oy = (96 - VY) * S;       // источник звука — черта «В»
+    const maxR = Math.hypot(W, H);
+    const rings = RINGS.map(r => { const p = seg(t, r.t0, r.t0 + 1.35); return { p, R: maxR * outCubic(p), c: r.c }; }).filter(r => r.p > 0 && r.p < 1);
+    const tw = new Map();
+    for (const k of twinkles) { const p = seg(t, k.t0, k.t0 + .55); if (p > 0 && p < 1) tw.set(k.d, Math.sin(Math.PI * p)); }
+    const reveal = Math.hypot(W, H) * .75 * appear;
+    for (const d of dots) {
+      const dist = Math.hypot(d.x - ox, d.y - oy);
+      let a = d.a * clamp((reveal - Math.hypot(d.x - W / 2, d.y - H / 2)) / 120) * .7;
+      if (a <= 0) continue;
+      let r = 1.3, col = BASE, push = 0, hit = 0;
+      for (const g of rings) {
+        const e = .75 * Math.exp(-(((dist - g.R) / 50) ** 2)) * Math.pow(1 - g.p, 1.4);
+        if (e > hit) { hit = e; col = g.c; }
+        push += 5 * e;
+      }
+      const w = tw.get(d) || 0;
+      if (w > hit) { hit = w; col = [255, 79, 58]; }
+      r += 1.4 * hit + .9 * w;
+      a = a + (Math.min(1, d.a) * .7 - a) * hit;
+      const c = hit > 0 ? col.map((v, i) => Math.round(BASE[i] + (v - BASE[i]) * Math.min(1, hit * 1.3))) : BASE;
+      const ux = dist ? (d.x - ox) / dist : 0, uy = dist ? (d.y - oy) / dist : 0;
+      ctx.globalAlpha = a;
+      ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+      ctx.beginPath(); ctx.arc(d.x + ux * push, d.y + uy * push, r, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
 
   /* ---------- таймлайн, с ---------- */
   const T = {
@@ -152,6 +224,7 @@
       g.n.setAttribute("transform", `translate(0 ${(1 - e) * 86})`);
     }
 
+    drawBg(t, dx);
     scrub.value = t; timeEl.textContent = t.toFixed(2) + " с";
   }
 
@@ -190,6 +263,8 @@
     addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); playing ? pause() : play(t >= TOTAL ? 0 : undefined); } });
   }
 
+  new ResizeObserver(layout).observe(intro);
+  layout();
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const still = new URLSearchParams(location.search).get("t");
   if (still !== null) { t = +still; render(t); }
