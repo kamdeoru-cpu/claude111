@@ -11,7 +11,7 @@
 */
 (() => {
   const KEY = "vo_consent";
-  const POLICY_URL = "#/help?q=cookie";       // раздел помощи про cookie
+  const POLICY_URL = "#/doc/cookies";          // Политика cookie
   const MAX_AGE = 60 * 60 * 24 * 182;
 
   const read = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } };

@@ -7,6 +7,8 @@
 <meta name="description" content="Все объявления — покупайте, продавайте и отдавайте даром. Размещение бесплатно.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 150 214%27%3E%3Cg transform=%27translate(20 4)%27 stroke-linejoin=%27round%27 stroke-width=%2710%27%3E%3Cpath d=%27M5 5H78A38 38 0 0 1 78 81H5Z%27 fill=%27%23FF4F3A%27 stroke=%27%23FF4F3A%27/%3E%3Cpath d=%27M5 97H84A44 44 0 0 1 84 185H30L5 207Z%27 fill=%27%2316181D%27 stroke=%27%2316181D%27/%3E%3C/g%3E%3C/svg%3E">
 <meta name="theme-color" content="#FFFFFF">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self' mailto:">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +34,7 @@ html.intro-on { overflow: hidden; }
 /*__APP_CSS__*/
 
 /* ===== панель проверки (убрать перед запуском) ===== */
-.qa { position: fixed; right: 16px; bottom: 16px; z-index: 8000; display: flex; gap: 6px; align-items: center; padding: 6px 6px 6px 12px; border-radius: 999px; background: rgba(22, 24, 29, .88); color: #fff; font: 700 12px/1 "Manrope", Arial, sans-serif; backdrop-filter: blur(6px); }
+.qa { position: fixed; left: 50%; transform: translateX(-50%); top: 8px; z-index: 8000; display: flex; gap: 6px; align-items: center; padding: 6px 6px 6px 12px; border-radius: 999px; background: rgba(22, 24, 29, .88); color: #fff; font: 700 12px/1 "Manrope", Arial, sans-serif; backdrop-filter: blur(6px); }
 .qa button { font: inherit; color: #fff; background: rgba(255, 255, 255, .12); border: 0; border-radius: 999px; padding: 7px 11px; cursor: pointer; }
 .qa button:hover { background: #FF4F3A; }
 @media (max-width: 520px) { .qa span { display: none; } }
@@ -55,7 +57,7 @@ html.intro-on { overflow: hidden; }
 <script>
 /* ===== интро: играет при заходе на главную ===== */
 addEventListener("intro:done", () => document.documentElement.classList.remove("intro-on"), { once: true });
-if (!/^#?\/?$/.test(location.hash) && !location.hash.startsWith("#/c/")) {
+if (!/^#?\/?$/.test(location.hash)) {
   document.getElementById("intro").remove();
   document.documentElement.classList.remove("intro-on");
 }

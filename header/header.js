@@ -87,6 +87,7 @@
     window.dispatchEvent(new CustomEvent("city:change", { detail: city }));
   });
   window.VO_CITY = () => city;
+  window.VO_CITIES = CITIES;
   cityInput.addEventListener("keydown", e => { if (e.key === "Escape") { search.classList.remove("is-city"); regionBtn.focus(); } });
 
   /* ---------- избранное ---------- */
@@ -113,6 +114,7 @@
     search.classList.remove("is-focus");
   }
   function closeMega() { hdr.classList.remove("is-menu"); scrim.classList.remove("on"); catBtn.setAttribute("aria-expanded", "false"); }
+  window.VO_closeMega = closeMega;
   const toggleMega = () => hdr.classList.contains("is-menu") ? closeMega() : openMega();
   catBtn.addEventListener("click", toggleMega);
   hdr.querySelectorAll("[data-open-mega]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); openMega(); }));

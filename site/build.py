@@ -15,6 +15,7 @@ assert "const SITE_MODE = true;" in intro_js
 hdr = rd("header/header.html")
 hdr_markup = hdr[hdr.index('<header class="hdr"'):hdr.index('<main class="demo"')]
 
+MODULES = ["core", "search", "feed", "ad", "auth", "cabinet", "post", "info", "docs", "ui"]  # порядок важен: core первым, ui (запуск) последним
 tpl = rd("site/index.tpl.html")
 out = (tpl.replace("/*__HEADER_CSS__*/", rd("header/header.css"))
           .replace("/*__COOKIE_CSS__*/", rd("cookies/cookies.css"))
@@ -25,7 +26,7 @@ out = (tpl.replace("/*__HEADER_CSS__*/", rd("header/header.css"))
           .replace("/*__COOKIE_JS__*/", js("cookies/cookies.js"))
           .replace("/*__APP_CSS__*/", rd("site/src/app.css"))
           .replace("<!--__PAGES__-->", rd("site/src/pages.html"))
-          .replace("/*__DATA_JS__*/", js("site/src/data.js"))
-          .replace("/*__APP_JS__*/", js("site/src/app.js")))
+          .replace("/*__DATA_JS__*/", js("site/src/data.js") + "\n" + js("site/src/contacts.js"))
+          .replace("/*__APP_JS__*/", "\n".join(js("site/src/" + m + ".js") for m in MODULES)))
 (R / "site/index.html").write_text(out)
 print("site/index.html", len(out) // 1024, "KB")
