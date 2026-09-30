@@ -142,6 +142,11 @@
     reset() { try { localStorage.removeItem(KEY); } catch (e) {} document.cookie = `${KEY}=; max-age=0; path=/`; if (root) { root.remove(); root = null; } open(); },
   };
 
-  const start = () => { if (!read()) setTimeout(open, 600); };
+  // если на странице идёт интро — ждём его окончания, чтобы не перебивать
+  const start = () => {
+    if (read()) return;
+    if (document.getElementById("intro")) addEventListener("intro:done", () => setTimeout(open, 700), { once: true });
+    else setTimeout(open, 600);
+  };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();

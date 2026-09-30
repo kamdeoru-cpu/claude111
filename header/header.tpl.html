@@ -23,12 +23,12 @@
   <!-- верхняя строка -->
   <div class="hdr-top"><div>
     <div class="hdr__wrap hdr-top__in">
-      <span class="live"><span class="live__dot"></span><span class="odo" data-value="2554120" aria-label="2 554 120"></span> объявлений сейчас</span>
-      <a href="#">Для бизнеса</a>
-      <a href="#">Доставка</a>
-      <div class="hdr-top__right">
-        <a class="safe" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path class="chk" d="m9 12 2 2 4-4"/></svg>Безопасная сделка</a>
+      <span class="note"><span class="note__beta">Бета</span>Мы только запустились — размещение бесплатно</span>
+      <div class="hdr-top__right hdr-top__links">
+        <a class="hl" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/></svg>Как это работает</a>
+        <a class="safe" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path class="chk" d="m9 12 2 2 4-4"/></svg>Безопасность</a>
         <a href="#">Помощь</a>
+        <a href="#">Написать нам</a>
       </div>
     </div>
   </div></div>
@@ -64,10 +64,10 @@
           <svg class="chev" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <label class="search__field">
-          <span class="search__ph" aria-hidden="true"><span class="pre">Найти</span><span class="word"></span></span>
+          <span class="search__ph" aria-hidden="true"><span class="def">Поиск среди объявлений</span><span class="typed"><span class="pre">Найти</span><span class="word"></span><span class="caret"></span></span></span>
           <input class="search__input" id="q" type="search" autocomplete="off" aria-label="Поиск по объявлениям">
         </label>
-        <button class="region" type="button">
+        <button class="region" type="button" id="regionBtn" aria-haspopup="listbox" aria-expanded="false">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <ellipse class="shadow" cx="12" cy="21.3" rx="3" ry=".9" fill="#C3C7CF" stroke="none"/>
             <g class="pin"><path d="M12 19.5s-5.5-5-5.5-9.3a5.5 5.5 0 0 1 11 0c0 4.3-5.5 9.3-5.5 9.3Z"/><circle cx="12" cy="10.2" r="2" fill="#FF4F3A" stroke="none"/></g>
@@ -79,17 +79,20 @@
         </button>
       </div>
 
+      <div class="city" role="dialog" aria-label="Выбор города">
+        <input type="text" placeholder="Город или регион" aria-label="Найти город">
+        <ul role="listbox"></ul>
+      </div>
+
       <div class="suggest" aria-label="Подсказки">
         <h4>Вы искали</h4>
-        <div class="suggest__recent">
-          <a class="chip-s" href="#">iPhone 15</a><a class="chip-s" href="#">Велосипед</a><a class="chip-s" href="#">Диван</a><a class="chip-s" href="#">Однушка у метро</a>
-        </div>
-        <h4>Сейчас ищут</h4>
+        <div class="suggest__recent"></div>
+        <h4>Популярные категории</h4>
         <ul class="suggest__list">
-          <li><a href="#"><span class="up">↗</span> PlayStation 5 <small>Электроника</small></a></li>
-          <li><a href="#"><span class="up">↗</span> Шины R17 зимние <small>Авто</small></a></li>
-          <li><a href="#"><span class="up">↗</span> Щенок корги <small>Животные</small></a></li>
-          <li><a href="#"><span class="up">↗</span> Дача с баней <small>Недвижимость</small></a></li>
+          <li><a href="#"><span class="up">→</span> Электроника <small>телефоны, ноутбуки</small></a></li>
+          <li><a href="#"><span class="up">→</span> Одежда и обувь <small>всё для гардероба</small></a></li>
+          <li><a href="#"><span class="up">→</span> Дом и сад <small>мебель, техника</small></a></li>
+          <li><a href="#"><span class="up">→</span> Отдам даром <small>бесплатно</small></a></li>
         </ul>
       </div>
     </form>

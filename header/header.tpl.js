@@ -6,44 +6,78 @@
   const $ = s => hdr.querySelector(s);
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- счётчик объявлений: барабаны цифр ---------- */
-  const odo = $(".odo");
-  if (odo) {
-    const digits = Number(odo.dataset.value).toLocaleString("ru-RU").replace(/\s/g, " ");
-    odo.innerHTML = [...digits].map(ch => ch === " " ? '<span class="odo__sep"></span>'
-      : `<span class="odo__d" data-n="${ch}">${"0123456789".split("").map(n => `<span>${n}</span>`).join("")}</span>`).join("");
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      odo.querySelectorAll(".odo__d").forEach((d, i) => {
-        d.style.transitionDelay = i * 60 + "ms";
-        d.style.transform = `translateY(-${d.dataset.n * 10}%)`;
-      });
-    }));
+  /* ---------- плейсхолдер: при наведении «печатаются» примеры ---------- */
+  const EXAMPLES = ["iPhone 15 Pro", "детский велосипед", "квартиру у метро", "угловой диван", "щенка корги", "зимние шины", "работу рядом с домом"];
+  const search = $("#search"), input = $("#q"), word = $(".search__ph .word"), box = $(".search__box");
+  let typeTimer = 0, wi = 0;
+  function typeLoop() {
+    const w = EXAMPLES[wi % EXAMPLES.length];
+    let i = 0, dir = 1;
+    const step = () => {
+      word.textContent = w.slice(0, i);
+      if (dir > 0 && i === w.length) { dir = -1; typeTimer = setTimeout(step, 1300); return; }
+      if (dir < 0 && i === 0) { wi++; typeTimer = setTimeout(typeLoop, 350); return; }
+      i += dir; typeTimer = setTimeout(step, dir > 0 ? 75 + Math.random() * 50 : 32);
+    };
+    step();
   }
-
-  /* ---------- живой плейсхолдер ---------- */
-  const EXAMPLES = ["iPhone 15 Pro", "детский велосипед", "квартиру у метро", "угловой диван", "щенка корги", "зимние шины", "PlayStation 5", "работу рядом"];
-  const word = $(".search__ph .word"), search = $("#search"), input = $("#q");
-  let wi = 0, timer = 0;
-  const paint = w => { word.className = "word"; word.innerHTML = [...w].map((c, i) => `<i style="animation-delay:${i * 22}ms">${c}</i>`).join(""); };
-  function nextWord() {
-    if (document.hidden || search.classList.contains("is-focus") || input.value) return;
-    word.classList.add("out");
-    setTimeout(() => paint(EXAMPLES[wi = (wi + 1) % EXAMPLES.length]), 300);
+  function startTyping() {
+    if (reduce || input.value || search.classList.contains("is-focus") || search.classList.contains("is-city") || search.classList.contains("is-typing")) return;
+    search.classList.add("is-typing"); word.textContent = ""; typeTimer = setTimeout(typeLoop, 380);
   }
-  paint(EXAMPLES[0]);
-  if (!reduce) timer = setInterval(nextWord, 2800);
+  function stopTyping() { clearTimeout(typeTimer); search.classList.remove("is-typing"); }
+  box.addEventListener("pointerenter", startTyping);
+  box.addEventListener("pointerleave", stopTyping);
 
   /* ---------- поиск: фокус, подсказки ---------- */
   // обводка поиска: подгоняем прямоугольник под размер поля
-  const ring = $(".search__ring rect"), box = $(".search__box");
+  const ring = $(".search__ring rect");
   new ResizeObserver(() => { const r = box.getBoundingClientRect(); ring.setAttribute("width", r.width - 2); ring.setAttribute("height", r.height - 2); ring.setAttribute("rx", (r.height - 2) / 2); }).observe(box);
   const syncValue = () => search.classList.toggle("has-value", !!input.value);
   input.addEventListener("input", syncValue);
-  input.addEventListener("focus", () => { search.classList.add("is-focus"); closeMega(); });
-  document.addEventListener("pointerdown", e => { if (!search.contains(e.target)) search.classList.remove("is-focus"); });
+  input.addEventListener("focus", () => { stopTyping(); renderRecent(); search.classList.add("is-focus"); search.classList.remove("is-city"); closeMega(); });
+  document.addEventListener("pointerdown", e => { if (!search.contains(e.target)) search.classList.remove("is-focus", "is-city"); });
   input.addEventListener("keydown", e => { if (e.key === "Escape") { input.blur(); search.classList.remove("is-focus"); } });
   const go = $("#go");
-  go.addEventListener("click", () => { go.classList.remove("is-sent"); void go.offsetWidth; go.classList.add("is-sent"); });
+  go.addEventListener("click", () => { go.classList.remove("is-sent"); void go.offsetWidth; go.classList.add("is-sent"); remember(input.value); });
+
+  // «Вы искали» — настоящая история этого браузера
+  const HKEY = "vo_recent";
+  const recent = () => { try { return JSON.parse(localStorage.getItem(HKEY)) || []; } catch (e) { return []; } };
+  function remember(q) {
+    q = q.trim(); if (!q) return;
+    const list = [q, ...recent().filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6);
+    try { localStorage.setItem(HKEY, JSON.stringify(list)); } catch (e) {}
+  }
+  function renderRecent() {
+    const list = recent(), wrap = $(".suggest__recent"), head = wrap.previousElementSibling;
+    wrap.innerHTML = list.map(q => `<a class="chip-s" href="#">${q.replace(/[<>&"]/g, "")}</a>`).join("");
+    wrap.hidden = head.hidden = !list.length;
+  }
+  $(".suggest__recent").addEventListener("click", e => { const a = e.target.closest("a"); if (a) { e.preventDefault(); input.value = a.textContent; syncValue(); input.focus(); } });
+
+  /* ---------- выбор города ---------- */
+  const CITIES = ["Вся Россия", "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону", "Уфа", "Красноярск", "Воронеж", "Пермь", "Волгоград", "Краснодар", "Тюмень", "Саратов", "Ижевск"];
+  const regionBtn = $("#regionBtn"), cityBox = $(".city"), cityInput = cityBox.querySelector("input"), cityList = cityBox.querySelector("ul");
+  let city = (() => { try { return localStorage.getItem("vo_city"); } catch (e) { return null; } })() || "Москва";
+  regionBtn.querySelector(".txt").textContent = city;
+  function renderCities() {
+    const q = cityInput.value.trim().toLowerCase(), list = CITIES.filter(c => c.toLowerCase().includes(q));
+    cityList.innerHTML = list.length ? list.map(c => `<li><button type="button" role="option" aria-selected="${c === city}">${c}</button></li>`).join("") : '<li class="empty">Такого города пока нет в списке</li>';
+  }
+  regionBtn.addEventListener("click", () => {
+    const on = !search.classList.contains("is-city");
+    stopTyping(); search.classList.toggle("is-city", on); search.classList.remove("is-focus"); regionBtn.setAttribute("aria-expanded", on);
+    if (on) { cityInput.value = ""; renderCities(); setTimeout(() => cityInput.focus(), 60); }
+  });
+  cityInput.addEventListener("input", renderCities);
+  cityList.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    city = b.textContent; regionBtn.querySelector(".txt").textContent = city;
+    try { localStorage.setItem("vo_city", city); } catch (e) {}
+    search.classList.remove("is-city"); regionBtn.setAttribute("aria-expanded", "false");
+  });
+  cityInput.addEventListener("keydown", e => { if (e.key === "Escape") { search.classList.remove("is-city"); regionBtn.focus(); } });
 
   /* ---------- избранное ---------- */
   const fav = $(".fav");
@@ -51,7 +85,7 @@
 
   /* ---------- мега-меню ---------- */
   const catBtn = $("#catBtn"), nav = $(".mega__nav"), body = $(".mega__body"), scrim = document.getElementById("scrim");
-  nav.innerHTML = CATS.map((c, i) => `<li style="--i:${i}"><button type="button" data-i="${i}">${c.icon}<span>${c.name}</span><span class="n">${c.count}</span></button></li>`).join("");
+  nav.innerHTML = CATS.map((c, i) => `<li style="--i:${i}"><button type="button" data-i="${i}">${c.icon}<span>${c.name}</span></button></li>`).join("");
   function show(i) {
     const c = CATS[i];
     nav.querySelectorAll("button").forEach(b => b.classList.toggle("is-on", +b.dataset.i === i));
