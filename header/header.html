@@ -25,17 +25,17 @@
     <div class="hdr__wrap hdr-top__in">
       <span class="note"><span class="note__beta">Бета</span>Мы только запустились — размещение бесплатно</span>
       <div class="hdr-top__right hdr-top__links">
-        <a class="hl" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/></svg>Как это работает</a>
-        <a class="safe" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path class="chk" d="m9 12 2 2 4-4"/></svg>Безопасность</a>
-        <a href="#">Помощь</a>
-        <a href="#">Написать нам</a>
+        <a class="hl" href="#/how"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/></svg>Как это работает</a>
+        <a class="safe" href="#/safety"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path class="chk" d="m9 12 2 2 4-4"/></svg>Безопасность</a>
+        <a href="#/help">Помощь</a>
+        <a href="#/contact">Написать нам</a>
       </div>
     </div>
   </div></div>
 
   <!-- основная строка -->
   <div class="hdr__wrap hdr-main__in">
-    <a class="logo" href="/" aria-label="Все объявления — на главную">
+    <a class="logo" href="#/" aria-label="Все объявления — на главную">
       <svg viewBox="0 0 634 214" role="img" aria-hidden="true">
         <g class="waves">
           <path class="wave" d="M96 40 A70 70 0 0 1 96 180" stroke="#FF4F3A"/>
@@ -51,7 +51,7 @@
       </svg>
     </a>
 
-    <form class="search" id="search" role="search" onsubmit="return false">
+    <form class="search" id="search" role="search">
       <div class="search__box">
         <svg class="search__ring" aria-hidden="true"><rect x="1" y="1" rx="25" pathLength="1"/></svg>
         <button class="cat-btn" type="button" id="catBtn" aria-expanded="false" aria-controls="mega">
@@ -89,32 +89,34 @@
         <div class="suggest__recent"></div>
         <h4>Популярные категории</h4>
         <ul class="suggest__list">
-          <li><a href="#"><span class="up">→</span> Электроника <small>телефоны, ноутбуки</small></a></li>
-          <li><a href="#"><span class="up">→</span> Одежда и обувь <small>всё для гардероба</small></a></li>
-          <li><a href="#"><span class="up">→</span> Дом и сад <small>мебель, техника</small></a></li>
-          <li><a href="#"><span class="up">→</span> Отдам даром <small>бесплатно</small></a></li>
+          <li><a href="#/c/tech"><span class="up">→</span> Электроника <small>телефоны, ноутбуки</small></a></li>
+          <li><a href="#/c/wear"><span class="up">→</span> Одежда и обувь <small>всё для гардероба</small></a></li>
+          <li><a href="#/c/home"><span class="up">→</span> Дом и сад <small>мебель, техника</small></a></li>
+          <li><a href="#/c/free"><span class="up">→</span> Отдам даром <small>бесплатно</small></a></li>
         </ul>
       </div>
     </form>
 
     <div class="acts">
-      <button class="ico ico--fav fav" type="button" aria-label="Избранное" aria-pressed="false">
+      <button class="ico ico--fav fav" type="button" id="favBtn" aria-label="Избранное" aria-haspopup="dialog">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
           <path class="mini mini--1" d="M7 7.2S5.2 6.1 5.2 4.8a1 1 0 0 1 1.8-.6 1 1 0 0 1 1.8.6C8.8 6.1 7 7.2 7 7.2Z" fill="#FF4F3A" stroke="none"/>
           <path class="mini mini--2" d="M17 6.2s-1.5-.9-1.5-2a.85.85 0 0 1 1.5-.5.85.85 0 0 1 1.5.5c0 1.1-1.5 2-1.5 2Z" fill="#FF4F3A" stroke="none"/>
           <path class="heart" d="M12 20s-7-4.3-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.7 12 20 12 20Z"/>
         </svg>
+        <span class="badge" hidden></span>
         <span class="tip">Избранное</span>
       </button>
-      <button class="ico msg" type="button" aria-label="Сообщения, 3 новых">
+      <button class="ico msg" type="button" id="msgBtn" aria-label="Сообщения" aria-haspopup="dialog">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
           <path class="bub" d="M4.5 4.5h10a5.5 5.5 0 0 1 0 11H8.5l-4 4Z"/>
           <g fill="#FF4F3A"><circle class="dot" cx="8.6" cy="10" r="1.1"/><circle class="dot" cx="11.8" cy="10" r="1.1"/><circle class="dot" cx="15" cy="10" r="1.1"/></g>
         </svg>
-        <span class="badge">3</span>
+        <span class="badge" hidden></span>
         <span class="tip">Сообщения</span>
       </button>
-      <button class="ico ico--bell bell" type="button" aria-label="Уведомления">
+      <button class="ico ico--bell bell" type="button" id="bellBtn" aria-label="Уведомления" aria-haspopup="dialog">
+        <span class="badge" hidden></span>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <g class="body"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15Z"/><path d="M12 3v2"/></g>
           <path class="clap" d="M10 20.5a2 2 0 0 0 4 0"/>
@@ -123,7 +125,7 @@
       </button>
     </div>
 
-    <a class="login" href="#">
+    <a class="login" id="loginBtn" href="#/login">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle class="head" cx="11" cy="8.5" r="3.5"/>
         <path d="M4.5 20a6.5 6.5 0 0 1 13 0"/>
@@ -132,7 +134,7 @@
       <span class="lbl"><span>Войти</span><span>Привет!</span></span>
     </a>
 
-    <a class="post" href="#">
+    <a class="post" href="#/post">
       <span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
       <span class="long">Разместить объявление</span><span class="short">Разместить</span>
     </a>
@@ -142,18 +144,18 @@
   <nav class="hdr-cats" aria-label="Популярные категории"><div>
     <div class="hdr__wrap">
       <div class="cats">
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="car"><path d="M3 15v-3.2l2-4.3a2 2 0 0 1 1.8-1.2h10.4a2 2 0 0 1 1.8 1.2l2 4.3V15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M3.5 11.5h17"/></g><g class="wh"><circle cx="7" cy="16.5" r="2.2" fill="#fff"/><path d="M7 14.3v4.4"/></g><g class="wh"><circle cx="17" cy="16.5" r="2.2" fill="#fff"/><path d="M17 14.3v4.4"/></g></svg></span><span>Авто</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="gr"><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6"/><circle cx="12" cy="12" r="5"/></g><circle cx="12" cy="12" r="1.8"/></svg></span><span>Запчасти</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="smoke" cx="17" cy="2.6" r="1.3" fill="#C3C7CF" stroke="none"/><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M16 7.2V4.5h2v4.3"/><rect class="win" x="10" y="12.5" width="4" height="4" rx=".8" fill="transparent"/></svg></span><span>Недвижимость</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="hdl" d="M9 8V6.5A1.5 1.5 0 0 1 10.5 5h3A1.5 1.5 0 0 1 15 6.5V8"/><rect x="3.5" y="8" width="17" height="11.5" rx="2.5"/><path d="M3.5 13h17"/><rect class="lock" x="10.5" y="11.5" width="3" height="3" rx=".8" fill="#fff"/></svg></span><span>Работа</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="wr" d="M14.5 5.5a4 4 0 0 0-5.2 5.1l-4.8 4.8a1.9 1.9 0 0 0 2.7 2.7l4.8-4.8a4 4 0 0 0 5.1-5.2l-2.4 2.4-2.2-.6-.6-2.2Z"/></svg></span><span>Услуги</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ph"><rect x="7" y="3" width="10" height="18" rx="2.5"/><rect class="scr" x="9" y="5.5" width="6" height="10" rx="1" fill="transparent" stroke="none"/><path d="M11 18.3h2"/></g></svg></span><span>Электроника</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="tee" d="M9 4 4 6.5l1.8 4 2.2-1V20h8V9.5l2.2 1 1.8-4L15 4a3 3 0 0 1-6 0Z"/></svg></span><span>Одежда и обувь</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="lf1" d="M12 10.5c-3 0-5-1.5-5-4.5 3 0 5 1.5 5 4.5Z"/><path class="lf2" d="M12 9c0-3 2-4.5 5-4.5 0 3-2 4.5-5 4.5Z"/><path d="M12 14V8.5"/><path d="M6.5 14h11l-1.4 6.2H7.9Z"/></svg></span><span>Дом и сад</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="bln"><path d="M12 3c3 0 5 2.4 5 5.3 0 3.4-2.8 6.2-5 6.2s-5-2.8-5-6.2C7 5.4 9 3 12 3Z"/><path d="m11.1 14.5.9 1.2.9-1.2"/></g><path d="M12 15.8c-1.2 1.5 1.2 2.6 0 4.6"/></svg></span><span>Детям</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse class="bsh" cx="12" cy="21" rx="4" ry="1" fill="#C3C7CF" stroke="none"/><g class="ball"><circle cx="12" cy="11" r="6.5"/><path d="M6.2 9c3.8 1.6 7.8 1.6 11.6 0M12 4.5c-2 3.6-2 9.4 0 13"/></g></svg></span><span>Хобби и спорт</span></a>
-          <a class="cat" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse class="toe" cx="5.5" cy="10.5" rx="1.6" ry="2"/><ellipse class="toe" cx="9.2" cy="6.6" rx="1.6" ry="2.1"/><ellipse class="toe" cx="14.8" cy="6.6" rx="1.6" ry="2.1"/><ellipse class="toe" cx="18.5" cy="10.5" rx="1.6" ry="2"/><path d="M12 12.5c-2.6 0-5 2.6-5 4.8 0 1.6 1.2 2.2 2.4 2.2 1 0 1.6-.6 2.6-.6s1.6.6 2.6.6c1.2 0 2.4-.6 2.4-2.2 0-2.2-2.4-4.8-5-4.8Z"/></svg></span><span>Животные</span></a>
-          <a class="cat cat--free" href="#"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="spark" d="M12 1.8v2.4M9.6 3l1 1.4M14.4 3l-1 1.4" stroke-width="1.6"/><path d="M5 11.5h14V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/><path d="M12 11.5V21"/><g class="lid"><rect x="3.5" y="7.5" width="17" height="4" rx="1"/><path d="M12 7.5c-1.2-2.6-4.6-3-4.6-1 0 1.2 2.6 1 4.6 1Zm0 0c1.2-2.6 4.6-3 4.6-1 0 1.2-2.6 1-4.6 1Z"/></g></svg></span><span>Отдам даром</span></a>
+          <a class="cat" href="#/c/auto" data-cat="auto"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="car"><path d="M3 15v-3.2l2-4.3a2 2 0 0 1 1.8-1.2h10.4a2 2 0 0 1 1.8 1.2l2 4.3V15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M3.5 11.5h17"/></g><g class="wh"><circle cx="7" cy="16.5" r="2.2" fill="#fff"/><path d="M7 14.3v4.4"/></g><g class="wh"><circle cx="17" cy="16.5" r="2.2" fill="#fff"/><path d="M17 14.3v4.4"/></g></svg></span><span>Авто</span></a>
+          <a class="cat" href="#/c/parts" data-cat="parts"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="gr"><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6"/><circle cx="12" cy="12" r="5"/></g><circle cx="12" cy="12" r="1.8"/></svg></span><span>Запчасти</span></a>
+          <a class="cat" href="#/c/realty" data-cat="realty"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle class="smoke" cx="17" cy="2.6" r="1.3" fill="#C3C7CF" stroke="none"/><path d="M4 11 12 4l8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M16 7.2V4.5h2v4.3"/><rect class="win" x="10" y="12.5" width="4" height="4" rx=".8" fill="transparent"/></svg></span><span>Недвижимость</span></a>
+          <a class="cat" href="#/c/job" data-cat="job"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="hdl" d="M9 8V6.5A1.5 1.5 0 0 1 10.5 5h3A1.5 1.5 0 0 1 15 6.5V8"/><rect x="3.5" y="8" width="17" height="11.5" rx="2.5"/><path d="M3.5 13h17"/><rect class="lock" x="10.5" y="11.5" width="3" height="3" rx=".8" fill="#fff"/></svg></span><span>Работа</span></a>
+          <a class="cat" href="#/c/service" data-cat="service"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="wr" d="M14.5 5.5a4 4 0 0 0-5.2 5.1l-4.8 4.8a1.9 1.9 0 0 0 2.7 2.7l4.8-4.8a4 4 0 0 0 5.1-5.2l-2.4 2.4-2.2-.6-.6-2.2Z"/></svg></span><span>Услуги</span></a>
+          <a class="cat" href="#/c/tech" data-cat="tech"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ph"><rect x="7" y="3" width="10" height="18" rx="2.5"/><rect class="scr" x="9" y="5.5" width="6" height="10" rx="1" fill="transparent" stroke="none"/><path d="M11 18.3h2"/></g></svg></span><span>Электроника</span></a>
+          <a class="cat" href="#/c/wear" data-cat="wear"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="tee" d="M9 4 4 6.5l1.8 4 2.2-1V20h8V9.5l2.2 1 1.8-4L15 4a3 3 0 0 1-6 0Z"/></svg></span><span>Одежда и обувь</span></a>
+          <a class="cat" href="#/c/home" data-cat="home"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="lf1" d="M12 10.5c-3 0-5-1.5-5-4.5 3 0 5 1.5 5 4.5Z"/><path class="lf2" d="M12 9c0-3 2-4.5 5-4.5 0 3-2 4.5-5 4.5Z"/><path d="M12 14V8.5"/><path d="M6.5 14h11l-1.4 6.2H7.9Z"/></svg></span><span>Дом и сад</span></a>
+          <a class="cat" href="#/c/kids" data-cat="kids"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="bln"><path d="M12 3c3 0 5 2.4 5 5.3 0 3.4-2.8 6.2-5 6.2s-5-2.8-5-6.2C7 5.4 9 3 12 3Z"/><path d="m11.1 14.5.9 1.2.9-1.2"/></g><path d="M12 15.8c-1.2 1.5 1.2 2.6 0 4.6"/></svg></span><span>Детям</span></a>
+          <a class="cat" href="#/c/hobby" data-cat="hobby"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse class="bsh" cx="12" cy="21" rx="4" ry="1" fill="#C3C7CF" stroke="none"/><g class="ball"><circle cx="12" cy="11" r="6.5"/><path d="M6.2 9c3.8 1.6 7.8 1.6 11.6 0M12 4.5c-2 3.6-2 9.4 0 13"/></g></svg></span><span>Хобби и спорт</span></a>
+          <a class="cat" href="#/c/pets" data-cat="pets"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse class="toe" cx="5.5" cy="10.5" rx="1.6" ry="2"/><ellipse class="toe" cx="9.2" cy="6.6" rx="1.6" ry="2.1"/><ellipse class="toe" cx="14.8" cy="6.6" rx="1.6" ry="2.1"/><ellipse class="toe" cx="18.5" cy="10.5" rx="1.6" ry="2"/><path d="M12 12.5c-2.6 0-5 2.6-5 4.8 0 1.6 1.2 2.2 2.4 2.2 1 0 1.6-.6 2.6-.6s1.6.6 2.6.6c1.2 0 2.4-.6 2.4-2.2 0-2.2-2.4-4.8-5-4.8Z"/></svg></span><span>Животные</span></a>
+          <a class="cat cat--free" href="#/c/free" data-cat="free"><span class="cat__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="spark" d="M12 1.8v2.4M9.6 3l1 1.4M14.4 3l-1 1.4" stroke-width="1.6"/><path d="M5 11.5h14V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/><path d="M12 11.5V21"/><g class="lid"><rect x="3.5" y="7.5" width="17" height="4" rx="1"/><path d="M12 7.5c-1.2-2.6-4.6-3-4.6-1 0 1.2 2.6 1 4.6 1Zm0 0c1.2-2.6 4.6-3 4.6-1 0 1.2-2.6 1-4.6 1Z"/></g></svg></span><span>Отдам даром</span></a>
       </div>
     </div>
   </div></nav>
@@ -166,7 +168,7 @@
       <div class="mega__promo" style="--i:6">
         <b>Продайте то, что больше не нужно</b>
         <p>Объявление за пару минут — бесплатно. Его увидят все, кто ищет.</p>
-        <a class="post" href="#"><span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Разместить</a>
+        <a class="post" href="#/post"><span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Разместить</a>
       </div>
     </div>
   </div>

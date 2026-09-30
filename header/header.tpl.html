@@ -25,17 +25,17 @@
     <div class="hdr__wrap hdr-top__in">
       <span class="note"><span class="note__beta">Бета</span>Мы только запустились — размещение бесплатно</span>
       <div class="hdr-top__right hdr-top__links">
-        <a class="hl" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/></svg>Как это работает</a>
-        <a class="safe" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path class="chk" d="m9 12 2 2 4-4"/></svg>Безопасность</a>
-        <a href="#">Помощь</a>
-        <a href="#">Написать нам</a>
+        <a class="hl" href="#/how"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/></svg>Как это работает</a>
+        <a class="safe" href="#/safety"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path class="chk" d="m9 12 2 2 4-4"/></svg>Безопасность</a>
+        <a href="#/help">Помощь</a>
+        <a href="#/contact">Написать нам</a>
       </div>
     </div>
   </div></div>
 
   <!-- основная строка -->
   <div class="hdr__wrap hdr-main__in">
-    <a class="logo" href="/" aria-label="Все объявления — на главную">
+    <a class="logo" href="#/" aria-label="Все объявления — на главную">
       <svg viewBox="0 0 634 214" role="img" aria-hidden="true">
         <g class="waves">
           <path class="wave" d="M96 40 A70 70 0 0 1 96 180" stroke="#FF4F3A"/>
@@ -51,7 +51,7 @@
       </svg>
     </a>
 
-    <form class="search" id="search" role="search" onsubmit="return false">
+    <form class="search" id="search" role="search">
       <div class="search__box">
         <svg class="search__ring" aria-hidden="true"><rect x="1" y="1" rx="25" pathLength="1"/></svg>
         <button class="cat-btn" type="button" id="catBtn" aria-expanded="false" aria-controls="mega">
@@ -89,32 +89,34 @@
         <div class="suggest__recent"></div>
         <h4>Популярные категории</h4>
         <ul class="suggest__list">
-          <li><a href="#"><span class="up">→</span> Электроника <small>телефоны, ноутбуки</small></a></li>
-          <li><a href="#"><span class="up">→</span> Одежда и обувь <small>всё для гардероба</small></a></li>
-          <li><a href="#"><span class="up">→</span> Дом и сад <small>мебель, техника</small></a></li>
-          <li><a href="#"><span class="up">→</span> Отдам даром <small>бесплатно</small></a></li>
+          <li><a href="#/c/tech"><span class="up">→</span> Электроника <small>телефоны, ноутбуки</small></a></li>
+          <li><a href="#/c/wear"><span class="up">→</span> Одежда и обувь <small>всё для гардероба</small></a></li>
+          <li><a href="#/c/home"><span class="up">→</span> Дом и сад <small>мебель, техника</small></a></li>
+          <li><a href="#/c/free"><span class="up">→</span> Отдам даром <small>бесплатно</small></a></li>
         </ul>
       </div>
     </form>
 
     <div class="acts">
-      <button class="ico ico--fav fav" type="button" aria-label="Избранное" aria-pressed="false">
+      <button class="ico ico--fav fav" type="button" id="favBtn" aria-label="Избранное" aria-haspopup="dialog">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
           <path class="mini mini--1" d="M7 7.2S5.2 6.1 5.2 4.8a1 1 0 0 1 1.8-.6 1 1 0 0 1 1.8.6C8.8 6.1 7 7.2 7 7.2Z" fill="#FF4F3A" stroke="none"/>
           <path class="mini mini--2" d="M17 6.2s-1.5-.9-1.5-2a.85.85 0 0 1 1.5-.5.85.85 0 0 1 1.5.5c0 1.1-1.5 2-1.5 2Z" fill="#FF4F3A" stroke="none"/>
           <path class="heart" d="M12 20s-7-4.3-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.7 12 20 12 20Z"/>
         </svg>
+        <span class="badge" hidden></span>
         <span class="tip">Избранное</span>
       </button>
-      <button class="ico msg" type="button" aria-label="Сообщения, 3 новых">
+      <button class="ico msg" type="button" id="msgBtn" aria-label="Сообщения" aria-haspopup="dialog">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
           <path class="bub" d="M4.5 4.5h10a5.5 5.5 0 0 1 0 11H8.5l-4 4Z"/>
           <g fill="#FF4F3A"><circle class="dot" cx="8.6" cy="10" r="1.1"/><circle class="dot" cx="11.8" cy="10" r="1.1"/><circle class="dot" cx="15" cy="10" r="1.1"/></g>
         </svg>
-        <span class="badge">3</span>
+        <span class="badge" hidden></span>
         <span class="tip">Сообщения</span>
       </button>
-      <button class="ico ico--bell bell" type="button" aria-label="Уведомления">
+      <button class="ico ico--bell bell" type="button" id="bellBtn" aria-label="Уведомления" aria-haspopup="dialog">
+        <span class="badge" hidden></span>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <g class="body"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15Z"/><path d="M12 3v2"/></g>
           <path class="clap" d="M10 20.5a2 2 0 0 0 4 0"/>
@@ -123,7 +125,7 @@
       </button>
     </div>
 
-    <a class="login" href="#">
+    <a class="login" id="loginBtn" href="#/login">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle class="head" cx="11" cy="8.5" r="3.5"/>
         <path d="M4.5 20a6.5 6.5 0 0 1 13 0"/>
@@ -132,7 +134,7 @@
       <span class="lbl"><span>Войти</span><span>Привет!</span></span>
     </a>
 
-    <a class="post" href="#">
+    <a class="post" href="#/post">
       <span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
       <span class="long">Разместить объявление</span><span class="short">Разместить</span>
     </a>
@@ -155,7 +157,7 @@ __CHIPS__
       <div class="mega__promo" style="--i:6">
         <b>Продайте то, что больше не нужно</b>
         <p>Объявление за пару минут — бесплатно. Его увидят все, кто ищет.</p>
-        <a class="post" href="#"><span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Разместить</a>
+        <a class="post" href="#/post"><span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Разместить</a>
       </div>
     </div>
   </div>

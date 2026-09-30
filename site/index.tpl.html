@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Все объявления</title>
 <meta name="description" content="Все объявления — покупайте, продавайте и отдавайте даром. Размещение бесплатно.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 150 214%27%3E%3Cg transform=%27translate(20 4)%27 stroke-linejoin=%27round%27 stroke-width=%2710%27%3E%3Cpath d=%27M5 5H78A38 38 0 0 1 78 81H5Z%27 fill=%27%23FF4F3A%27 stroke=%27%23FF4F3A%27/%3E%3Cpath d=%27M5 97H84A44 44 0 0 1 84 185H30L5 207Z%27 fill=%27%2316181D%27 stroke=%27%2316181D%27/%3E%3C/g%3E%3C/svg%3E">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,14 +28,8 @@ html.intro-on { overflow: hidden; }
 /* ===== cookie ===== */
 /*__COOKIE_CSS__*/
 
-/* ===== временная заглушка контента ===== */
-.stub { max-width: 1320px; margin: 0 auto; padding: 28px clamp(14px, 3vw, 32px) 80px; }
-.stub__hello { display: block; margin-bottom: 24px; padding: 16px 20px; border-radius: 22px 22px 22px 6px; background: #F4F5F7; color: #3A3F4A; font-weight: 600; font-size: 15px; }
-.stub__hello b { color: #16181D; margin-right: .35em; }
-.stub__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 22px; }
-.stub__grid i { display: block; aspect-ratio: 4/3; border-radius: 16px; background: #F4F5F7; }
-.stub__grid b, .stub__grid s { display: block; height: 12px; border-radius: 6px; background: #F4F5F7; margin-top: 12px; width: 80%; }
-.stub__grid s { width: 42%; background: #FFE3DF; }
+/* ===== страницы ===== */
+/*__APP_CSS__*/
 
 /* ===== панель проверки (убрать перед запуском) ===== */
 .qa { position: fixed; right: 16px; bottom: 16px; z-index: 8000; display: flex; gap: 6px; align-items: center; padding: 6px 6px 6px 12px; border-radius: 999px; background: rgba(22, 24, 29, .88); color: #fff; font: 700 12px/1 "Manrope", Arial, sans-serif; backdrop-filter: blur(6px); }
@@ -49,15 +44,7 @@ html.intro-on { overflow: hidden; }
 
 <!--__HEADER__-->
 
-<main class="stub">
-  <div class="stub__hello"><b>Здесь будет лента объявлений.</b> Пока это заглушка, чтобы проверить шапку при прокрутке.</div>
-  <div class="stub__grid" aria-hidden="true">
-    <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
-    <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
-    <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
-    <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
-  </div>
-</main>
+<!--__PAGES__-->
 
 <div class="qa" role="group" aria-label="Панель проверки">
   <span>Проверка:</span>
@@ -66,13 +53,24 @@ html.intro-on { overflow: hidden; }
 </div>
 
 <script>
-/* ===== интро ===== */
+/* ===== интро: играет при заходе на главную ===== */
 addEventListener("intro:done", () => document.documentElement.classList.remove("intro-on"), { once: true });
+if (!/^#?\/?$/.test(location.hash) && !location.hash.startsWith("#/c/")) {
+  document.getElementById("intro").remove();
+  document.documentElement.classList.remove("intro-on");
+}
+if (document.getElementById("intro")) {
 /*__INTRO_JS__*/
+}
 </script>
 <script>
 /* ===== шапка ===== */
 /*__HEADER_JS__*/
+</script>
+<script>
+/* ===== данные и страницы ===== */
+/*__DATA_JS__*/
+/*__APP_JS__*/
 </script>
 <script>
 /* ===== cookie ===== */

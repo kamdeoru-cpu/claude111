@@ -1,6 +1,7 @@
 /* Все объявления — шапка: только переключение классов, всё движение — в CSS. */
 (() => {
   const CATS = __CATS__;
+  window.VO_CATS = CATS;
   const hdr = document.getElementById("hdr");
   if (!hdr) return;
   const $ = s => hdr.querySelector(s);
@@ -39,7 +40,14 @@
   document.addEventListener("pointerdown", e => { if (!search.contains(e.target)) search.classList.remove("is-focus", "is-city"); });
   input.addEventListener("keydown", e => { if (e.key === "Escape") { input.blur(); search.classList.remove("is-focus"); } });
   const go = $("#go");
-  go.addEventListener("click", () => { go.classList.remove("is-sent"); void go.offsetWidth; go.classList.add("is-sent"); remember(input.value); });
+  search.addEventListener("submit", e => {
+    e.preventDefault();
+    go.classList.remove("is-sent"); void go.offsetWidth; go.classList.add("is-sent");
+    const q = input.value.trim(); remember(q);
+    search.classList.remove("is-focus"); input.blur();
+    location.hash = q ? "#/s/" + encodeURIComponent(q) : "#/";
+  });
+  $(".suggest").addEventListener("click", e => { if (e.target.closest(".suggest__list a")) search.classList.remove("is-focus"); });
 
   // «Вы искали» — настоящая история этого браузера
   const HKEY = "vo_recent";
@@ -54,7 +62,7 @@
     wrap.innerHTML = list.map(q => `<a class="chip-s" href="#">${q.replace(/[<>&"]/g, "")}</a>`).join("");
     wrap.hidden = head.hidden = !list.length;
   }
-  $(".suggest__recent").addEventListener("click", e => { const a = e.target.closest("a"); if (a) { e.preventDefault(); input.value = a.textContent; syncValue(); input.focus(); } });
+  $(".suggest__recent").addEventListener("click", e => { const a = e.target.closest("a"); if (a) { e.preventDefault(); input.value = a.textContent; syncValue(); search.requestSubmit(); } });
 
   /* ---------- выбор города ---------- */
   const CITIES = ["Вся Россия", "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону", "Уфа", "Красноярск", "Воронеж", "Пермь", "Волгоград", "Краснодар", "Тюмень", "Саратов", "Ижевск"];
@@ -76,12 +84,13 @@
     city = b.textContent; regionBtn.querySelector(".txt").textContent = city;
     try { localStorage.setItem("vo_city", city); } catch (e) {}
     search.classList.remove("is-city"); regionBtn.setAttribute("aria-expanded", "false");
+    window.dispatchEvent(new CustomEvent("city:change", { detail: city }));
   });
+  window.VO_CITY = () => city;
   cityInput.addEventListener("keydown", e => { if (e.key === "Escape") { search.classList.remove("is-city"); regionBtn.focus(); } });
 
   /* ---------- избранное ---------- */
-  const fav = $(".fav");
-  fav.addEventListener("click", () => { const on = fav.classList.toggle("is-on"); fav.setAttribute("aria-pressed", on); });
+
 
   /* ---------- мега-меню ---------- */
   const catBtn = $("#catBtn"), nav = $(".mega__nav"), body = $(".mega__body"), scrim = document.getElementById("scrim");
@@ -91,7 +100,7 @@
     nav.querySelectorAll("button").forEach(b => b.classList.toggle("is-on", +b.dataset.i === i));
     body.querySelector("h3").textContent = c.name;
     const per = Math.ceil(c.subs.length / 3), cols = [0, 1, 2].map(k => c.subs.slice(k * per, k * per + per));
-    body.querySelector(".mega__cols").innerHTML = cols.map((list, k) => `<div class="mega__col" style="--i:${k + 1}">${list.map(s => `<a href="#">${s}</a>`).join("")}</div>`).join("");
+    body.querySelector(".mega__cols").innerHTML = cols.map((list, k) => `<div class="mega__col" style="--i:${k + 1}">${list.map(s => `<a href="#/c/${c.id}">${s}</a>`).join("")}</div>`).join("");
     body.classList.remove("swap"); void body.offsetWidth; body.classList.add("swap");
   }
   show(0);
@@ -108,18 +117,32 @@
   catBtn.addEventListener("click", toggleMega);
   hdr.querySelectorAll("[data-open-mega]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); openMega(); }));
   scrim.addEventListener("click", closeMega);
+  $(".mega").addEventListener("click", e => { if (e.target.closest("a")) closeMega(); });
   addEventListener("keydown", e => { if (e.key === "Escape") closeMega(); });
 
   /* ---------- поведение при прокрутке ---------- */
-  // строка категорий прячется при прокрутке вниз и возвращается, если заметно прокрутить вверх
-  // (порог в 60px гасит скачки от схлопывания верхней строки)
+  // Шапка зафиксирована, а место под неё держит распорка постоянной высоты:
+  // сжатие шапки при прокрутке не двигает страницу, поэтому ничего не «дрыгается».
+  let space = document.querySelector(".hdr-space");
+  if (!space) { space = document.createElement("div"); space.className = "hdr-space"; hdr.after(space); }
+  const topIn = $(".hdr-top__in"), main = $(".hdr-main__in"), catsIn = $(".cats");
+  function measure() {
+    const wide = matchMedia("(min-width: 761px)").matches;
+    const topH = wide ? topIn.offsetHeight : 0;
+    const mainH = wide ? 76 : main.offsetHeight;
+    space.style.height = topH + mainH + catsIn.offsetHeight + 1 + "px";
+  }
+  measure(); addEventListener("resize", measure);
+  if (document.fonts) document.fonts.ready.then(measure);
+
   let peak = scrollY, ticking = false;
   function onScroll() {
-    const y = scrollY;
-    hdr.classList.toggle("is-scrolled", y > 8);
+    const y = scrollY, sc = hdr.classList.contains("is-scrolled");
+    if (!sc && y > 24) hdr.classList.add("is-scrolled");
+    else if (sc && y < 6) hdr.classList.remove("is-scrolled");
     if (y > peak) peak = y;
-    if (y < 160 || y < peak - 60) { hdr.classList.remove("is-tucked"); peak = y; }
-    else if (y > 160 && y >= peak) hdr.classList.add("is-tucked");
+    if (y < 200 || y < peak - 60) { hdr.classList.remove("is-tucked"); peak = y; }
+    else if (y >= peak) hdr.classList.add("is-tucked");
     ticking = false;
   }
   addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });

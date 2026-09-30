@@ -35,7 +35,7 @@ CATS = [
  ("free", "Отдам даром", ["Вещи", "Мебель", "Техника", "Детское", "Книги", "Растения", "Животные в добрые руки"]),
 ]
 
-chips = "\n".join(f'          <a class="cat{" cat--free" if k == "free" else ""}" href="#"><span class="cat__ic">{ICON[k]}</span><span>{n}</span></a>' for k, n, _ in CATS)
+chips = "\n".join(f'          <a class="cat{" cat--free" if k == "free" else ""}" href="#/c/{k}" data-cat="{k}"><span class="cat__ic">{ICON[k]}</span><span>{n}</span></a>' for k, n, _ in CATS)
 html = open("header.tpl.html").read()
 html = html.replace("__W1__", paths[0]).replace("__W2__", paths[1]).replace("__CHIPS__", chips)
 open("header.html", "w").write(html)
