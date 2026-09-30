@@ -1,14 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Все объявления">
-  <rect width="256" height="256" rx="56" fill="#152238"/>
-  <g transform="translate(52 46)">
-    <rect x="0" y="12" width="118" height="84" rx="10" fill="#FFFFFF"/>
-    <rect x="18" y="36" width="64" height="10" rx="5" fill="#152238"/>
-    <rect x="18" y="56" width="82" height="10" rx="5" fill="#152238"/>
-    <circle cx="59" cy="12" r="11" fill="#FF6B00"/>
-    <rect x="0"   y="102" width="19" height="52" rx="4" fill="#FFFFFF"/>
-    <rect x="24.75" y="102" width="19" height="52" rx="4" fill="#FFFFFF"/>
-    <rect x="74.25" y="102" width="19" height="52" rx="4" fill="#FFFFFF"/>
-    <rect x="99"  y="102" width="19" height="52" rx="4" fill="#FFFFFF"/>
-    <rect x="49.5" y="102" width="19" height="52" rx="4" fill="#FF6B00" transform="translate(78 16) rotate(18 59 128)"/>
+  <rect width="256" height="256" rx="58" fill="#16181D"/>
+  <g transform="translate(78 36) scale(0.88)" stroke-linejoin="round" stroke-width="10">
+    <path d="M5 5 H78 A38 38 0 0 1 78 81 H5 Z" fill="#FF4F3A" stroke="#FF4F3A"/>
+    <path d="M5 97 H84 A44 44 0 0 1 84 185 H30 L5 207 Z" fill="#FFFFFF" stroke="#FFFFFF"/>
   </g>
 </svg>
