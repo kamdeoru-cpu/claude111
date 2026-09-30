@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Все объявления — шапка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="header.css">
+<style>
+  /* только для демо: условный контент под шапкой, чтобы проверить прокрутку */
+  body { margin: 0; background: #fff; font-family: "Manrope", Arial, sans-serif; }
+  .demo { max-width: 1320px; margin: 0 auto; padding: 28px clamp(14px, 3vw, 32px) 80px; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 22px; }
+  .demo i { display: block; aspect-ratio: 4/3; border-radius: 16px; background: #F4F5F7; }
+  .demo b, .demo s { display: block; height: 12px; border-radius: 6px; background: #F4F5F7; margin-top: 12px; width: 80%; }
+  .demo s { width: 42%; background: #FFE3DF; }
+</style>
+</head>
+<body>
+
+<header class="hdr" id="hdr">
+  <!-- верхняя строка -->
+  <div class="hdr-top"><div>
+    <div class="hdr__wrap hdr-top__in">
+      <span class="live"><span class="live__dot"></span><span class="odo" data-value="2554120" aria-label="2 554 120"></span> объявлений сейчас</span>
+      <a href="#">Для бизнеса</a>
+      <a href="#">Доставка</a>
+      <div class="hdr-top__right">
+        <a class="safe" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4F3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path class="chk" d="m9 12 2 2 4-4"/></svg>Безопасная сделка</a>
+        <a href="#">Помощь</a>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- основная строка -->
+  <div class="hdr__wrap hdr-main__in">
+    <a class="logo" href="/" aria-label="Все объявления — на главную">
+      <svg viewBox="0 0 634 214" role="img" aria-hidden="true">
+        <g class="waves">
+          <path class="wave" d="M96 40 A70 70 0 0 1 96 180" stroke="#FF4F3A"/>
+          <path class="wave wave--2" d="M96 40 A70 70 0 0 1 96 180" stroke="#16181D" opacity="0"/>
+          <path class="wave wave--3" d="M96 40 A70 70 0 0 1 96 180" stroke="#FF4F3A" opacity="0"/>
+        </g>
+        <g transform="translate(20 4)" stroke-linejoin="round" stroke-width="10">
+          <path class="bowl bowl--a" d="M5 5 H78 A38 38 0 0 1 78 81 H5 Z" fill="#FF4F3A" stroke="#FF4F3A"/>
+          <path class="bowl bowl--b" d="M5 97 H84 A44 44 0 0 1 84 185 H30 L5 207 Z" fill="#16181D" stroke="#16181D"/>
+        </g>
+        <path fill="#16181D" d="__W1__"/>
+        <path fill="#16181D" d="__W2__"/>
+      </svg>
+    </a>
+
+    <form class="search" id="search" role="search" onsubmit="return false">
+      <div class="search__box">
+        <svg class="search__ring" aria-hidden="true"><rect x="1" y="1" rx="25" pathLength="1"/></svg>
+        <button class="cat-btn" type="button" id="catBtn" aria-expanded="false" aria-controls="mega">
+          <svg class="cards" width="22" height="22" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+            <rect class="k1" x="3" y="7" width="8" height="12" rx="2" fill="#16181D"/>
+            <rect class="k3" x="13" y="7" width="8" height="12" rx="2" fill="#16181D"/>
+            <rect class="k2" x="8" y="5" width="8" height="14" rx="2" fill="#16181D"/>
+          </svg>
+          <span class="txt">Категории</span>
+          <svg class="chev" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <label class="search__field">
+          <span class="search__ph" aria-hidden="true"><span class="pre">Найти</span><span class="word"></span></span>
+          <input class="search__input" id="q" type="search" autocomplete="off" aria-label="Поиск по объявлениям">
+        </label>
+        <button class="region" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <ellipse class="shadow" cx="12" cy="21.3" rx="3" ry=".9" fill="#C3C7CF" stroke="none"/>
+            <g class="pin"><path d="M12 19.5s-5.5-5-5.5-9.3a5.5 5.5 0 0 1 11 0c0 4.3-5.5 9.3-5.5 9.3Z"/><circle cx="12" cy="10.2" r="2" fill="#FF4F3A" stroke="none"/></g>
+          </svg>
+          <span class="txt">Москва</span>
+        </button>
+        <button class="go" type="submit" id="go" aria-label="Найти">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><g class="lens"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></g></svg>
+        </button>
+      </div>
+
+      <div class="suggest" aria-label="Подсказки">
+        <h4>Вы искали</h4>
+        <div class="suggest__recent">
+          <a class="chip-s" href="#">iPhone 15</a><a class="chip-s" href="#">Велосипед</a><a class="chip-s" href="#">Диван</a><a class="chip-s" href="#">Однушка у метро</a>
+        </div>
+        <h4>Сейчас ищут</h4>
+        <ul class="suggest__list">
+          <li><a href="#"><span class="up">↗</span> PlayStation 5 <small>Электроника</small></a></li>
+          <li><a href="#"><span class="up">↗</span> Шины R17 зимние <small>Авто</small></a></li>
+          <li><a href="#"><span class="up">↗</span> Щенок корги <small>Животные</small></a></li>
+          <li><a href="#"><span class="up">↗</span> Дача с баней <small>Недвижимость</small></a></li>
+        </ul>
+      </div>
+    </form>
+
+    <div class="acts">
+      <button class="ico ico--fav fav" type="button" aria-label="Избранное" aria-pressed="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+          <path class="mini mini--1" d="M7 7.2S5.2 6.1 5.2 4.8a1 1 0 0 1 1.8-.6 1 1 0 0 1 1.8.6C8.8 6.1 7 7.2 7 7.2Z" fill="#FF4F3A" stroke="none"/>
+          <path class="mini mini--2" d="M17 6.2s-1.5-.9-1.5-2a.85.85 0 0 1 1.5-.5.85.85 0 0 1 1.5.5c0 1.1-1.5 2-1.5 2Z" fill="#FF4F3A" stroke="none"/>
+          <path class="heart" d="M12 20s-7-4.3-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.7 12 20 12 20Z"/>
+        </svg>
+        <span class="tip">Избранное</span>
+      </button>
+      <button class="ico msg" type="button" aria-label="Сообщения, 3 новых">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+          <path class="bub" d="M4.5 4.5h10a5.5 5.5 0 0 1 0 11H8.5l-4 4Z"/>
+          <g fill="#FF4F3A"><circle class="dot" cx="8.6" cy="10" r="1.1"/><circle class="dot" cx="11.8" cy="10" r="1.1"/><circle class="dot" cx="15" cy="10" r="1.1"/></g>
+        </svg>
+        <span class="badge">3</span>
+        <span class="tip">Сообщения</span>
+      </button>
+      <button class="ico ico--bell bell" type="button" aria-label="Уведомления">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <g class="body"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15Z"/><path d="M12 3v2"/></g>
+          <path class="clap" d="M10 20.5a2 2 0 0 0 4 0"/>
+        </svg>
+        <span class="tip">Уведомления</span>
+      </button>
+    </div>
+
+    <a class="login" href="#">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle class="head" cx="11" cy="8.5" r="3.5"/>
+        <path d="M4.5 20a6.5 6.5 0 0 1 13 0"/>
+        <g class="hand"><path d="M20 12.5V9"/><circle cx="20" cy="8" r="1.3" fill="#FF4F3A" stroke="none"/></g>
+      </svg>
+      <span class="lbl"><span>Войти</span><span>Привет!</span></span>
+    </a>
+
+    <a class="post" href="#">
+      <span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+      <span class="long">Разместить объявление</span><span class="short">Разместить</span>
+    </a>
+  </div>
+
+  <!-- строка категорий -->
+  <nav class="hdr-cats" aria-label="Популярные категории"><div>
+    <div class="hdr__wrap">
+      <div class="cats">
+__CHIPS__
+      </div>
+    </div>
+  </div></nav>
+
+  <!-- мега-меню категорий -->
+  <div class="mega" id="mega" role="dialog" aria-label="Все категории">
+    <div class="hdr__wrap mega__in">
+      <ul class="mega__nav"></ul>
+      <div class="mega__body"><h3></h3><div class="mega__cols"></div></div>
+      <div class="mega__promo" style="--i:6">
+        <b>Продайте то, что больше не нужно</b>
+        <p>Объявление за пару минут — бесплатно. Его увидят все, кто ищет.</p>
+        <a class="post" href="#"><span class="post__plus"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Разместить</a>
+      </div>
+    </div>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<main class="demo" aria-hidden="true">
+  <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
+  <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
+  <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
+  <div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div><div><i></i><b></b><s></s></div>
+</main>
+
+<script src="header.js" defer></script>
+</body>
+</html>
