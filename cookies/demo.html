@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cookie — демо</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cookies.css">
+<style>
+  /* только для демо: условная страница, чтобы видеть баннер в контексте */
+  body { margin: 0; background: #fff; font-family: "Manrope", Arial, sans-serif; color: #16181D; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 4vw, 48px); border-bottom: 1px solid #EEF0F3; }
+  header img { height: 40px; display: block; }
+  .again { font: inherit; font-weight: 700; font-size: 14px; border: 1px solid #E1E4E9; background: #fff; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+  .again:hover { border-color: #16181D; }
+  main { padding: 28px clamp(16px, 4vw, 48px); display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+  .card i { display: block; aspect-ratio: 4/3; border-radius: 14px; background: #F2F3F5; }
+  .card b, .card s { display: block; height: 12px; border-radius: 6px; background: #F2F3F5; margin-top: 12px; width: 80%; }
+  .card s { width: 45%; background: #FFE3DF; }
+</style>
+</head>
+<body>
+<header>
+  <img src="../logo/vseobyavleniya-logo.svg" alt="Все объявления">
+  <button class="again" onclick="CookieConsent.reset()">Показать баннер снова</button>
+</header>
+<main>
+  <div class="card"><i></i><b></b><s></s></div><div class="card"><i></i><b></b><s></s></div>
+  <div class="card"><i></i><b></b><s></s></div><div class="card"><i></i><b></b><s></s></div>
+  <div class="card"><i></i><b></b><s></s></div><div class="card"><i></i><b></b><s></s></div>
+  <div class="card"><i></i><b></b><s></s></div><div class="card"><i></i><b></b><s></s></div>
+</main>
+<script src="cookies.js"></script>
+<script>
+  // демо: при каждом открытии показываем баннер заново
+  try { localStorage.removeItem("vo_consent"); } catch (e) {}
+  const st = new URLSearchParams(location.search).get("state");   // для скриншотов: settings
+  if (st === "settings") setTimeout(() => document.querySelector('[data-act="toggle"]').click(), 1500);
+  if (st === "auto") {   // сценарий для превью: настроить → включить аналитику → сохранить
+    const q = s => document.querySelector(s);
+    setTimeout(() => q('[data-act="toggle"]').click(), 2200);
+    setTimeout(() => q('[data-opt="analytics"]').click(), 2900);
+    setTimeout(() => q('[data-act="toggle"]').click(), 3500);
+  }
+</script>
+</body>
+</html>
