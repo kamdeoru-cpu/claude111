@@ -204,7 +204,7 @@
           <div class="field field--ic"><input id="pfPhone" inputmode="tel" placeholder=" " value="${esc(u.phone || "")}"><label for="pfPhone">Телефон</label><span class="field__ic">${VO.ico.phone}</span><em id="pfPhoneE">Проверьте номер</em></div>
           <div class="fs"><h4>Кто видит номер в объявлениях</h4><div class="vis">${VIS.map(([k, t, d]) => `<label><input type="radio" name="vis" value="${k}"${u.phoneVis === k ? " checked" : ""}><span><b>${t}</b><small>${d}</small></span></label>`).join("")}</div></div>
           <div class="field"><input id="pfCity" maxlength="60" placeholder=" " value="${esc(u.city || "")}"><label for="pfCity">Город или населённый пункт</label><em>Укажите город</em></div>
-          <div class="field field--area"><textarea id="pfAbout" rows="3" maxlength="300" placeholder=" ">${esc(u.about || "")}</textarea><label for="pfAbout">О себе</label><small class="count" id="pfC">${(u.about || "").length} / 300</small></div>
+          <div class="field field--area"><textarea id="pfAbout" rows="3" maxlength="300" placeholder=" ">${esc(u.about || "")}</textarea><label for="pfAbout">О себе</label><em>Проверьте текст</em><small class="count" id="pfC">${(u.about || "").length} / 300</small></div>
           <div class="field"><input readonly value="${esc(u.email)}" placeholder=" "><label>Почта для входа</label></div>
           <button class="btn btn--accent btn--wide" type="submit">Сохранить</button>
         </form>
@@ -227,9 +227,10 @@
     f.addEventListener("submit", e => {
       e.preventDefault();
       const pp = VO.phoneProblem($("#pfPhone", f).value); $("#pfPhoneE", f).textContent = pp || "";
-      const ok = [VO.check($("#pfName", f).parentElement, $("#pfName", f).value.trim().length > 0), VO.check($("#pfPhone", f).parentElement, !pp), VO.check($("#pfCity", f).parentElement, $("#pfCity", f).value.trim().length > 1), type !== "company" || VO.check($("#pfComp", f).parentElement, $("#pfComp", f).value.trim().length > 1)].every(Boolean);
+      const G = VO.guard;
+      const ok = [G.field($("#pfName", f), "name", { min: 2 }), VO.check($("#pfPhone", f).parentElement, !pp), G.field($("#pfCity", f), "place", { min: 2 }), type !== "company" || G.field($("#pfComp", f), "company", { min: 2 }), G.field($("#pfAbout", f), "about", { optional: true })].every(Boolean);
       if (!ok) return VO.toast("Проверьте выделенные поля");
-      Object.assign(u, { type, company: type === "company" ? $("#pfComp", f).value.trim() : "", name: $("#pfName", f).value.trim(), phone: $("#pfPhone", f).value, phoneVis: vis(), showPhone: vis() !== "none", city: $("#pfCity", f).value.trim(), about: $("#pfAbout", f).value.trim().slice(0, 300), color: (f.querySelector("[name=color]:checked") || {}).value || u.color });
+      Object.assign(u, { type, company: type === "company" ? G.clean($("#pfComp", f).value).slice(0, 60) : "", name: G.clean($("#pfName", f).value).slice(0, 40), phone: $("#pfPhone", f).value, phoneVis: vis(), showPhone: vis() !== "none", city: G.clean($("#pfCity", f).value).slice(0, 60), about: G.clean($("#pfAbout", f).value, { multiline: true, maxLines: 8 }).slice(0, 300), color: (f.querySelector("[name=color]:checked") || {}).value || u.color });
       VO.saveUser(u); VO.toast("Профиль сохранён");
     });
   }

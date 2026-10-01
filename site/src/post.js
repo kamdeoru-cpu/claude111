@@ -3,9 +3,10 @@
   const { $, $$, esc, store, state: S } = VO;
   const page = VO.page("post");
   const MAX_PHOTOS = 8, DAY_LIMIT = 10;
-  const BANNED = /(оружи|пистолет|патрон|наркот|спайс|закладк|поддельн|фальшив|рецептурн|психотроп|взрывчат|краденн)/i;
-  const LINK = /(https?:\/\/|www\.|t\.me\/|wa\.me|\.ru\b|\.com\b)/i;
-  const PHONE = /(\+?7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/;
+  const G = VO.guard, TMAX = 50, DMAX = 3000;
+  // разумный потолок цены по категориям — от опечаток и «цен-шуток»
+  const PMAX = { realty: 5e9, auto: 1e9, job: 5e6, service: 1e7 };
+  const pmax = () => PMAX[d.cat] || 1e8;
   const STEPS = [["cat", "Категория"], ["item", "Что продаёте"], ["photo", "Фото"], ["price", "Цена и передача"], ["desc", "Описание"], ["check", "Проверка"]];
   const HINT = { auto: "Kia Rio, 2017, 1.6 AT", parts: "Зимние шины R16, комплект", realty: "2-комнатная квартира, 54 м²", job: "Бариста в кофейню", service: "Ремонт стиральных машин на дому", tech: "iPhone 13, 128 ГБ", wear: "Пуховик зимний, размер M", home: "Угловой диван", kids: "Детский самокат", hobby: "Горный велосипед 27,5″", pets: "Аквариум 60 л", free: "Отдам книги по программированию" };
   let d = null, stepI = 0, editId = null;
@@ -24,39 +25,39 @@
   function stepItem() {
     const defs = window.VO_FILTERS[d.cat] || [];
     return `<h2>Что продаёте</h2>
-      <div class="field"><input id="pTitle" maxlength="70" placeholder=" " value="${esc(d.title)}"><label for="pTitle">Название</label><em>От 5 символов — что это, модель, размер</em><small class="count">${d.title.length} / 70</small></div>
+      <div class="field"><input id="pTitle" maxlength="${TMAX}" placeholder=" " value="${esc(d.title)}"><label for="pTitle">Название</label><em>От 5 символов — что это, модель, размер</em><small class="count">${d.title.length} / ${TMAX}</small></div>
       <p class="hint">Например: «${esc(HINT[d.cat] || "")}»</p>
       ${usesCond(d.cat) ? `<div class="fs"><h4>Состояние</h4><div class="conds">${[["Новое", "С биркой или в упаковке"], ["Как новое", "Без следов использования"], ["Б/у", "Есть следы использования"]].map(([k, t]) => `<label><input type="radio" name="cond" value="${k}"${d.cond === k ? " checked" : ""}><span><b>${k}</b><small>${t}</small></span></label>`).join("")}</div></div>` : ""}
       ${defs.length ? `<div class="attrs"><h4>Характеристики <small class="muted">необязательно, но с ними находят быстрее</small></h4>${defs.map(f => {
-        if (f.t === "chips") { const v = d.attrs[f.k], other = v && !f.o.includes(v); return `<div class="attr"><span>${f.n}</span><div class="chips chips--s">${f.o.map(o => `<button type="button" data-at="${f.k}" data-v="${esc(o)}" aria-pressed="${v === o}">${esc(o)}</button>`).join("")}<button type="button" data-at="${f.k}" data-v="__other" aria-pressed="${!!other || d.other[f.k] != null}">Другое</button></div>${other || d.other[f.k] != null ? `<div class="field field--sm"><input data-other="${f.k}" maxlength="40" placeholder=" " value="${esc(other ? v : d.other[f.k] || "")}"><label>Свой вариант</label></div>` : ""}</div>`; }
+        if (f.t === "chips") { const v = d.attrs[f.k], other = v && !f.o.includes(v); return `<div class="attr"><span>${f.n}</span><div class="chips chips--s">${f.o.map(o => `<button type="button" data-at="${f.k}" data-v="${esc(o)}" aria-pressed="${v === o}">${esc(o)}</button>`).join("")}<button type="button" data-at="${f.k}" data-v="__other" aria-pressed="${!!other || d.other[f.k] != null}">Другое</button></div>${other || d.other[f.k] != null ? `<div class="field field--sm"><input data-other="${f.k}" maxlength="30" placeholder=" " value="${esc(other ? v : d.other[f.k] || "")}"><label>Свой вариант</label><em>Проверьте текст</em></div>` : ""}</div>`; }
         if (f.t === "range") return `<div class="field field--sm"><input data-num="${f.k}" inputmode="numeric" placeholder=" " value="${d.attrs[f.k] != null ? d.attrs[f.k] : ""}"><label>${f.n}</label></div>`;
         if (f.t === "toggle") return `<label class="switch-l"><input type="checkbox" data-tg="${f.k}"${d.attrs[f.k] ? " checked" : ""}><span class="sw"></span>${f.n}</label>`;
       }).join("")}</div>` : ""}`;
   }
   function stepPhoto() {
-    return `<h2>Фотографии</h2><p class="muted">До ${MAX_PHOTOS} фото. Первое станет обложкой. Данные о месте съёмки мы удаляем.</p>
-      <div class="photos" id="pPhotos">${d.photos.map((p, i) => `<div class="photo${i === 0 ? " photo--cover" : ""}"><img src="${p}" alt="Фото ${i + 1}">${i === 0 ? "<em>Обложка</em>" : ""}<div class="photo__bar">${i ? `<button type="button" data-mv="${i}" data-dir="-1" aria-label="Левее">‹</button><button type="button" data-cover="${i}" title="Сделать обложкой">★</button>` : ""}${i < d.photos.length - 1 ? `<button type="button" data-mv="${i}" data-dir="1" aria-label="Правее">›</button>` : ""}<button type="button" data-rm="${i}" aria-label="Удалить">×</button></div></div>`).join("")}
-      ${d.photos.length < MAX_PHOTOS ? `<label class="drop drop--tile"><input type="file" id="pPhoto" accept="image/jpeg,image/png,image/webp" multiple hidden><span class="drop__ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><b>${d.photos.length ? "Ещё фото" : "Добавить фото"}</b><small>или перетащите сюда</small></label>` : ""}</div>
-      <div class="ptips"><b>Как снять, чтобы купили быстрее</b><ul><li>При дневном свете, без вспышки</li><li>Общий вид, детали и недостатки</li><li>Однотонный фон без лишних вещей</li></ul></div>
+    return `<h2>Фотографии</h2><p class="muted">До ${MAX_PHOTOS} фото. Первое станет обложкой — порядок меняется перетаскиванием. Перед загрузкой мы уменьшаем фото и удаляем из него служебные данные: место съёмки, модель телефона, дату.</p>
+      <div class="photos" id="pPhotos">${d.photos.map((p, i) => `<div class="photo${i === 0 ? " photo--cover" : ""}" data-i="${i}" title="Зажмите и перетащите, чтобы поменять порядок"><img src="${p}" alt="Фото ${i + 1}" draggable="false">${i === 0 ? "<em>Обложка</em>" : ""}<div class="photo__bar">${i ? `<button type="button" data-mv="${i}" data-dir="-1" aria-label="Левее">‹</button><button type="button" data-cover="${i}" title="Сделать обложкой">★</button>` : ""}${i < d.photos.length - 1 ? `<button type="button" data-mv="${i}" data-dir="1" aria-label="Правее">›</button>` : ""}<button type="button" data-rm="${i}" aria-label="Удалить">×</button></div></div>`).join("")}${Array.from({ length: busy }, () => `<div class="photo photo--busy"><i class="spin"></i><small>Обрабатываем…</small></div>`).join("")}
+      ${d.photos.length + busy < MAX_PHOTOS ? `<label class="drop drop--tile"><input type="file" id="pPhoto" accept="image/jpeg,image/png,image/webp" multiple hidden><span class="drop__ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><b>${d.photos.length ? "Ещё фото" : "Добавить фото"}</b><small>или перетащите сюда</small></label>` : ""}</div>
+      <div class="ptips"><b>Как снять, чтобы купили быстрее</b><ul><li>При дневном свете, без вспышки</li><li>Общий вид, детали и недостатки</li><li>Однотонный фон без лишних вещей</li><li>Без чужих фото из интернета, текста и номеров телефона на снимке</li></ul><small class="muted">JPG, PNG или WebP · до 20 МБ · от 200 × 200 пикселей</small></div>
       ${d.photos.length ? "" : `<p class="muted">Без фото объявление тоже можно опубликовать — подставим картинку категории.</p>`}`;
   }
   function stepPrice() {
     const sim = VO.allAds().filter(a => a.cat === d.cat && a.price > 0 && !a.mine).map(a => a.price).sort((a, b) => a - b);
     const per = d.cat === "job" ? ["в месяц", "за смену", "в час"] : d.cat === "service" ? ["за услугу", "в час", "за выезд"] : null;
     return `<h2>Цена и передача</h2>
-      <div class="row2"><div class="field"><input id="pPrice" inputmode="numeric" placeholder=" " value="${d.free ? "" : d.price}"${d.free ? " disabled" : ""}><label for="pPrice">${d.cat === "job" ? "Зарплата, ₽" : "Цена, ₽"}</label><em>Укажите цену или отметьте «Отдам даром»</em></div>
+      <div class="row2"><div class="field"><input id="pPrice" inputmode="numeric" placeholder=" " value="${d.free ? "" : d.price}"${d.free ? " disabled" : ""}><label for="pPrice">${d.cat === "job" ? "Зарплата, ₽" : "Цена, ₽"}</label><em id="pPriceE">Укажите цену или отметьте «Отдам даром»</em></div>
         ${d.cat === "job" ? "" : `<label class="switch-l"><input type="checkbox" id="pFree"${d.free ? " checked" : ""}><span class="sw"></span>Отдам даром</label>`}
         <label class="switch-l"><input type="checkbox" id="pBargain"${d.bargain ? " checked" : ""}${d.free ? " disabled" : ""}><span class="sw"></span>Торг</label></div>
       ${per ? `<div class="chips chips--s">${per.map(p => `<button type="button" data-per="${p}" aria-pressed="${(d.per || per[0]) === p}">${p}</button>`).join("")}</div>` : ""}
       ${sim.length ? `<div class="pricehint">Похожие объявления в этой категории: <b>от ${VO.rub(sim[0])} до ${VO.rub(sim[sim.length - 1])}</b>. Цена чуть ниже рынка — и откликов больше.</div>` : ""}
       ${["job", "service", "realty"].includes(d.cat) ? "" : `<div class="fs"><h4>Как передать</h4><div class="vis vis--row">${[["meet", "Встреча", "в вашем городе"], ["ship", "Отправка", "Почта, СДЭК, Boxberry"], ["courier", "Привезу сам(а)", "по договорённости"]].map(([k, t, s]) => `<label><input type="checkbox" data-dv="${k}"${d.delivery.includes(k) ? " checked" : ""}><span><b>${t}</b><small>${s}</small></span></label>`).join("")}</div></div>`}
       <div class="row2 row2--eq"><div class="field"><input id="pCity" maxlength="60" placeholder=" " value="${esc(d.city)}"><label for="pCity">Город или населённый пункт</label><em>Укажите, где находится</em></div>
-        <div class="field"><input id="pDistrict" maxlength="60" placeholder=" " value="${esc(d.district)}"><label for="pDistrict">Район или метро (необязательно)</label></div></div>`;
+        <div class="field"><input id="pDistrict" maxlength="50" placeholder=" " value="${esc(d.district)}"><label for="pDistrict">Район или метро (необязательно)</label><em>Проверьте текст</em></div></div>`;
   }
   function stepDesc() {
     const u = VO.user(), vis = { none: "никому — только сообщения", auth: "только вошедшим", all: "всем" }[u.phoneVis || "none"];
     return `<h2>Описание</h2>
-      <div class="field field--area"><textarea id="pDesc" rows="8" maxlength="3000" placeholder=" ">${esc(d.desc)}</textarea><label for="pDesc">Расскажите подробнее</label><small class="count">${d.desc.length} / 3000</small></div>
+      <div class="field field--area"><textarea id="pDesc" rows="8" maxlength="${DMAX}" placeholder=" ">${esc(d.desc)}</textarea><label for="pDesc">Расскажите подробнее</label><em>Проверьте текст</em><small class="count">${d.desc.length} / ${DMAX}</small></div>
       <div class="dtips">${["Состояние и недостатки", "Что в комплекте", "Почему продаёте", "Когда удобно показать"].map(t => `<button type="button" data-tip="${t}">+ ${t}</button>`).join("")}</div>
       <div class="contact-way"><b>Как с вами свяжутся</b><span>Сообщения на сайте — всегда. Номер телефона: ${vis}. <a href="#/me/profile">Изменить в профиле</a></span></div>`;
   }
@@ -81,29 +82,43 @@
 
   function toAd() {
     const attrs = { ...d.attrs };
-    Object.entries(d.other).forEach(([k, v]) => { if (v && v.trim()) attrs[k] = v.trim(); });
+    Object.entries(d.other).forEach(([k, v]) => { v = G.clean(v).slice(0, 30); if (v) attrs[k] = v; });
     const price = d.free ? 0 : +String(d.price).replace(/\D/g, "") || 0;
-    return { cat: d.cat || "tech", sub: d.sub, title: d.title.trim(), attrs, price, bargain: !d.free && d.bargain,
+    return { cat: d.cat || "tech", sub: d.sub, title: G.clean(d.title).slice(0, TMAX), attrs, price, bargain: !d.free && d.bargain,
       per: d.cat === "job" ? (d.per || "в месяц").replace(/^в /, "") : d.cat === "service" ? (d.per || "за услугу") : null,
-      cond: d.free ? "Даром" : d.cat === "job" ? "Работа" : d.cat === "service" ? "Услуга" : d.cond, delivery: d.delivery, district: d.district.trim(),
-      city: d.city.trim() || "Москва", desc: d.desc.trim(), photos: d.photos, photo: d.photos[0] || null, ill: window.VO_CAT_ILL[d.cat || "tech"], bg: window.VO_CAT_BG[d.cat || "tech"] };
+      cond: d.free ? "Даром" : d.cat === "job" ? "Работа" : d.cat === "service" ? "Услуга" : d.cond, delivery: d.delivery, district: G.clean(d.district).slice(0, 50),
+      city: G.clean(d.city).slice(0, 60) || "Москва", desc: G.clean(d.desc, { multiline: true, maxLines: 60 }).slice(0, DMAX), photos: d.photos, photo: d.photos[0] || null, ill: window.VO_CAT_ILL[d.cat || "tech"], bg: window.VO_CAT_BG[d.cat || "tech"] };
   }
   const previewCard = () => { const a = { ...toAd(), id: "preview", created: Date.now() }; if (!a.title) a.title = "Название объявления"; if (!d.free && !a.price) { a.price = null; a.cond = d.cond; } return VO.cardHTML(a).replace(/ data-fav="[^"]*"/, " disabled tabindex=\"-1\"").replace('class="card', 'class="card in'); };
   function problems() {
-    const p = [], t = d.title + " " + d.desc;
+    const p = [], add = (where, m) => m && !p.includes(where + m) && p.push(where + m);
     if (!d.cat) p.push("Выберите категорию");
-    if (d.title.trim().length < 5) p.push("Название слишком короткое — минимум 5 символов");
-    if (!d.free && !(+String(d.price).replace(/\D/g, "") > 0)) p.push("Укажите цену или отметьте «Отдам даром»");
-    if (d.city.trim().length < 2) p.push("Укажите город");
-    if (BANNED.test(t)) p.push("Похоже на запрещённый товар — такие объявления не публикуются (см. Правила размещения)");
-    if (LINK.test(t)) p.push("Уберите ссылки из текста — это частый приём мошенников");
-    if (PHONE.test(t)) p.push("Не пишите телефон в тексте — включите его показ в профиле");
+    if (G.clean(d.title).length < 5) p.push("Название слишком короткое — минимум 5 символов");
+    else add("Название: ", G.text(d.title, "title"));
+    if (d.desc.trim()) add("Описание: ", G.text(d.desc, "desc"));
+    // запрещёнку ищем и в связке «название + описание»
+    add("", !p.length && G.banned(d.title + "\n" + d.desc) ? "Похоже на запрещённое к продаже — см. Правила размещения" : null);
+    Object.values(d.other).forEach(v => v && v.trim() && add("Характеристики: ", G.text(v, "other")));
+    const pr = +String(d.price).replace(/\D/g, "");
+    if (!d.free && !(pr > 0)) p.push("Укажите цену или отметьте «Отдам даром»");
+    else if (!d.free && pr > pmax()) p.push(`Проверьте цену — для этой категории не больше ${VO.rub(pmax())}`);
+    if (G.clean(d.city).length < 2) p.push("Укажите город");
+    else add("Город: ", G.text(d.city, "place"));
+    if (d.district.trim()) add("Район: ", G.text(d.district, "place"));
     return p;
   }
   function validStep(i) {
     if (i === 0 && !d.cat) { VO.toast("Выберите категорию"); return false; }
-    if (i === 1 && d.title.trim().length < 5) { const f = $("#pTitle", page); VO.check(f.parentElement, false); f.focus(); return false; }
-    if (i === 3) { const okP = d.free || +String(d.price).replace(/\D/g, "") > 0, okC = d.city.trim().length > 1; VO.check($("#pPrice", page).parentElement, okP); VO.check($("#pCity", page).parentElement, okC); if (!okP || !okC) return false; }
+    if (i === 1) {
+      const f = $("#pTitle", page); if (!G.field(f, "title", { min: 5 })) { f.focus(); return false; }
+      const bad = $$("[data-other]", page).filter(x => x.value.trim() && !G.field(x, "other")); if (bad.length) { bad[0].focus(); return false; }
+    }
+    if (i === 3) {
+      const pr = +String(d.price).replace(/\D/g, ""), okP = G.mark($("#pPrice", page), d.free || pr > 0 ? (d.free || pr <= pmax() ? null : `Не больше ${VO.rub(pmax())} — проверьте, нет ли лишних нулей`) : "Укажите цену или отметьте «Отдам даром»");
+      const okC = G.field($("#pCity", page), "place", { min: 2 }), okD = G.field($("#pDistrict", page), "place", { optional: true });
+      if (!okP || !okC || !okD) return false;
+    }
+    if (i === 4 && !G.field($("#pDesc", page), "desc", { optional: true })) { $("#pDesc", page).focus(); return false; }
     return true;
   }
 
@@ -124,6 +139,7 @@
     if (stepI === 3) VO.cityField($("#pCity", page), v => { d.city = v; refresh(); });
     if (focusId) { const el = $("#" + focusId, page); if (el) { el.focus(); const v = el.value; el.value = ""; el.value = v; } }
   }
+  let busy = 0;
   const refresh = () => { $("#wizPrev", page).innerHTML = previewCard(); $("#quality", page).innerHTML = quality(); saveDraft(); };
   const go = i => { stepI = Math.max(0, Math.min(STEPS.length - 1, i)); render(); scrollTo({ top: 0, behavior: "smooth" }); saveDraft(); };
 
@@ -144,14 +160,22 @@
   });
   page.addEventListener("input", e => {
     const t = e.target, fl = t.closest(".field"); if (fl) fl.classList.remove("bad");
-    if (t.id === "pTitle") { d.title = t.value; fl.querySelector(".count").textContent = `${t.value.length} / 70`; }
-    if (t.id === "pDesc") { d.desc = t.value; fl.querySelector(".count").textContent = `${t.value.length} / 3000`; }
+    if (t.id === "pTitle") { d.title = t.value; fl.querySelector(".count").textContent = `${t.value.length} / ${TMAX}`; }
+    if (t.id === "pDesc") { d.desc = t.value; fl.querySelector(".count").textContent = `${t.value.length} / ${DMAX}`; }
     if (t.id === "pPrice") { t.value = t.value.replace(/\D/g, "").slice(0, 10).replace(/\B(?=(\d{3})+(?!\d))/g, " "); d.price = t.value; }
     if (t.id === "pCity") d.city = t.value;
     if (t.id === "pDistrict") d.district = t.value;
-    if (t.dataset.other) d.other[t.dataset.other] = t.value.slice(0, 40);
+    if (t.dataset.other) d.other[t.dataset.other] = t.value.slice(0, 30);
     if (t.dataset.num) { t.value = t.value.replace(/\D/g, "").slice(0, 9); if (t.value) d.attrs[t.dataset.num] = +t.value; else delete d.attrs[t.dataset.num]; }
     refresh();
+  });
+  // подсказка об ошибке — сразу, как только человек ушёл с поля
+  page.addEventListener("focusout", e => {
+    const t = e.target; if (!t.value || !t.value.trim()) return;
+    if (t.id === "pTitle") G.field(t, "title", { min: 5 });
+    if (t.id === "pDesc") G.field(t, "desc");
+    if (t.id === "pDistrict") G.field(t, "place");
+    if (t.dataset.other) G.field(t, "other");
   });
   page.addEventListener("change", e => {
     const t = e.target;
@@ -160,22 +184,78 @@
     if (t.id === "pBargain") d.bargain = t.checked;
     if (t.dataset.tg) { if (t.checked) d.attrs[t.dataset.tg] = true; else delete d.attrs[t.dataset.tg]; }
     if (t.dataset.dv) { d.delivery = $$("[data-dv]", page).filter(x => x.checked).map(x => x.dataset.dv); }
-    if (t.id === "pPhoto") [...t.files].slice(0, MAX_PHOTOS - d.photos.length).forEach(takePhoto);
+    if (t.id === "pPhoto") { addPhotos(t.files); t.value = ""; }
     refresh();
   });
   ["dragover", "dragenter"].forEach(ev => page.addEventListener(ev, e => { const x = e.target.closest(".drop"); if (x) { e.preventDefault(); x.classList.add("over"); } }));
   page.addEventListener("dragleave", e => { const x = e.target.closest(".drop"); if (x) x.classList.remove("over"); });
-  page.addEventListener("drop", e => { const x = e.target.closest(".drop"); if (x) { e.preventDefault(); [...e.dataTransfer.files].slice(0, MAX_PHOTOS - d.photos.length).forEach(takePhoto); } });
-  function takePhoto(file) {
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return VO.toast("Подойдут JPG, PNG или WebP");
-    if (file.size > 15e6) return VO.toast("Фото больше 15 МБ — выберите поменьше");
-    const img = new Image(), url = URL.createObjectURL(file);
-    img.onload = () => { const k = Math.min(1, 900 / Math.max(img.width, img.height)), cv = document.createElement("canvas"); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); if (d.photos.length < MAX_PHOTOS) d.photos.push(cv.toDataURL("image/jpeg", .78)); render(); saveDraft(); };
-    img.onerror = () => VO.toast("Не получилось открыть изображение");
-    img.src = url;
+  page.addEventListener("drop", e => { const x = e.target.closest(".drop"); if (x) { e.preventDefault(); x.classList.remove("over"); addPhotos(e.dataTransfer.files); } });
+  // Фото обрабатываем по одному: проверка формата по содержимому, размеров, пересжатие без EXIF
+  async function addPhotos(list) {
+    let files = [...list];
+    const room = MAX_PHOTOS - d.photos.length - busy;
+    if (files.length > room) { VO.toast(room > 0 ? `Можно добавить ещё ${room} фото — лишние не загрузили` : `Уже ${MAX_PHOTOS} фото — это максимум`); files = files.slice(0, Math.max(0, room)); }
+    if (!files.length) return;
+    const w = G.rate("photo", 60, 36e5); if (w) return VO.toast(`Слишком много загрузок. Попробуйте через ${G.wait(w)}`);
+    busy += files.length; if (stepI === 2) render();
+    const errs = [];
+    for (const f of files) {
+      try {
+        const url = await G.image(f);
+        if (d.photos.includes(url)) errs.push("Это фото уже добавлено");
+        else if (d.photos.length < MAX_PHOTOS) d.photos.push(url);
+      } catch (err) { errs.push(err.message); }
+      busy--; if (stepI === 2 && !drag) render(); saveDraft();
+    }
+    [...new Set(errs)].slice(0, 3).forEach((m, i) => setTimeout(() => VO.toast(m, 5200), i * 250));
   }
+
+  /* ---------- перетаскивание фото: мышью сразу, пальцем — после короткого удержания ---------- */
+  let drag = null;
+  const photoEls = () => $$("#pPhotos .photo[data-i]", page);
+  page.addEventListener("pointerdown", e => {
+    const ph = e.target.closest(".photo[data-i]"); if (!ph || e.target.closest("button") || e.button > 0) return;
+    drag = { el: ph, x: e.clientX, y: e.clientY, on: false, touch: e.pointerType !== "mouse" };
+    if (drag.touch) drag.timer = setTimeout(() => drag && startDrag(drag.x, drag.y), 260);
+  });
+  function startDrag(x, y) {
+    const r = drag.el.getBoundingClientRect();
+    drag.on = true; drag.dx = x - r.left; drag.dy = y - r.top;
+    const g = drag.ghost = drag.el.cloneNode(true); g.classList.add("photo--ghost"); g.removeAttribute("data-i");
+    Object.assign(g.style, { width: r.width + "px", height: r.height + "px", left: r.left + "px", top: r.top + "px" });
+    document.body.appendChild(g); drag.el.classList.add("photo--hole"); page.classList.add("is-sorting");
+    if (navigator.vibrate) navigator.vibrate(12);
+  }
+  addEventListener("pointermove", e => {
+    if (!drag) return;
+    if (!drag.on) { if (drag.touch) { if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) { clearTimeout(drag.timer); drag = null; } return; } if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return; startDrag(drag.x, drag.y); }
+    drag.x = e.clientX; drag.y = e.clientY;
+    drag.ghost.style.transform = `translate(${e.clientX - drag.dx - parseFloat(drag.ghost.style.left)}px, ${e.clientY - drag.dy - parseFloat(drag.ghost.style.top)}px) rotate(-3deg) scale(1.05)`;
+    const over = document.elementFromPoint(e.clientX, e.clientY), tgt = over && over.closest("#pPhotos .photo[data-i]");
+    if (!tgt || tgt === drag.el) return;
+    const els = photoEls(), before = new Map(els.map(x => [x, x.getBoundingClientRect()]));
+    const a = els.indexOf(drag.el), b = els.indexOf(tgt);
+    tgt.parentNode.insertBefore(drag.el, a < b ? tgt.nextSibling : tgt);
+    els.forEach(x => { if (x === drag.el) return; const o = before.get(x), n = x.getBoundingClientRect(); if (o.left !== n.left || o.top !== n.top) x.animate([{ transform: `translate(${o.left - n.left}px, ${o.top - n.top}px)` }, { transform: "none" }], { duration: 220, easing: "cubic-bezier(.2,.8,.2,1)" }); });
+  });
+  // пока тянем пальцем — страница не прокручивается
+  page.addEventListener("touchmove", e => { if (drag && drag.on) e.preventDefault(); }, { passive: false });
+  const endDrag = () => {
+    if (!drag) return; clearTimeout(drag.timer);
+    if (drag.on) {
+      const order = photoEls().map(x => +x.dataset.i), moved = order.some((v, i) => v !== i);
+      drag.ghost.remove(); page.classList.remove("is-sorting");
+      const stop = ev => { ev.stopPropagation(); ev.preventDefault(); }; page.addEventListener("click", stop, { capture: true, once: true }); setTimeout(() => page.removeEventListener("click", stop, true), 60);
+      drag = null;
+      if (moved) { d.photos = order.map(i => d.photos[i]); saveDraft(); }
+      render();
+    } else drag = null;
+  };
+  addEventListener("pointerup", endDrag); addEventListener("pointercancel", endDrag);
+  page.addEventListener("contextmenu", e => { if (e.target.closest(".photo[data-i]")) e.preventDefault(); });
   function publish() {
     const p = problems(); if (p.length) return VO.toast(p[0]);
+    if (busy) return VO.toast("Подождите — фото ещё обрабатываются");
     const u = VO.user(), ad = toAd();
     if (!editId && S.mine.filter(a => a.owner === u.email && Date.now() - (a.first || a.created) < 864e5).length >= DAY_LIMIT) return VO.toast(`Можно размещать до ${DAY_LIMIT} объявлений в сутки. Попробуйте завтра`);
     if (editId) { const i = S.mine.findIndex(a => a.id === editId), old = S.mine[i]; S.mine[i] = { ...old, ...ad, id: editId, owner: u.email, created: old.created, first: old.first || old.created, status: old.status }; }

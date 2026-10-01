@@ -15,7 +15,7 @@ assert "const SITE_MODE = true;" in intro_js
 hdr = rd("header/header.html")
 hdr_markup = hdr[hdr.index('<header class="hdr"'):hdr.index('<main class="demo"')]
 
-MODULES = ["core", "chat", "reviews", "search", "feed", "ad", "auth", "cabinet", "post", "info", "docs", "ads", "ui"]  # порядок важен: core первым, ui (запуск) последним
+MODULES = ["core", "guard", "chat", "reviews", "search", "feed", "ad", "auth", "cabinet", "post", "info", "docs", "ads", "ui"]  # порядок важен: core первым, ui (запуск) последним
 tpl = rd("site/index.tpl.html")
 out = (tpl.replace("/*__HEADER_CSS__*/", rd("header/header.css"))
           .replace("/*__COOKIE_CSS__*/", rd("cookies/cookies.css"))

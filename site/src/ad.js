@@ -105,7 +105,7 @@
     const t = e.target, a = cur; if (!a) return;
     const v = t.closest("[data-view]"); if (v) return setView(+v.dataset.view);
     const st = t.closest("[data-step]"); if (st) return setView(view + +st.dataset.step);
-    if (t.closest("[data-zoom]")) { const phs = a.photos && a.photos.length ? a.photos : null; return VO.sheet(`<div class="lb card__media" data-v="${phs ? 0 : view}" style="--bg:${a.bg}"><span class="card__blob"></span><div class="card__art">${phs ? `<img src="${phs[view]}" alt="">` : VO.media(a)}</div></div>`, { cls: "sheet--lb" }); }
+    if (t.closest("[data-zoom]") || (t.closest(".gal__main.has-ph") && !t.closest("button"))) { const phs = a.photos && a.photos.length ? a.photos : null; if (phs) return VO.lightbox(phs, view); return VO.sheet(`<div class="lb card__media" data-v="${phs ? 0 : view}" style="--bg:${a.bg}"><span class="card__blob"></span><div class="card__art">${phs ? `<img src="${phs[view]}" alt="">` : VO.media(a)}</div></div>`, { cls: "sheet--lb" }); }
     if (t.closest("[data-share]")) return VO.share({ title: a.title + " — " + (a.price ? VO.rub(a.price) : "даром"), url: location.href.split("#")[0] + "#/ad/" + a.id });
     if (t.closest("[data-write]")) {
       if (!VO.user()) return VO.needLogin("#/ad/" + a.id, "Войдите, чтобы написать продавцу");
@@ -135,13 +135,15 @@
     const REASONS = ["Мошенничество или обман", "Запрещённый товар или услуга", "Неверная цена или категория", "Уже продано", "Оскорбления или спам", "Другое"];
     const el = VO.sheet(`<form class="report" id="reportF"><h3>Что не так с объявлением?</h3><p class="muted">Жалоба анонимна. Мы проверим объявление и при нарушении скроем его.</p>
       <div class="report__r">${REASONS.map((r, i) => `<label><input type="radio" name="r" value="${r}"${i === 0 ? " checked" : ""}><span>${r}</span></label>`).join("")}</div>
-      <div class="field field--area"><textarea id="repT" rows="3" maxlength="500" placeholder=" "></textarea><label for="repT">Комментарий (необязательно)</label></div>
+      <div class="field field--area"><textarea id="repT" rows="3" maxlength="500" placeholder=" "></textarea><label for="repT">Комментарий (необязательно)</label><em>Проверьте текст</em></div>
       <button class="btn btn--ink btn--wide" type="submit">Отправить жалобу</button></form>`, { cls: "sheet--sm" });
     $("#reportF", el).addEventListener("submit", e => {
       e.preventDefault();
+      const G = VO.guard; if (!G.field($("#repT", el), "report", { optional: true })) return;
+      const w = G.rate("report", 10, 864e5); if (w) return VO.toast(`Слишком много жалоб за сутки. Попробуйте через ${G.wait(w)}`);
       const reps = VO.store.get("vo_reports", []);
       if (reps.some(r => r.ad === a.id)) { VO.closeSheet(); return VO.toast("Вы уже жаловались на это объявление — мы проверяем"); }
-      reps.push({ ad: a.id, reason: new FormData(e.target).get("r"), text: $("#repT", el).value.slice(0, 500), t: Date.now() });
+      reps.push({ ad: a.id, reason: new FormData(e.target).get("r"), text: G.clean($("#repT", el).value, { multiline: true, maxLines: 10 }).slice(0, 500), t: Date.now() });
       VO.store.set("vo_reports", reps); VO.closeSheet(); VO.toast("Спасибо! Проверим объявление в ближайшее время");
     });
   }

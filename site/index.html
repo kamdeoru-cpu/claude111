@@ -1933,7 +1933,7 @@ a.note-i:hover { background: var(--mist); }
 .wiz__card > .muted { margin: -8px 0 0; }
 .wiz__nav { display: flex; justify-content: space-between; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); margin-top: 6px; }
 .wiz__side { position: sticky; top: 100px; display: grid; gap: 14px; }
-.wiz__prev { pointer-events: none; }
+.wiz__prev .card { cursor: default; }
 .wiz__prev .heart-b { opacity: .5; }
 .ctiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 10px; }
 .ctile { display: grid; grid-template-rows: auto 1fr; justify-items: center; align-items: start; gap: 10px; height: 116px; padding: 16px 8px 10px; border-radius: 20px; border: 1.5px solid var(--line); background: #fff; font: inherit; cursor: pointer; transition: all .25s var(--spring); min-width: 0; }
@@ -2037,6 +2037,68 @@ a.note-i:hover { background: var(--mist); }
 
 html.in-chat .fab { display: none; }
 @media (max-width: 1000px) { .wiz__side { display: none; } }
+
+/* ===== Длинный текст никогда не раздвигает страницу ===== */
+html { overflow-x: clip; }
+body { overflow-wrap: anywhere; }
+img, video, svg { max-width: 100%; }
+.card__title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.adp > *, .wiz > *, .cab > *, .chats > *, .contact > * { min-width: 0; }
+.adp__title, .adp h1 { overflow-wrap: anywhere; }
+.note-i > div { min-width: 0; }
+.note-i span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cform__prev { max-height: 7.6em; overflow: hidden; white-space: pre-line; }
+.ticket p { max-height: 14em; overflow: auto; white-space: pre-line; }
+.hp { position: absolute !important; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+/* ===== Несколько фото на карточке ===== */
+.card__art .card__ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .18s; }
+.card__art .card__ph.on { opacity: 1; }
+.card__bars--ph { z-index: 2; }
+.card__bars--ph i { background: rgba(255,255,255,.55); box-shadow: 0 0 0 .5px rgba(0,0,0,.08); }
+.card__bars--ph i.on { background: #fff; }
+.card__media:has(.card__ph) .card__bars { opacity: 1; }
+
+/* ===== Галерея объявления: в рамке — кадр, по клику — фото целиком ===== */
+.gal__ph { object-fit: cover; background: none; cursor: zoom-in; }
+.gal__thumbs { overflow-x: auto; scrollbar-width: thin; padding-bottom: 4px; scroll-snap-type: x proximity; }
+.gal__thumbs button { flex: none; scroll-snap-align: start; }
+.sheet--lbx .sheet__back { background: rgba(10,11,14,.92); }
+.sheet--lbx .sheet__box { width: 100%; height: 100%; max-height: none; padding: 0; background: transparent; border-radius: 0; overflow: hidden; display: grid; }
+.sheet--lbx .sheet__x { background: rgba(255,255,255,.14); color: #fff; z-index: 3; }
+.lbx { position: relative; display: grid; place-items: center; min-height: 0; }
+.lbx__stage { width: 100%; height: calc(100vh - 32px); display: grid; place-items: center; }
+.lbx__img { max-width: min(100%, calc(100vw - 140px)); max-height: calc(100vh - 40px); object-fit: contain; border-radius: 6px; user-select: none; animation: fade .25s both; }
+.lbx__nav { position: absolute; top: calc(50% - 26px); width: 52px; height: 52px; border-radius: 50%; border: 0; background: rgba(255,255,255,.14); color: #fff; font-size: 30px; cursor: pointer; transition: background-color .2s; }
+.lbx__nav:hover { background: rgba(255,255,255,.26); }
+.lbx__nav--l { left: 8px; } .lbx__nav--r { right: 8px; }
+.lbx__count { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); color: #fff; font-weight: 700; font-size: 13px; background: rgba(255,255,255,.14); padding: 5px 12px; border-radius: 999px; }
+.msg__ph { cursor: zoom-in; object-fit: cover; }
+
+/* ===== Быстрые ответы: листаются ===== */
+.chat__qw { position: relative; }
+.chat__quick { scroll-behavior: auto; cursor: grab; user-select: none; padding-right: 16px; }
+.chat__quick.drag { cursor: grabbing; } .chat__quick.drag button { pointer-events: none; }
+.chat__qa { position: absolute; top: 10px; z-index: 2; width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; font-size: 18px; line-height: 1; cursor: pointer; display: grid; place-items: center; box-shadow: 0 6px 16px -8px rgba(22,24,29,.35); }
+.chat__qa[hidden] { display: none; }
+.chat__qa--l { left: 6px; } .chat__qa--r { right: 6px; }
+.chat__qw::before, .chat__qw::after { content: ""; position: absolute; top: 10px; bottom: 0; width: 48px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 1; }
+.chat__qw::before { left: 0; background: linear-gradient(90deg, #fff 30%, rgba(255,255,255,0)); }
+.chat__qw::after { right: 0; background: linear-gradient(270deg, #fff 30%, rgba(255,255,255,0)); }
+.chat__qw.fade-l::before, .chat__qw.fade-r::after { opacity: 1; }
+
+/* ===== Фото в мастере: перетаскивание ===== */
+.photo[data-i] { cursor: grab; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.is-sorting, .is-sorting * { cursor: grabbing !important; }
+.photo--hole { opacity: .28; outline: 2px dashed var(--muted); outline-offset: -2px; }
+.photo--hole .photo__bar { display: none; }
+.photo--ghost { position: fixed; z-index: 9999; margin: 0; pointer-events: none; animation: none; box-shadow: 0 24px 50px -18px rgba(22,24,29,.55); transition: none; }
+.photo--ghost .photo__bar { display: none; }
+.photo--busy { display: grid; place-items: center; align-content: center; gap: 8px; color: var(--muted); font-size: 12.5px; font-weight: 700; border: 1.5px dashed var(--line); background: #fff; }
+.spin { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (hover: none) { .photo__bar { opacity: 1; } }
+.ptips small { display: block; margin-top: 8px; }
 
 
 /* ===== панель проверки (убрать перед запуском) ===== */
@@ -2957,7 +3019,7 @@ window.VO_BRAND_ICONS = {
 
   /* ---------- форматирование ---------- */
   VO.rub = n => n.toLocaleString("ru-RU") + " ₽";
-  VO.price = a => a.price == null ? '<span class="muted">Цена не указана</span>' : a.price === 0 ? '<span class="free">Даром</span>' : `${VO.rub(a.price)}${a.per ? `<small>${a.per === "выезд" ? "за выезд" : "в " + a.per}</small>` : ""}`;
+  VO.price = a => a.price == null ? '<span class="muted">Цена не указана</span>' : a.price === 0 ? '<span class="free">Даром</span>' : `${VO.rub(a.price)}${a.per ? `<small>${/^(за|в) /.test(a.per) ? a.per : a.per === "выезд" ? "за выезд" : "в " + a.per}</small>` : ""}`;
   VO.minutesAgo = a => a.created ? Math.floor((Date.now() - a.created) / 60000) : a.ago + Math.floor((Date.now() - LOADED) / 60000);
   VO.agoText = a => {
     const m = VO.minutesAgo(a);
@@ -2968,6 +3030,10 @@ window.VO_BRAND_ICONS = {
   };
   VO.plural = (n, a, b, c) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c; };
   VO.media = a => a.photo ? `<img src="${a.photo}" alt="">` : (window.VO_ILL[a.ill] || "");
+  // несколько фото: на карточке листаются движением мыши (как на крупных площадках)
+  const PH = VO._ph = {};
+  const multi = a => a.photos && a.photos.length > 1;
+  VO.cardMedia = a => { if (!multi(a)) return VO.media(a); PH[a.id] = a.photos; return a.photos.map((p, i) => `<img class="card__ph${i ? "" : " on"}" ${i ? `data-k="${i}"` : `src="${p}"`} alt="">`).join(""); };
   VO.tag = a => a.status === "archived" ? '<span class="card__tag">Снято</span>' : a.status === "sold" ? '<span class="card__tag">Продано</span>' : a.price === 0 ? '<span class="card__tag card__tag--free">Даром</span>'
     : a.cond === "Новое" ? '<span class="card__tag card__tag--new">Новое</span>' : `<span class="card__tag">${esc(a.cond)}</span>`;
   VO.heart = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.3-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.7 12 20 12 20Z"/></svg>';
@@ -2985,9 +3051,9 @@ window.VO_BRAND_ICONS = {
   VO.cardHTML = (a, i = 0) => `<article class="card${a.mine ? " card--mine" : ""}" data-id="${a.id}" tabindex="0" style="--d:${Math.min(i, 12) * 45}ms" aria-label="${esc(a.title)}">
       <div class="card__media" data-v="0" style="--bg:${a.bg}">
         <span class="card__blob"></span>
-        <div class="card__art">${VO.media(a)}</div>
+        <div class="card__art">${VO.cardMedia(a)}</div>
         ${VO.tag(a)}
-        ${a.photo ? "" : '<span class="card__bars"><i></i><i></i><i></i></span>'}
+        ${multi(a) ? `<span class="card__bars card__bars--ph">${a.photos.map((_, i) => `<i${i ? "" : ' class="on"'}></i>`).join("")}</span>` : a.photo ? "" : '<span class="card__bars"><i></i><i></i><i></i></span>'}
       </div>
       <button class="heart-b${S.favs.has(a.id) ? " is-on" : ""}" type="button" data-fav="${a.id}" aria-pressed="${S.favs.has(a.id)}" aria-label="В избранное">${VO.heart}</button>
       <div class="card__body">
@@ -3003,9 +3069,31 @@ window.VO_BRAND_ICONS = {
   // «фото» на карточке меняются при движении мыши
   document.addEventListener("pointermove", e => {
     const m = e.target.closest && e.target.closest(".card .card__media"); if (!m) return;
-    const r = m.getBoundingClientRect(); m.dataset.v = Math.min(2, Math.floor((e.clientX - r.left) / r.width * 3));
+    const r = m.getBoundingClientRect(), imgs = m.querySelectorAll(".card__ph");
+    if (imgs.length) return phTo(m, Math.min(imgs.length - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * imgs.length))));
+    m.dataset.v = Math.min(2, Math.floor((e.clientX - r.left) / r.width * 3));
   });
-  document.addEventListener("pointerout", e => { const m = e.target.closest && e.target.closest(".card .card__media"); if (m && !m.contains(e.relatedTarget)) m.dataset.v = 0; });
+  function phTo(m, k) {
+    const imgs = m.querySelectorAll(".card__ph"), id = m.closest(".card").dataset.id;
+    imgs.forEach((im, i) => { if (i === k && !im.src && PH[id]) im.src = PH[id][i]; im.classList.toggle("on", i === k); });
+    m.querySelectorAll(".card__bars--ph i").forEach((b, i) => b.classList.toggle("on", i === k));
+  }
+  document.addEventListener("pointerout", e => { const m = e.target.closest && e.target.closest(".card .card__media"); if (m && !m.contains(e.relatedTarget)) { m.dataset.v = 0; if (m.querySelector(".card__ph")) phTo(m, 0); } });
+
+  /* ---------- просмотр фото на весь экран ---------- */
+  VO.lightbox = (list, k = 0) => {
+    let i = k;
+    const el = VO.sheet(`<div class="lbx"><div class="lbx__stage"><img class="lbx__img" alt=""></div>${list.length > 1 ? `<button class="lbx__nav lbx__nav--l" type="button" data-lb="-1" aria-label="Предыдущее фото">‹</button><button class="lbx__nav lbx__nav--r" type="button" data-lb="1" aria-label="Следующее фото">›</button><div class="lbx__count"></div>` : ""}</div>`, { cls: "sheet--lbx" });
+    const img = el.querySelector(".lbx__img"), cnt = el.querySelector(".lbx__count");
+    const show = n => { i = (n + list.length) % list.length; img.src = list[i]; if (cnt) cnt.textContent = `${i + 1} / ${list.length}`; };
+    show(i);
+    el.addEventListener("click", e => { const b = e.target.closest("[data-lb]"); if (b) show(i + +b.dataset.lb); });
+    const key = e => { if (!document.body.contains(el)) return removeEventListener("keydown", key); if (e.key === "ArrowRight") show(i + 1); if (e.key === "ArrowLeft") show(i - 1); };
+    addEventListener("keydown", key);
+    let sx = null; el.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+    el.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1)); sx = null; });
+    return el;
+  };
 
   /* ---------- избранное ---------- */
   VO.toggleFav = (id, btn) => {
@@ -3256,6 +3344,283 @@ window.VO_BRAND_ICONS = {
   VO.start = () => { addEventListener("hashchange", route); syncBadges(); route(); };
 })();
 
+/* =========================================================
+   Защита ввода: очистка текста, мат и оскорбления, запрещённые товары,
+   контакты в обход сайта, мусорный текст, защита от ботов, лимиты, проверка фото.
+   Всё это — первая линия. На сервере те же проверки нужно повторить:
+   браузерные проверки умелый человек обходит.
+   ========================================================= */
+(() => {
+  const G = VO.guard = {};
+  // \b в JS не видит кириллицу — подменяем на «юникодную» границу слова
+  const B = "(?:(?<![\\p{L}\\d])(?=[\\p{L}\\d])|(?<=[\\p{L}\\d])(?![\\p{L}\\d]))";
+  const U = rx => new RegExp(rx.source.replace(/\\b/g, B).replace(/ё/g, "е"), rx.flags.replace("u", "") + "u");
+
+  /* ---------- очистка ---------- */
+  // невидимые символы, смена направления текста, «залго» (горы диакритики)
+  const INVIS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F­͏؜ᅟᅠ឴឵᠎​-‏‪-‮⁠-⁯ㅤ︀-️﻿ﾠ￰-￿]/g;
+  G.clean = (s, { multiline = false, maxLines = 40 } = {}) => {
+    s = String(s ?? "").normalize("NFC").replace(/\r\n?/g, "\n").replace(INVIS, "").replace(/(\p{M}{2})\p{M}+/gu, "$1").replace(/\t/g, " ");
+    if (!multiline) return s.replace(/\s+/g, " ").trim();
+    s = s.split("\n").map(l => l.replace(/ {2,}/g, " ").trimEnd()).join("\n").replace(/\n{3,}/g, "\n\n").trim();
+    const lines = s.split("\n");
+    return lines.length > maxLines ? lines.slice(0, maxLines).join("\n") : s;
+  };
+
+  /* ---------- нормализация для поиска запрещённого ---------- */
+  // латиница и цифры, похожие на кириллицу: «xyй», «п1зда», «3ае6ал»
+  const LOOK = { a: "а", b: "в", c: "с", e: "е", h: "н", k: "к", m: "м", o: "о", p: "р", t: "т", x: "х", y: "у", u: "и", i: "и", l: "л", n: "п", r: "г", "3": "з", "0": "о", "6": "б", "4": "ч", "1": "и", "!": "и", "@": "а", "$": "с", "|": "и" };
+  const norm = s => {
+    s = s.toLowerCase().replace(/ё/g, "е").replace(INVIS, "");
+    // «х у й», «х.у.й», «х-у-й» — буквы через разделители склеиваем
+    s = s.replace(/(^|[\s,;:()"«»])((?:[\p{L}\d@$!|][\s._\-*]+){2,}[\p{L}\d@$!|])(?=$|[\s,;:()"«»?!.])/gu, (m, a, w) => a + w.replace(/[\s._\-*]+/g, ""));
+    return s.split(/[^\p{L}\d@$!|*]+/u).filter(Boolean).map(w => {
+      const cyr = /[а-я]/.test(w);
+      if (cyr) w = [...w].map(ch => LOOK[ch] || ch).join("");
+      return { raw: w, w: w.replace(/(.)\1+/g, "$1"), lat: !cyr };
+    });
+  };
+  G.norm = norm;
+
+  /* ---------- мат и оскорбления (по корням, с исключениями) ---------- */
+  const PFX = "(?:за|на|по|от|ото|вы|у|съ|разъ|подъ|до|пере|при|про|вз|объ|изъ|недо|раз?съ|подъ|надъ|въ|долбо|мозго|пиз?до|остопиздо)?";
+  const MAT = [
+    new RegExp(`^${PFX}(?:е|ье|ъе|йо|ьо)б(?!ург)(?:а|у|л|н|ы|и|о|е|ш|т|к|ищ|ись|ись|ц|ля|ло)`),
+    /^(?:е|йо)бт?$/, /^еп(?:т|ть)$/, /^(?:е|йо)пт(?:а|ь)?$/,
+    /(?<!стра|застра|перестра|пере)ху(?:й|я|е|ю|и|ищ|ев|ял|ес)/,
+    /пиз[дж]|пезд/, /^бля(?![хшк])/, /^бл[еяи]ть?$/, /выбляд|ублюд/,
+    /^муд(?:ак|ач|ил|оз|охат|озвон|ень)/, /пид[оа]?р|^педик(?:и|ов|а|ам)?$|педрил/,
+    /г[ао]нд[оа]н/, /залуп/, /шлюх|^шалав/, /^(?:за|на|по|от)?дроч/, /^манд(?:а|ы|у|ой|ятин|авошк|еж)$/,
+    /^(?:на|по|ни|до)хер$|^херн(?:я|и|ю|ей)$|^хер(?:ов|ом|ово|ова)$|^нахер/,
+    /^жоп(?:а|ы|у|ой|е|ам|ами|ах|ный|ная|ное|ка|ке|ку|чик)?$/, /говн(?:о|а|у|ом|ище|юк|як|ец|ый|ая)/,
+    /^(?:за|об|ис|на|про|вы|об|у)?сра(?:ть|л|ла|ли|н|нь|ка|ный|ная|ное|ло|чк)/, /^ссан|^ссыкл/, /^дерьм/,
+    /^курв|^потаскух|^шмар/, /^мраз(?:ь|и|ью|ота|отн)/, /^гнид(?:а|ы|е)$/, /^чмо(?:шник|шн)?$/, /^уеб|^уёб/, /^тупорыл|^дебил|^даун(?:ы|ов|ам)?$|^дегенерат|^кретин/,
+    // оскорбления по национальности и т.п.
+    /^хач(?:и|ей|ам|у|ом|ик|ики)?$/, /^жид(?:ы|ов|ам|а|у|ом|яра|ята|овск)?$/, /^нигг?ер/, /^пиндос/, /^москал(?:и|ей|ям|ь)$/, /^хохл(?:ы|ов|ам|а|у)$/, /^чучмек/, /^узкоглаз/,
+  ];
+  const MAT_LAT = [/^(?:mother)?f+u+c*k|^fck|^fuk|^sh[i1]t(?:s|ty|head)?$|^b[i1]tch|^cunt|^d[i1]ck(?:head)?s?$|^assh[o0]le|^bastard|^wh[o0]re|^slut|^n[i1]gg(?:a|er)|^fag(?:got|s)?$/];
+  const hasMat = s => norm(s).some(({ w, raw, lat }) => lat ? MAT_LAT.some(r => r.test(raw)) : MAT.some(r => r.test(w) || r.test(raw)))
+    || /(?:^|[^\p{L}])[хпеб]\*+[\p{L}*]{1,6}/u.test(s.toLowerCase());   // «х*й», «п**да», «б**ть»
+  G.hasMat = hasMat;
+
+  /* ---------- запрещённые товары и услуги ---------- */
+  // [что ищем, что это, когда это не запрет]
+  const BAN = [
+    [/закладк|кладмен|кладов?щик|мефедрон|\bмеф\b|амфетамин|метамфетамин|\bмет\b.{0,10}(?:кристал|чист)|гашиш|\bгаш\b|марихуан|каннабис|\bспайс|кокаин|\bкокс\b|героин|\bлсд\b|\blsd\b|экстази|\bмдма\b|\bmdma\b|альфа[ -]?пвп|\bк[ -]?2\b.{0,10}смес|насвай|псилоцибин|галлюциноген|наркот|психотроп|прекурсор|соли? для ванн|\bшишк[иа]\b.{0,15}(?:сорт|индик|сатив|гидр)|\bбошк|\bкайф\b.{0,10}(?:прода|достав)|трав[аук]\b.{0,10}(?:курит|дунуть|покурить)/, "наркотики", /шишки? (?:хвои|сосн|ел|кедр)|еловые шишки|кедровые/],
+    [/огнестрел|боев\S* (?:оружи|патрон|пистолет)|\bпатрон(?:ы|ов|ами)?\b.{0,15}(?:калибр|\d{1,2}[x×х]\d{2}|9мм|5[.,]45|7[.,]62|\.22|\.308)|\bобрез\b.{0,10}(?:ружь|ствол|ижк|мр)|глушител\S*.{0,12}(?:оруж|ствол|для ружь|для карабин)|взрывчат|тротил|гексоген|\bтнт\b|\bc-?4\b.{0,6}(?:взрыв|пластит)|пластит|\bгранат(?:а|ы|у)\b(?!.{0,15}(?:сок|фрукт|плод|дерев|кг|сорт))|детонатор|\bзапал(?:ы)?\b.{0,10}(?:грана|взрыв)|самопал|\bствол\b.{0,15}(?:купл|прода|без докум)|\bпистолет\S*|револьвер|\bавтомат\b.{0,10}(?:калашник|ак-?\d|боев)|\bак-?47\b|\bкалаш|травматическ|\bтравмат\b|кастет|выкидн\S* нож|нож-?бабочк|\bарбалет\b.{0,10}(?:для охот|боев)|электрошокер.{0,10}(?:мощн|боев)/, "оружие", /клеев|для пены|монтажн|водян|игрушечн|детск|краск|покрас|пульверизат|подкачк|для мойк|полив|термопистолет|паяльн|герметик|строительн|массажн|пескоструй|для смазки|продувочн|пневмопистолет|автомат\S* (?:выключ|кофе|стирал|корм)|для накачк|пистолет для (?:шин|шиномонт|подкачк|налива|заправ)|заправочн/],
+    [/(?:купл|прода|продаю|сделаю|изготов|нарисую|оформл\S* без|помогу получить)\S*\s.{0,12}(?:паспорт\b|паспорта рф|загранпаспорт|диплом|аттестат|водительск\S* (?:прав|удостов)|справк|медкнижк|медицинск\S* книжк|больничн|\bвнж\b|\bрвп\b|патент на работ|прописк|регистрац\S* (?:временн|в москв|для мигрант))|без (?:сдачи )?экзамен|права без|диплом без|\bфиктивн/, "документы", /ветеринар|вет\.? ?паспорт|ветпаспорт|техпаспорт|паспорт\S* (?:изделия|качества|прибора|на товар|на собак|на кош|живот|щенк|котён|котен)|\bптс\b|родословн|метрик|клеймо|чип/],
+    [/обнал|\bдроп(?:ы|ов|ам|ом)?\b|\bдропов|отмыв|карт(?:ы|у|ой)\b.{0,20}(?:на чужое|без паспорта|оформлен\S* на (?:друг|подставн))|продам (?:банковск\S* )?карт(?:у|ы)\b.{0,10}(?:сбер|тинькофф|т-?банк|альфа|втб)|сим[ -]?карт\S*\s.{0,15}без (?:паспорта|регистрац)|левые сим|\bпробив\b|пробью (?:по|номер|человек)|детализаци\S* звонк|\bбаз[аыу]\b.{0,15}(?:данных|клиентов|номеров|телефонов).{0,15}(?:прода|слив|купл)|слив\S* баз|взлом\S* (?:страниц|аккаунт|почт|телефон|вк|whatsapp|ватсап|телеграм)|\bддос|\bddos|кардинг|\bcvv\b|фишинг|накрутк\S* (?:отзыв|голос)|напишу отзыв\S* (?:за деньги|на заказ)|купл\S* аккаунт\S* (?:госуслуг|банк)|аккаунт\S* госуслуг/, "незаконные услуги"],
+    [/интим|эскорт|проститу|секс\S*\s?(?:услуг|за деньги|за плату|встреч)|массаж\S*\s.{0,10}(?:с продолжени|эротическ|для мужчин|интим|боди|юни)|эротическ\S* массаж|девушк\S* на (?:час|ночь)|досуг для (?:мужчин|состоят)|вебкам|webcam|порно|\bxxx\b|18\+.{0,15}(?:видео|фото|контент)|onlyfans|онлифанс|содержанк|спонсор\S* для девушек|ищу спонсора|интим-?услуг/, "услуги для взрослых", /интимн\S* гигиен/],
+    [/казино|букмекер|ставк\S*.{0,15}(?:с гарант|без риска|верняк)|договорн\S* матч|\bсливы матч|прогноз\S* на спорт\S*.{0,15}(?:гарант|100%)|гарантированн\S* (?:доход|выигрыш|прибыл)|пассивн\S* доход|удвоени\S* (?:денег|вклад|депозит)|финансов\S* пирамид|заработ\S* от \d+\s?(?:тыс|000|к\b)\S*\s.{0,6}в (?:день|неделю|сутки)|быстр\S* заработ|без вложений.{0,20}(?:доход|заработ)|инвестиц\S*.{0,25}(?:гарант|\d+ ?% в (?:день|неделю|месяц))|\d+ ?% в (?:день|неделю) |крипт\S*.{0,20}(?:x2|х2|удво|гарант)|\bp2p\b.{0,15}(?:арбитраж|связк)|арбитраж\S* (?:крипт|трафик)|связк\S* (?:p2p|крипт)|работа в (?:интернет|телефоне).{0,25}от \d+|легкий заработ/, "сомнительный заработок", /настольн\S* игр|набор\S* для покера|покерн\S* набор|фишки для покер/],
+    [/без рецепта|рецептурн|трамадол|прегабалин|\bлирика\b.{0,10}(?:капсул|мг|таблет)|тропикамид|феназепам|сибутрамин|анабол|стероид|\bтестостерон\b.{0,15}(?:энант|ципион|пропион|курс)|гормон роста|клонидин|сильнодейств|снотворн\S*.{0,10}без рецепт|кодеин|морфин|метадон|оксикодон|фентанил|бупренорф|залепл|ксанакс|xanax/, "лекарства", /нестероидн/],
+    [/самогон\S*\s.{0,10}(?:прода|на продаж|литр)|спирт\S*\s(?:питьев|медицинск|альфа|люкс)|алкогол\S*.{0,15}(?:с доставк|ночью|круглосуточно|продам|продаю|оптом)|водк\S*.{0,10}(?:оптом|ящик|без акциз)|без акциз|контрабанд|\bвейп\S*\s.{0,15}(?:несовершеннолет|без паспорта|школьник)|снюс|\bснус\b|никотинов\S* (?:пакет|паст)|насвай/, "алкоголь и табак"],
+    [/(?:точная |1:1 |1 в 1 |1в1 |люкс )?(?:копия|реплик\S*|подделк\S*|фейк\S*|паль\b)\s.{0,20}(?:бренд|nike|найк|adidas|адидас|gucci|гуччи|louis|луи|\blv\b|chanel|шанель|prada|прада|rolex|ролекс|apple|iphone|айфон|airpods|эйрподс|dyson|дайсон|balenciaga|баленсиага|dior|диор|hermes|cartier|картье|moncler|монклер|stone island|стон айленд)|\bреплик[аи]\b|поддельн|фальшив|контрафакт|\bлюкс[- ]копи|\bкопия (?:бренд|часов|сумк|кроссов)|оригинальн\S* качеств\S* (?:копи|реплик)/, "подделки"],
+    [/краден|ворован|спизж|спизд|без документов.{0,15}(?:авто|машин|мотоцикл|телефон|айфон|iphone|ноутбук)|под восстановлени\S* без докум|найден\S* (?:телефон|айфон|iphone|смартфон|ноутбук)|нашёл (?:телефон|айфон|iphone)|нашел (?:телефон|айфон|iphone)|icloud.{0,15}(?:заблок|lock|не отвяз)|залоченн|блокировк\S* icloud|снят\S* с учёта.{0,15}по доверенност|номер\S* (?:двигател|кузова).{0,10}(?:перебит|не читаетс)/, "сомнительное происхождение"],
+    [/краснокнижн|красн\S* книг\S*.{0,10}(?:живот|птиц|растен|занесен)|шкур\S*.{0,10}(?:тигр|леопард|барс|медвед|рыси|снежн)|слонов\S* кост|бивн(?:и|я|ей)\b|живо\S* (?:орёл|орел|сокол|ястреб|сова|филин|кречет|балобан)|чучел\S*.{0,10}(?:тигр|леопард|орла|сокола|медвед)|икр\S*.{0,10}(?:осетр|белуг|стерляд|калуг)(?!.{0,20}(?:аквакульт|фермерск|честный знак|декларац))|акульи плавники/, "охраняемые животные и растения"],
+    [/органы? (?:на продажу|продам|куплю)|продам (?:почку|печень|орган)|куплю (?:почку|печень)|суррогатн\S* мат\S*.{0,15}(?:ищу|предлага|за деньги)|донорск\S* (?:яйцеклет|сперм).{0,15}(?:прода|за деньги)|продам (?:ребенка|младенца)\b|усыновлен\S* за деньги|отда(?:м|ю) (?:ребёнк|ребенк)/, "недопустимые предложения"],
+    [/курьер\S*.{0,30}(?:закладк|кладм|пакет\S* без вопросов|не вскрыва)|(?:перевозк|доставк)\S*\s.{0,15}(?:посылок|пакетов|конверт).{0,20}(?:без вопросов|не вскрыва|не задавать)|забрать деньги у (?:пенсионер|бабуш|стари)|курьер\S*.{0,25}(?:забрать|получить|передать) (?:деньги|наличные) (?:у|от) |работа.{0,30}(?:без вопросов|не задавать вопрос)|оплата в крипт\S*.{0,20}курьер|\bработа\b.{0,25}\bзакладк/, "опасная «работа»"],
+    [/экстремист|террорист|нацист|свастик|фашист\S* (?:символ|атрибут)|\bигил\b|джихад|майн кампф|mein kampf/, "запрещённая символика и литература", /истори\S* (?:второй|великой|вов)|музей|документальн/],
+  ];
+  BAN.forEach(b => { b[0] = U(b[0]); if (b[2]) b[2] = U(b[2]); });
+  G.banned = s => { const t = s.toLowerCase().replace(/ё/g, "е"); for (const [rx, what, ok] of BAN) if (rx.test(t) && !(ok && ok.test(t))) return what; return null; };
+
+  /* ---------- контакты в обход сайта ---------- */
+  const NUMW = "(?:ноль|нуль|один|одна|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|сто|двести|триста|девяносто|восемьдесят|семьдесят|шестьдесят|пятьдесят|сорок|тридцать|двадцать|одиннадцать|двенадцать|тринадцать|четырнадцать|пятнадцать|шестнадцать|семнадцать|восемнадцать|девятнадцать)";
+  const PHONE_RX = /(?:\+\s?7|(?<!\d)[78])?[\s(.\-]{0,2}9\d{2}[\s).\-]{0,2}\d{3}[\s.\-]{0,2}\d{2}[\s.\-]{0,2}\d{2}(?!\d)|(?<!\d)8[\s(.\-]{0,2}[3-8]\d{2}[\s).\-]{0,2}\d{3}[\s.\-]{0,2}\d{2}[\s.\-]{0,2}\d{2}(?!\d)/;
+  const NUMW_RX = new RegExp(`(?:${NUMW}[\\s,.\\-]+){6,}${NUMW}`, "i");
+  const LINK_RX = U(/(?:https?:|ftp:|www\.|t\.me\b|wa\.me\b|vk\.(?:com|ru|me)\b|ok\.ru\b|[a-zа-я0-9-]{2,}(?:\.|\s?(?:точка|\(dot\)|\[dot\])\s?)(?:ru|ру|рф|com|net|org|su|io|me|info|online|site|shop|store|xyz|pro|biz|club|top|link|ly|cc|tk|ws)\b)/i);
+  const MAIL_RX = /[\w.+-]+\s?(?:@|\(at\)|\[at\]|собака|собачка)\s?[\w-]+\s?(?:\.|точка)\s?[a-zа-я]{2,}/iu;
+  const MESS_RX = U(/телеграм|телеграмм|\bтелег[аеу]\b|\bтг\b|\btg\b|telegram|whats\s?app|вотсап|вацап|ватсап|ватцап|вотс ап|\bвоцап|viber|вайбер|\bвибер|скайп|skype|инстаграм|instagram|\bинст[ау]?\b|discord|дискорд|\bmax\b.{0,10}(?:мессендж|пишите)|пишите в (?:лс|личку|директ|личные)|(?:^|\s)@[a-z0-9_]{4,}/i);
+  G.contacts = s => {
+    if (MAIL_RX.test(s)) return "Не пишите почту в тексте — покупатели напишут вам в сообщениях на сайте";
+    if (PHONE_RX.test(s) || NUMW_RX.test(s)) return "Не пишите телефон в тексте — включите его показ в профиле";
+    if (LINK_RX.test(s)) return "Уберите ссылки и адреса сайтов — это частый приём мошенников";
+    if (MESS_RX.test(s)) return "Не уводите в мессенджеры — общение через сообщения на сайте защищает от обмана";
+    return null;
+  };
+
+  /* ---------- мусор и спам ---------- */
+  const KEYB = /йцукен|фываф?|ячсмит|asdfg|zxcvb|1234567890/i;
+  G.junk = (s, { title = false, maxWord = 28 } = {}) => {
+    const letters = s.match(/\p{L}/gu) || [];
+    if (/(\p{L})\1{3,}/u.test(s)) return "Слишком много одинаковых букв подряд";
+    if (/([^\p{L}\p{N}\s])\1{4,}/u.test(s)) return "Уберите повторяющиеся знаки";
+    const long = s.split(/[\s,.;:!?()«»"/\\]+/).find(w => w.length > maxWord && !/^\d+$/.test(w));
+    if (long) return `Слишком длинное слово без пробелов («${long.slice(0, 12)}…»). Разделите его пробелами`;
+    if (KEYB.test(s.replace(/\s/g, ""))) return "Похоже на случайный набор символов";
+    const words = s.toLowerCase().match(/[\p{L}]+/gu) || [];
+    for (const w of words) if (w.length >= 6 && /[а-я]/.test(w) && !/[аеёиоуыэюя]/.test(w)) return "Похоже на случайный набор букв";
+    if (words.length >= 4) { let run = 1; for (let i = 1; i < words.length; i++) { run = words[i] === words[i - 1] ? run + 1 : 1; if (run >= 3) return "Одно и то же слово повторяется подряд"; } }
+    if (title) {
+      if (letters.length < 3) return "В названии должны быть слова, а не только цифры и знаки";
+      const up = letters.filter(c => c !== c.toLowerCase()).length;
+      if (letters.length >= 8 && up / letters.length > .6) return "Не пишите название заглавными буквами — так оно выглядит как крик";
+      if (/\p{Extended_Pictographic}/u.test(s)) return "Уберите эмодзи из названия";
+      if (/[!?]{2,}|^[^\p{L}\p{N}«"]/u.test(s)) return "Уберите лишние знаки из названия";
+      if (/срочно|дешево!|выгодно!|акция|скидк\S* \d+ ?%|лучш\S* цен/i.test(s)) return "Уберите из названия рекламные слова («срочно», «акция») — им место в описании";
+    }
+    return null;
+  };
+
+  /* ---------- проверки по типу поля ---------- */
+  const RESERVED = /админ|модерат|поддержк|служб\S* (?:безопасн|поддерж)|support|admin|moderat|все ?объявлени|всеобьявлени|vseobyavlen|техподдерж|официальн|official|сотрудник сайта|робот сайта|оператор сайта/i;
+  // Вернёт текст ошибки или null
+  G.text = (s, kind) => {
+    const raw = String(s || "");
+    if (kind === "name") {
+      const v = G.clean(raw);
+      if (v.length < 2) return "Слишком короткое имя";
+      if (!/^[\p{L}][\p{L}\s.'’\-]*$/u.test(v)) return "В имени — только буквы, пробел и дефис";
+      if (/\p{Lu}{4,}/u.test(v) && v === v.toUpperCase()) return "Напишите имя обычными буквами, не заглавными";
+      if (/[a-z]/i.test(v) && /[а-яё]/i.test(v)) return "Не смешивайте русские и латинские буквы";
+      if (RESERVED.test(v)) return "Это имя нельзя использовать — его можно спутать с сайтом";
+      if (hasMat(v)) return "Выберите другое имя — без грубых слов";
+      return G.junk(v, { maxWord: 20 });
+    }
+    if (kind === "company") {
+      const v = G.clean(raw);
+      if (v.length < 2) return "Укажите название";
+      if (!/^[\p{L}\p{N}\s.,'’"«»&+\-№()]+$/u.test(v)) return "В названии есть недопустимые символы";
+      if (RESERVED.test(v)) return "Это название нельзя использовать — его можно спутать с сайтом";
+      if (hasMat(v)) return "Название не должно содержать грубых слов";
+      return G.contacts(v) || G.junk(v, { maxWord: 24 });
+    }
+    if (kind === "place") {
+      const v = G.clean(raw);
+      if (!/^[\p{L}\p{N}][\p{L}\p{N}\s.,'’\-()№]*$/u.test(v)) return "Только буквы, цифры, пробел и дефис";
+      if (hasMat(v)) return "Уберите грубые слова";
+      return G.contacts(v) || G.junk(v, { maxWord: 26 });
+    }
+    // свободный текст: title, desc, review, reply, report, chat, ticket, about, other
+    const v = G.clean(raw, { multiline: true });
+    if (hasMat(v)) return kind === "chat" ? "Сообщение не отправлено: без грубых слов, пожалуйста" : "Уберите грубые слова и оскорбления";
+    if (["title", "desc"].includes(kind)) { const b = G.banned(v); if (b) return `Похоже на запрещённое к продаже (${b}). Такие объявления не публикуются — см. Правила размещения`; }
+    if (["title", "desc", "review", "reply", "about", "other"].includes(kind)) { const c = G.contacts(v); if (c) return c; }
+    if (["chat", "ticket", "report"].includes(kind)) { const j = G.junk(v, { maxWord: 500 }); return j && /одинаковых|повторяющиеся/.test(j) ? j : null; }
+    return G.junk(v, { title: kind === "title", maxWord: kind === "title" ? 24 : 30 });
+  };
+
+  // Показать ошибку под полем: текст в <em>, красная рамка. Вернёт true, если ошибки нет
+  G.mark = (input, msg) => {
+    const f = input.closest(".field"), em = f && f.querySelector("em");
+    if (em) { if (em.dataset.def == null) em.dataset.def = em.textContent; em.textContent = msg || em.dataset.def; }
+    if (f) f.classList.toggle("bad", !!msg);
+    return !msg;
+  };
+  // Проверить поле по типу; пустое и необязательное — без ошибки
+  G.field = (input, kind, { min = 0, optional = false } = {}) => {
+    const v = G.clean(input.value, { multiline: input.tagName === "TEXTAREA" });
+    if (!v && optional) return G.mark(input, null);
+    if (v.length < min) return G.mark(input, min > 1 ? `Минимум ${min} символ${min % 10 === 1 && min !== 11 ? "" : min % 10 < 5 && (min < 10 || min > 20) ? "а" : "ов"}` : "Заполните поле");
+    return G.mark(input, G.text(v, kind));
+  };
+
+  /* ---------- одноразовая почта ---------- */
+  const TEMP = /(?:^|\.)(?:mailinator|guerrillamail|guerrillamailblock|sharklasers|grr\.la|10minutemail|10minemail|temp-?mail|tempmail|tempmailo|tempr\.email|throwawaymail|yopmail|getnada|nada\.email|dispostable|maildrop|mohmal|mailnesia|trashmail|fakeinbox|spamgourmet|mintemail|emailondeck|moakt|tmail|tmpmail|burnermail|33mail|mailcatch|inboxkitten|dropmail|crazymailing|minuteinbox|mail\.tm|mail\.gw|emltmp|tmpbox|luxusmail|vomoto|wegwerfmail|spambox|spam4\.me|tempinbox|tempail|fexbox|byom|anonbox|mvrht|1secmail|1secmail\.(?:com|org|net)|esiix|wwjmp|xojxe|yoggm|kzccv|qiott|laafd|txcct|rteet|dpptd|tmails\.net|cuvox|armyspy|dayrep|einrot|fleckens|gustr|jourrapide|rhyta|superrito|teleworm)\./i;
+  G.tempMail = email => TEMP.test((email.split("@")[1] || "") + ".");
+
+  /* ---------- лимиты действий ---------- */
+  G.rate = (key, max, ms) => {
+    const all = VO.store.get("vo_rate", {}), now = Date.now(), arr = (all[key] || []).filter(t => now - t < ms);
+    if (arr.length >= max) return Math.ceil((ms - (now - arr[0])) / 1000);
+    arr.push(now); all[key] = arr;
+    Object.keys(all).forEach(k => { all[k] = all[k].filter(t => now - t < 864e5); if (!all[k].length) delete all[k]; });
+    VO.store.set("vo_rate", all); return 0;
+  };
+  G.wait = s => s > 90 ? `${Math.ceil(s / 60)} мин` : `${s} с`;
+
+  /* ---------- защита форм от ботов ---------- */
+  // скрытое поле-ловушка + слишком быстрое заполнение + ни одного настоящего нажатия
+  G.trap = form => {
+    if (form.dataset.trap) return; form.dataset.trap = "1";
+    const hp = document.createElement("div"); hp.className = "hp"; hp.setAttribute("aria-hidden", "true");
+    hp.innerHTML = `<label>Сайт компании<input type="text" name="website" tabindex="-1" autocomplete="off"></label>`;
+    form.appendChild(hp);
+    const arm = () => { if (!form._t0) form._t0 = Date.now(); };
+    form.addEventListener("focusin", arm); form.addEventListener("pointerdown", arm);
+    form.addEventListener("keydown", e => { if (e.isTrusted) form._human = (form._human || 0) + 1; });
+    form.addEventListener("pointerdown", e => { if (e.isTrusted) form._human = (form._human || 0) + 1; });
+    form.addEventListener("paste", e => { if (e.isTrusted) form._human = (form._human || 0) + 1; });
+  };
+  G.isBot = (form, minMs = 1500) => {
+    const hp = form.querySelector('.hp input'); if (hp && hp.value) return "Не получилось отправить. Обновите страницу и попробуйте ещё раз";
+    if (!form._human) return "Заполните форму вручную";
+    if (form._t0 && Date.now() - form._t0 < minMs) return "Слишком быстро — проверьте, всё ли заполнено";
+    return null;
+  };
+
+  /* ---------- фото ---------- */
+  // Тип определяем по содержимому файла, а не по расширению: «картинка» с кодом внутри не пройдёт.
+  const sniff = b => {
+    if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return "jpeg";
+    if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return "png";
+    if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "webp";
+    if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return "gif";
+    const s = String.fromCharCode(...b.slice(4, 12));
+    if (/^ftyp(?:heic|heix|hevc|mif1|msf1|heim|heis)/.test(s)) return "heic";
+    if (/^ftypavi[fs]/.test(s)) return "avif";
+    const head = String.fromCharCode(...b.slice(0, 256)).toLowerCase();
+    if (/<svg|<\?xml|<html|<script/.test(head)) return "svg";
+    return null;
+  };
+  // Размеры — из заголовка, ДО раскодирования: защита от «бомб» в 30 000 × 30 000 пикселей
+  const dims = (b, t) => {
+    const u32 = i => (b[i] << 24 | b[i + 1] << 16 | b[i + 2] << 8 | b[i + 3]) >>> 0;
+    if (t === "png") return [u32(16), u32(20)];
+    if (t === "webp") {
+      const f = String.fromCharCode(b[12], b[13], b[14], b[15]);
+      if (f === "VP8X") return [1 + (b[24] | b[25] << 8 | b[26] << 16), 1 + (b[27] | b[28] << 8 | b[29] << 16)];
+      if (f === "VP8 ") return [(b[26] | b[27] << 8) & 0x3fff, (b[28] | b[29] << 8) & 0x3fff];
+      if (f === "VP8L") { const v = b[21] | b[22] << 8 | b[23] << 16 | b[24] << 24; return [1 + (v & 0x3fff), 1 + (v >> 14 & 0x3fff)]; }
+    }
+    if (t === "jpeg") {
+      let i = 2;
+      while (i + 9 < b.length) {
+        if (b[i] !== 0xFF) { i++; continue; }
+        const m = b[i + 1], len = b[i + 2] << 8 | b[i + 3];
+        if (m >= 0xC0 && m <= 0xCF && ![0xC4, 0xC8, 0xCC].includes(m)) return [b[i + 7] << 8 | b[i + 8], b[i + 5] << 8 | b[i + 6]];
+        if (m === 0xD8 || (m >= 0xD0 && m <= 0xD7) || m === 0x01) { i += 2; continue; }
+        i += 2 + len;
+      }
+    }
+    return null;
+  };
+  const MAX_MB = 20, MAX_PX = 40e6, MAX_SIDE = 12000, MIN_SIDE = 200, MAX_RATIO = 5;
+  const canWebp = (() => { try { const c = document.createElement("canvas"); c.width = c.height = 1; return c.toDataURL("image/webp").startsWith("data:image/webp"); } catch (e) { return false; } })();
+  // Вернёт data:URL пересжатого снимка (без EXIF и геометки) или бросит понятную ошибку
+  G.image = async (file, { side = 1280, budget = 210e3 } = {}) => {
+    if (!file || !file.size) throw new Error("Файл пустой");
+    if (file.size > MAX_MB * 1048576) throw new Error(`Фото больше ${MAX_MB} МБ — выберите поменьше`);
+    const head = new Uint8Array(await file.slice(0, 256 * 1024).arrayBuffer());
+    const t = sniff(head);
+    if (t === "heic") throw new Error("Формат HEIC с iPhone пока не поддерживается. В настройках камеры выберите «Наиболее совместимый» или пришлите JPG");
+    if (t === "svg") throw new Error("Векторные картинки (SVG) не принимаем — только фотографии");
+    if (!["jpeg", "png", "webp", "gif"].includes(t)) throw new Error("Это не фотография. Подойдут JPG, PNG или WebP");
+    const wh = dims(head, t);
+    if (wh && (wh[0] * wh[1] > MAX_PX || wh[0] > MAX_SIDE || wh[1] > MAX_SIDE)) throw new Error("Слишком большое разрешение — уменьшите фото до 40 мегапикселей");
+    let bmp;
+    try { bmp = await createImageBitmap(file, { imageOrientation: "from-image" }); }
+    catch (e) { bmp = await new Promise((ok, no) => { const i = new Image(), u = URL.createObjectURL(file); i.onload = () => { URL.revokeObjectURL(u); ok(i); }; i.onerror = () => { URL.revokeObjectURL(u); no(new Error("Файл повреждён — не получилось открыть фото")); }; i.src = u; }); }
+    const w = bmp.width, h = bmp.height;
+    if (!w || !h) throw new Error("Файл повреждён — не получилось открыть фото");
+    if (w * h > MAX_PX) throw new Error("Слишком большое разрешение — уменьшите фото до 40 мегапикселей");
+    if (Math.min(w, h) < MIN_SIDE) throw new Error(`Фото слишком маленькое — нужно хотя бы ${MIN_SIDE} × ${MIN_SIDE} пикселей`);
+    if (Math.max(w, h) / Math.min(w, h) > MAX_RATIO) throw new Error("Фото слишком вытянутое (как скриншот длинной страницы). Обрежьте его");
+    // Перерисовка на холст: остаются только пиксели — EXIF, геометка, модель телефона и всё «приклеенное» к файлу пропадают
+    let k = Math.min(1, side / Math.max(w, h)), q = .84, out = "";
+    for (let pass = 0; pass < 6; pass++) {
+      const cv = document.createElement("canvas"); cv.width = Math.max(1, Math.round(w * k)); cv.height = Math.max(1, Math.round(h * k));
+      const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height);   // прозрачный PNG — на белом
+      cx.imageSmoothingQuality = "high"; cx.drawImage(bmp, 0, 0, cv.width, cv.height);
+      out = cv.toDataURL(canWebp ? "image/webp" : "image/jpeg", q);
+      if (out.length <= budget) break;
+      if (q > .62) q -= .1; else k *= .82;
+    }
+    if (bmp.close) bmp.close();
+    return out;
+  };
+})();
+
 /* Переписка и сделки.
    Чаты нельзя удалить — только закрепить, отключить уведомления, заблокировать собеседника или пожаловаться.
    ДЕМО (до сервера): тестовые продавцы и демо-покупатели отвечают автоматически, чтобы можно было пройти весь путь сделки. */
@@ -3295,10 +3660,15 @@ window.VO_BRAND_ICONS = {
   function push(c, m) { c.msgs.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t: Date.now(), ...m }); save(); }
   function sys(c, text) { push(c, { from: "sys", text }); }
   function send(c, text, photo) {
-    if (c.blocked) return VO.toast("Вы заблокировали собеседника — сначала разблокируйте");
-    text = (text || "").trim().slice(0, 2000); if (!text && !photo) return;
+    if (c.blocked) { VO.toast("Вы заблокировали собеседника — сначала разблокируйте"); return false; }
+    const G = VO.guard;
+    text = G.clean(text, { multiline: true, maxLines: 30 }).slice(0, 2000); if (!text && !photo) return false;
+    const bad = text && G.text(text, "chat"); if (bad) { VO.toast(bad); return false; }
+    const mineM = c.msgs.filter(m => m.from === "me").slice(-2);
+    if (text && mineM.length === 2 && mineM.every(m => m.text === text)) { VO.toast("Вы уже отправили это сообщение"); return false; }
+    const w = G.rate("msg", 20, 60e3) || G.rate("msg:h", 300, 36e5); if (w) { VO.toast(`Слишком много сообщений подряд. Подождите ${G.wait(w)}`); return false; }
     push(c, { from: "me", text, photo: photo || null, seen: false });
-    botTurn(c, text);
+    botTurn(c, text); return true;
   }
 
   /* ---------- ДЕМО: автоответы ---------- */
@@ -3440,7 +3810,7 @@ window.VO_BRAND_ICONS = {
       ${dealBar(c)}
       <div class="chat__body" id="chatBody">${html}<div class="msg msg--peer chat__typing" hidden><div class="msg__b"><span class="bub--typing"><i></i><i></i><i></i></span></div></div></div>
       ${c.blocked ? `<div class="chat__blocked">Вы заблокировали ${esc(p.name)}. Пользователь не сможет вам писать. <button class="link" type="button" data-cm="block">Разблокировать</button></div>` : `
-      <div class="chat__quick">${quick.map(q => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <div class="chat__qw"><button class="chat__qa chat__qa--l" type="button" data-qs="-1" aria-label="Прокрутить влево" hidden>‹</button><div class="chat__quick" id="chatQuick">${quick.map(q => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div><button class="chat__qa chat__qa--r" type="button" data-qs="1" aria-label="Прокрутить вправо" hidden>›</button></div>
       <form class="chat__f" id="chatF">
         <label class="icb chat__att" title="Прикрепить фото" aria-label="Прикрепить фото"><input type="file" accept="image/jpeg,image/png,image/webp" hidden id="chatPh"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 7"/></svg></label>
         <textarea id="chatT" rows="1" maxlength="2000" placeholder="Сообщение"></textarea>
@@ -3454,7 +3824,22 @@ window.VO_BRAND_ICONS = {
     if (open) { let ch = false; open.msgs.forEach(m => { if (m.from === "peer" && !m.read) { m.read = true; ch = true; } }); if (ch) save(); }
     host.innerHTML = `<div class="chats${open ? " has-open" : ""}">${listHTML()}<div class="chats__c">${open ? convHTML(open) : `<div class="chats__none"><svg width="120" height="96" viewBox="0 0 120 96"><path d="M20 12h50a24 24 0 0 1 0 48H40L20 80Z" fill="#F4F5F7"/><path d="M60 40h34a16 16 0 0 1 0 32H80L68 82V72a16 16 0 0 1-8-32Z" fill="#FFEDEA"/></svg><b>Выберите диалог</b><span>Здесь будет переписка, этапы сделки и быстрые ответы.</span></div>`}</div></div>`;
     const body = $("#chatBody", host); if (body) body.scrollTop = body.scrollHeight;
+    quickArrows();
   }
+  // быстрые ответы: лента листается колесом, перетаскиванием и стрелками
+  function quickArrows() {
+    const q = page && $("#chatQuick", page); if (!q) return;
+    const l = $(".chat__qa--l", page), r = $(".chat__qa--r", page), max = q.scrollWidth - q.clientWidth;
+    l.hidden = q.scrollLeft < 4; r.hidden = q.scrollLeft > max - 4 || max < 4;
+    q.parentElement.classList.toggle("fade-l", !l.hidden); q.parentElement.classList.toggle("fade-r", !r.hidden);
+  }
+  document.addEventListener("scroll", e => { if (e.target.id === "chatQuick") quickArrows(); }, true);
+  addEventListener("resize", () => quickArrows());
+  document.addEventListener("wheel", e => { const q = e.target.closest && e.target.closest("#chatQuick"); if (!q || Math.abs(e.deltaX) > Math.abs(e.deltaY) || q.scrollWidth <= q.clientWidth) return; e.preventDefault(); q.scrollLeft += e.deltaY; }, { passive: false });
+  let qd = null;
+  document.addEventListener("pointerdown", e => { const q = e.pointerType === "mouse" && e.target.closest && e.target.closest("#chatQuick"); if (q) qd = { q, x: e.clientX, s: q.scrollLeft, moved: false }; });
+  document.addEventListener("pointermove", e => { if (!qd) return; const dx = e.clientX - qd.x; if (Math.abs(dx) > 5) { qd.moved = true; qd.q.classList.add("drag"); } if (qd.moved) qd.q.scrollLeft = qd.s - dx; });
+  document.addEventListener("pointerup", () => { if (qd) { const q = qd; setTimeout(() => q.q.classList.remove("drag"), 0); if (q.moved) { const stop = ev => { ev.stopPropagation(); ev.preventDefault(); }; document.addEventListener("click", stop, { capture: true, once: true }); setTimeout(() => document.removeEventListener("click", stop, true), 50); } qd = null; } });
   function paintIfOpen(id) {
     if (!page || VO.current() !== "me" || !/^#\/me\/msg/.test(location.hash)) return;
     const keep = $("#chatT", page) ? $("#chatT", page).value : "";
@@ -3467,7 +3852,9 @@ window.VO_BRAND_ICONS = {
     if (!page || !page.contains(e.target)) return;
     const t = e.target;
     const cf = t.closest("[data-cf]"); if (cf) { filter = cf.dataset.cf; return render(page, open && open.id); }
-    const q = t.closest("[data-q]"); if (q && open) { send(open, q.dataset.q); return render(page, open.id); }
+    const qs = t.closest("[data-qs]"); if (qs) { const q = $("#chatQuick", page); q.scrollBy({ left: +qs.dataset.qs * q.clientWidth * .7, behavior: "smooth" }); return; }
+    const ph = t.closest(".msg__ph"); if (ph) return VO.lightbox([ph.src], 0);
+    const q = t.closest("[data-q]"); if (q && open) { if (send(open, q.dataset.q)) render(page, open.id); return; }
     const cm = t.closest("[data-cm]");
     if (cm && open) {
       const k = cm.dataset.cm;
@@ -3505,14 +3892,13 @@ window.VO_BRAND_ICONS = {
   document.addEventListener("keydown", e => { if (e.target.id === "chatT" && e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#chatF", page).requestSubmit(); } });
   document.addEventListener("submit", e => {
     if (e.target.id !== "chatF" || !open) return; e.preventDefault();
-    const ta = $("#chatT", page); send(open, ta.value); ta.value = ""; render(page, open.id); $("#chatT", page).focus();
+    const ta = $("#chatT", page); if (!send(open, ta.value)) return; ta.value = ""; render(page, open.id); $("#chatT", page).focus();
   });
   document.addEventListener("change", e => {
     if (e.target.id !== "chatPh" || !open) return;
-    const f = e.target.files[0]; if (!f || !/^image\//.test(f.type)) return;
-    const img = new Image(), url = URL.createObjectURL(f);
-    img.onload = () => { const k = Math.min(1, 800 / Math.max(img.width, img.height)), cv = document.createElement("canvas"); cv.width = img.width * k; cv.height = img.height * k; cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); send(open, "", cv.toDataURL("image/jpeg", .75)); render(page, open.id); };
-    img.src = url;
+    const f = e.target.files[0], c = open; e.target.value = ""; if (!f) return;
+    const w = VO.guard.rate("msgph", 10, 6e5); if (w) return VO.toast(`Слишком много фото подряд. Подождите ${VO.guard.wait(w)}`);
+    VO.guard.image(f, { side: 1280, budget: 170e3 }).then(url => { if (send(c, "", url)) render(page, c.id); }).catch(err => VO.toast(err.message));
   });
 
   function startDeal(c) {
@@ -3612,16 +3998,18 @@ window.VO_BRAND_ICONS = {
     const paintS = () => { $$("#revS [data-s]", el).forEach(b => b.classList.toggle("on", +b.dataset.s <= stars)); $("#revSL", el).textContent = L[stars] || "Поставьте оценку"; };
     const paintV = () => { const v = doneDeal(me, target, role); $("#revV", el).innerHTML = v ? `<span class="rev__v">✓ Будет отмечен «Сделка на сайте»</span>` : `<span class="rev__nv">Сделки на сайте не было — отзыв будет с отметкой «Без сделки на сайте»</span>`; };
     paintS(); paintV(); requestAnimationFrame(VO.syncInks);
+    VO.guard.trap($("#revF", el));
     $("#revRole", el).addEventListener("click", e => { const b = e.target.closest("[data-r]"); if (!b) return; role = b.dataset.r; VO.selectTab($("#revRole", el), b); paintV(); });
     $("#revS", el).addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (b) { stars = +b.dataset.s; paintS(); } });
     $("#revS", el).addEventListener("mouseover", e => { const b = e.target.closest("[data-s]"); if (b) $$("#revS [data-s]", el).forEach(x => x.classList.toggle("hov", +x.dataset.s <= +b.dataset.s)); });
     $("#revS", el).addEventListener("mouseleave", () => $$("#revS [data-s]", el).forEach(x => x.classList.remove("hov")));
     $("#revF", el).addEventListener("submit", e => {
       e.preventDefault();
-      const text = $("#revT", el).value.trim();
+      const G = VO.guard, text = G.clean($("#revT", el).value, { multiline: true, maxLines: 15 }).slice(0, 1000);
       if (!stars) return VO.toast("Поставьте оценку от 1 до 5");
-      if (!VO.check($("#revT", el).parentElement, text.length >= 10)) return;
-      if (/(https?:\/\/|www\.|\+?7[\d\s()-]{9,})/i.test(text)) return VO.toast("Уберите из отзыва ссылки и номера телефонов");
+      if (!G.field($("#revT", el), "review", { min: 10 })) return;
+      const bot = G.isBot(e.target); if (bot) return VO.toast(bot);
+      if (!ex) { const w = G.rate("review", 5, 864e5); if (w) return VO.toast(`Можно оставить до 5 отзывов в сутки. Попробуйте через ${G.wait(w)}`); }
       const u = VO.user(), deal = doneDeal(me, target, role) && VO.chats.all().find(c => VO.uid(c.owner) === me && c.peer === target && c.deal && c.deal.stage === "done");
       R.add({ target, author: me, authorName: VO.displayName(u) || u.name, role, stars, text, verified: !!deal, ad: deal ? deal.ad.title : null });
       VO.closeSheet(true); VO.toast("Спасибо! Отзыв опубликован"); VO.emit("reviews-ui");
@@ -3634,8 +4022,8 @@ window.VO_BRAND_ICONS = {
     const rp = e.target.closest("[data-rev-reply]");
     if (rp) {
       const r = own.find(x => x.id === rp.dataset.revReply); if (!r) return;
-      const el = VO.sheet(`<form id="rpl"><h3>Ответ на отзыв</h3><p class="muted">Ответ увидят все. Спокойно и по делу — так вы вызовете больше доверия.</p><div class="field field--area"><textarea id="rplT" rows="4" maxlength="600" placeholder=" "></textarea><label for="rplT">Ваш ответ</label></div><button class="btn btn--ink btn--wide" type="submit">Ответить</button></form>`, { cls: "sheet--sm" });
-      $("#rpl", el).addEventListener("submit", ev => { ev.preventDefault(); const v = $("#rplT", el).value.trim(); if (v.length < 3) return; r.reply = v.slice(0, 600); save(); VO.closeSheet(true); VO.emit("reviews-ui"); VO.toast("Ответ опубликован"); });
+      const el = VO.sheet(`<form id="rpl"><h3>Ответ на отзыв</h3><p class="muted">Ответ увидят все. Спокойно и по делу — так вы вызовете больше доверия.</p><div class="field field--area"><textarea id="rplT" rows="4" maxlength="600" placeholder=" "></textarea><label for="rplT">Ваш ответ</label><em>Проверьте текст</em></div><button class="btn btn--ink btn--wide" type="submit">Ответить</button></form>`, { cls: "sheet--sm" });
+      $("#rpl", el).addEventListener("submit", ev => { ev.preventDefault(); const G = VO.guard; if (!G.field($("#rplT", el), "reply", { min: 3 })) return; r.reply = G.clean($("#rplT", el).value, { multiline: true, maxLines: 10 }).slice(0, 600); save(); VO.closeSheet(true); VO.emit("reviews-ui"); VO.toast("Ответ опубликован"); });
     }
   });
   document.addEventListener("change", e => { const v = e.target.closest("[data-rev-v]"); const box = v && v.closest("[data-revs]"); if (box) { const role = ($("[data-rev-role][aria-pressed=true]", box) || {}).dataset?.revRole || "all"; box.outerHTML = R.block(box.dataset.revs, { role, v: v.checked }); } });
@@ -4142,7 +4530,7 @@ window.VO_BRAND_ICONS = {
     const t = e.target, a = cur; if (!a) return;
     const v = t.closest("[data-view]"); if (v) return setView(+v.dataset.view);
     const st = t.closest("[data-step]"); if (st) return setView(view + +st.dataset.step);
-    if (t.closest("[data-zoom]")) { const phs = a.photos && a.photos.length ? a.photos : null; return VO.sheet(`<div class="lb card__media" data-v="${phs ? 0 : view}" style="--bg:${a.bg}"><span class="card__blob"></span><div class="card__art">${phs ? `<img src="${phs[view]}" alt="">` : VO.media(a)}</div></div>`, { cls: "sheet--lb" }); }
+    if (t.closest("[data-zoom]") || (t.closest(".gal__main.has-ph") && !t.closest("button"))) { const phs = a.photos && a.photos.length ? a.photos : null; if (phs) return VO.lightbox(phs, view); return VO.sheet(`<div class="lb card__media" data-v="${phs ? 0 : view}" style="--bg:${a.bg}"><span class="card__blob"></span><div class="card__art">${phs ? `<img src="${phs[view]}" alt="">` : VO.media(a)}</div></div>`, { cls: "sheet--lb" }); }
     if (t.closest("[data-share]")) return VO.share({ title: a.title + " — " + (a.price ? VO.rub(a.price) : "даром"), url: location.href.split("#")[0] + "#/ad/" + a.id });
     if (t.closest("[data-write]")) {
       if (!VO.user()) return VO.needLogin("#/ad/" + a.id, "Войдите, чтобы написать продавцу");
@@ -4172,13 +4560,15 @@ window.VO_BRAND_ICONS = {
     const REASONS = ["Мошенничество или обман", "Запрещённый товар или услуга", "Неверная цена или категория", "Уже продано", "Оскорбления или спам", "Другое"];
     const el = VO.sheet(`<form class="report" id="reportF"><h3>Что не так с объявлением?</h3><p class="muted">Жалоба анонимна. Мы проверим объявление и при нарушении скроем его.</p>
       <div class="report__r">${REASONS.map((r, i) => `<label><input type="radio" name="r" value="${r}"${i === 0 ? " checked" : ""}><span>${r}</span></label>`).join("")}</div>
-      <div class="field field--area"><textarea id="repT" rows="3" maxlength="500" placeholder=" "></textarea><label for="repT">Комментарий (необязательно)</label></div>
+      <div class="field field--area"><textarea id="repT" rows="3" maxlength="500" placeholder=" "></textarea><label for="repT">Комментарий (необязательно)</label><em>Проверьте текст</em></div>
       <button class="btn btn--ink btn--wide" type="submit">Отправить жалобу</button></form>`, { cls: "sheet--sm" });
     $("#reportF", el).addEventListener("submit", e => {
       e.preventDefault();
+      const G = VO.guard; if (!G.field($("#repT", el), "report", { optional: true })) return;
+      const w = G.rate("report", 10, 864e5); if (w) return VO.toast(`Слишком много жалоб за сутки. Попробуйте через ${G.wait(w)}`);
       const reps = VO.store.get("vo_reports", []);
       if (reps.some(r => r.ad === a.id)) { VO.closeSheet(); return VO.toast("Вы уже жаловались на это объявление — мы проверяем"); }
-      reps.push({ ad: a.id, reason: new FormData(e.target).get("r"), text: $("#repT", el).value.slice(0, 500), t: Date.now() });
+      reps.push({ ad: a.id, reason: new FormData(e.target).get("r"), text: G.clean($("#repT", el).value, { multiline: true, maxLines: 10 }).slice(0, 500), t: Date.now() });
       VO.store.set("vo_reports", reps); VO.closeSheet(); VO.toast("Спасибо! Проверим объявление в ближайшее время");
     });
   }
@@ -4257,13 +4647,17 @@ window.VO_BRAND_ICONS = {
     e.preventDefault();
     const m = $("#aMail", page).value.trim().toLowerCase();
     if (!VO.check($("#aMail", page).parentElement, VO.MAIL_RX.test(m) && m.length <= 120)) return;
+    if (VO.guard.tempMail(m)) return VO.guard.mark($("#aMail", page), "Одноразовые почтовые ящики не подходят — укажите постоянную почту");
+    const bot = VO.guard.isBot($("#authMail", page), 600); if (bot) return VO.toast(bot);
+    const w = VO.guard.rate("otp:" + m, 5, 36e5) || VO.guard.rate("otp", 12, 36e5); if (w) return VO.toast(`Слишком много запросов кода. Попробуйте через ${VO.guard.wait(w)}`);
     if (lock() > Date.now()) return VO.toast(`Слишком много попыток. Попробуйте через ${Math.ceil((lock() - Date.now()) / 60000)} мин`);
     pending = { email: m }; $("#aMailShow", page).textContent = m;
     step("code"); clearCells(); sendCode(); setTimeout(() => cells[0].focus(), 80);
   });
   $("#aMail", page).addEventListener("input", () => $("#aMail", page).parentElement.classList.remove("bad"));
   $("[data-back]", page).addEventListener("click", () => { step("mail"); $("#inbox", page).hidden = true; $("#aMail", page).focus(); });
-  $("#resend", page).addEventListener("click", () => { clearCells(); sendCode(); });
+  $("#resend", page).addEventListener("click", () => { const w = VO.guard.rate("otp:" + pending.email, 5, 36e5); if (w) return VO.toast(`Слишком много запросов кода. Попробуйте через ${VO.guard.wait(w)}`); clearCells(); sendCode(); });
+  VO.guard.trap($("#authMail", page));
   $("#inboxFill", page).addEventListener("click", () => { [...pending.code].forEach((d, i) => { cells[i].value = d; cells[i].classList.add("filled"); }); check(); });
   function clearCells() { cells.forEach(c => { c.value = ""; c.classList.remove("filled"); }); otp.classList.remove("bad", "ok"); err.textContent = ""; }
   function fail(msg) { otp.classList.remove("bad"); void otp.offsetWidth; otp.classList.add("bad"); err.textContent = msg; setTimeout(() => { cells.forEach(c => { c.value = ""; c.classList.remove("filled"); }); cells[0].focus(); }, 380); }
@@ -4321,7 +4715,7 @@ window.VO_BRAND_ICONS = {
     const f = $("#onbF", el), name = $("#oName", el), phone = $("#oPhone", el), city = $("#oCity", el);
     let type = "person";
     requestAnimationFrame(VO.syncInks);
-    VO.cityField(city);
+    VO.cityField(city); VO.guard.trap(f);
     $("#oType", el).addEventListener("click", e => { const b = e.target.closest("[data-ty]"); if (!b) return; type = b.dataset.ty; VO.selectTab($("#oType", el), b); $("#oCompW", el).hidden = type !== "company"; });
     name.addEventListener("input", () => { $("#onbAva", el).textContent = (name.value.trim()[0] || "?").toUpperCase(); name.parentElement.classList.remove("bad"); });
     phone.addEventListener("input", () => { phone.value = phone.value ? VO.phoneMask(phone.value) : ""; phone.parentElement.classList.remove("bad"); });
@@ -4332,12 +4726,14 @@ window.VO_BRAND_ICONS = {
     f.addEventListener("submit", e => {
       e.preventDefault();
       const pp = VO.phoneProblem(phone.value); $("#oPhoneE", el).textContent = pp || "";
-      const ok = [VO.check(name.parentElement, name.value.trim().length > 0), VO.check(phone.parentElement, !pp), VO.check(city.parentElement, city.value.trim().length > 1), type !== "company" || VO.check($("#oComp", el).parentElement, $("#oComp", el).value.trim().length > 1)].every(Boolean);
+      const G = VO.guard;
+      const ok = [G.field(name, "name", { min: 2 }), VO.check(phone.parentElement, !pp), G.field(city, "place", { min: 2 }), type !== "company" || G.field($("#oComp", el), "company", { min: 2 })].every(Boolean);
       const agree = $("#oAgree", el).checked;
       $("#oErr", el).textContent = !agree && ok ? "Нужно согласие на обработку данных — без него мы не можем хранить ваш профиль" : "";
       if (!ok || !agree) return;
+      const bot = G.isBot(f); if (bot) return ($("#oErr", el).textContent = bot);
       const vis = f.querySelector("[name=vis]:checked").value;
-      Object.assign(u, { type, company: type === "company" ? $("#oComp", el).value.trim() : "", name: name.value.trim().slice(0, 40), phone: phone.value, phoneVis: vis, showPhone: vis !== "none", city: city.value.trim().slice(0, 60), onboarded: true, consentAt: Date.now() });
+      Object.assign(u, { type, company: type === "company" ? G.clean($("#oComp", el).value).slice(0, 60) : "", name: G.clean(name.value).slice(0, 40), phone: phone.value, phoneVis: vis, showPhone: vis !== "none", city: G.clean(city.value).slice(0, 60), onboarded: true, consentAt: Date.now() });
       VO.closeSheet(true); VO.saveUser(u);
       VO.toast(`Готово, ${esc(u.name)}! Профиль заполнен`);
     });
@@ -4558,7 +4954,7 @@ window.VO_BRAND_ICONS = {
           <div class="field field--ic"><input id="pfPhone" inputmode="tel" placeholder=" " value="${esc(u.phone || "")}"><label for="pfPhone">Телефон</label><span class="field__ic">${VO.ico.phone}</span><em id="pfPhoneE">Проверьте номер</em></div>
           <div class="fs"><h4>Кто видит номер в объявлениях</h4><div class="vis">${VIS.map(([k, t, d]) => `<label><input type="radio" name="vis" value="${k}"${u.phoneVis === k ? " checked" : ""}><span><b>${t}</b><small>${d}</small></span></label>`).join("")}</div></div>
           <div class="field"><input id="pfCity" maxlength="60" placeholder=" " value="${esc(u.city || "")}"><label for="pfCity">Город или населённый пункт</label><em>Укажите город</em></div>
-          <div class="field field--area"><textarea id="pfAbout" rows="3" maxlength="300" placeholder=" ">${esc(u.about || "")}</textarea><label for="pfAbout">О себе</label><small class="count" id="pfC">${(u.about || "").length} / 300</small></div>
+          <div class="field field--area"><textarea id="pfAbout" rows="3" maxlength="300" placeholder=" ">${esc(u.about || "")}</textarea><label for="pfAbout">О себе</label><em>Проверьте текст</em><small class="count" id="pfC">${(u.about || "").length} / 300</small></div>
           <div class="field"><input readonly value="${esc(u.email)}" placeholder=" "><label>Почта для входа</label></div>
           <button class="btn btn--accent btn--wide" type="submit">Сохранить</button>
         </form>
@@ -4581,9 +4977,10 @@ window.VO_BRAND_ICONS = {
     f.addEventListener("submit", e => {
       e.preventDefault();
       const pp = VO.phoneProblem($("#pfPhone", f).value); $("#pfPhoneE", f).textContent = pp || "";
-      const ok = [VO.check($("#pfName", f).parentElement, $("#pfName", f).value.trim().length > 0), VO.check($("#pfPhone", f).parentElement, !pp), VO.check($("#pfCity", f).parentElement, $("#pfCity", f).value.trim().length > 1), type !== "company" || VO.check($("#pfComp", f).parentElement, $("#pfComp", f).value.trim().length > 1)].every(Boolean);
+      const G = VO.guard;
+      const ok = [G.field($("#pfName", f), "name", { min: 2 }), VO.check($("#pfPhone", f).parentElement, !pp), G.field($("#pfCity", f), "place", { min: 2 }), type !== "company" || G.field($("#pfComp", f), "company", { min: 2 }), G.field($("#pfAbout", f), "about", { optional: true })].every(Boolean);
       if (!ok) return VO.toast("Проверьте выделенные поля");
-      Object.assign(u, { type, company: type === "company" ? $("#pfComp", f).value.trim() : "", name: $("#pfName", f).value.trim(), phone: $("#pfPhone", f).value, phoneVis: vis(), showPhone: vis() !== "none", city: $("#pfCity", f).value.trim(), about: $("#pfAbout", f).value.trim().slice(0, 300), color: (f.querySelector("[name=color]:checked") || {}).value || u.color });
+      Object.assign(u, { type, company: type === "company" ? G.clean($("#pfComp", f).value).slice(0, 60) : "", name: G.clean($("#pfName", f).value).slice(0, 40), phone: $("#pfPhone", f).value, phoneVis: vis(), showPhone: vis() !== "none", city: G.clean($("#pfCity", f).value).slice(0, 60), about: G.clean($("#pfAbout", f).value, { multiline: true, maxLines: 8 }).slice(0, 300), color: (f.querySelector("[name=color]:checked") || {}).value || u.color });
       VO.saveUser(u); VO.toast("Профиль сохранён");
     });
   }
@@ -4659,9 +5056,10 @@ window.VO_BRAND_ICONS = {
   const { $, $$, esc, store, state: S } = VO;
   const page = VO.page("post");
   const MAX_PHOTOS = 8, DAY_LIMIT = 10;
-  const BANNED = /(оружи|пистолет|патрон|наркот|спайс|закладк|поддельн|фальшив|рецептурн|психотроп|взрывчат|краденн)/i;
-  const LINK = /(https?:\/\/|www\.|t\.me\/|wa\.me|\.ru\b|\.com\b)/i;
-  const PHONE = /(\+?7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/;
+  const G = VO.guard, TMAX = 50, DMAX = 3000;
+  // разумный потолок цены по категориям — от опечаток и «цен-шуток»
+  const PMAX = { realty: 5e9, auto: 1e9, job: 5e6, service: 1e7 };
+  const pmax = () => PMAX[d.cat] || 1e8;
   const STEPS = [["cat", "Категория"], ["item", "Что продаёте"], ["photo", "Фото"], ["price", "Цена и передача"], ["desc", "Описание"], ["check", "Проверка"]];
   const HINT = { auto: "Kia Rio, 2017, 1.6 AT", parts: "Зимние шины R16, комплект", realty: "2-комнатная квартира, 54 м²", job: "Бариста в кофейню", service: "Ремонт стиральных машин на дому", tech: "iPhone 13, 128 ГБ", wear: "Пуховик зимний, размер M", home: "Угловой диван", kids: "Детский самокат", hobby: "Горный велосипед 27,5″", pets: "Аквариум 60 л", free: "Отдам книги по программированию" };
   let d = null, stepI = 0, editId = null;
@@ -4680,39 +5078,39 @@ window.VO_BRAND_ICONS = {
   function stepItem() {
     const defs = window.VO_FILTERS[d.cat] || [];
     return `<h2>Что продаёте</h2>
-      <div class="field"><input id="pTitle" maxlength="70" placeholder=" " value="${esc(d.title)}"><label for="pTitle">Название</label><em>От 5 символов — что это, модель, размер</em><small class="count">${d.title.length} / 70</small></div>
+      <div class="field"><input id="pTitle" maxlength="${TMAX}" placeholder=" " value="${esc(d.title)}"><label for="pTitle">Название</label><em>От 5 символов — что это, модель, размер</em><small class="count">${d.title.length} / ${TMAX}</small></div>
       <p class="hint">Например: «${esc(HINT[d.cat] || "")}»</p>
       ${usesCond(d.cat) ? `<div class="fs"><h4>Состояние</h4><div class="conds">${[["Новое", "С биркой или в упаковке"], ["Как новое", "Без следов использования"], ["Б/у", "Есть следы использования"]].map(([k, t]) => `<label><input type="radio" name="cond" value="${k}"${d.cond === k ? " checked" : ""}><span><b>${k}</b><small>${t}</small></span></label>`).join("")}</div></div>` : ""}
       ${defs.length ? `<div class="attrs"><h4>Характеристики <small class="muted">необязательно, но с ними находят быстрее</small></h4>${defs.map(f => {
-        if (f.t === "chips") { const v = d.attrs[f.k], other = v && !f.o.includes(v); return `<div class="attr"><span>${f.n}</span><div class="chips chips--s">${f.o.map(o => `<button type="button" data-at="${f.k}" data-v="${esc(o)}" aria-pressed="${v === o}">${esc(o)}</button>`).join("")}<button type="button" data-at="${f.k}" data-v="__other" aria-pressed="${!!other || d.other[f.k] != null}">Другое</button></div>${other || d.other[f.k] != null ? `<div class="field field--sm"><input data-other="${f.k}" maxlength="40" placeholder=" " value="${esc(other ? v : d.other[f.k] || "")}"><label>Свой вариант</label></div>` : ""}</div>`; }
+        if (f.t === "chips") { const v = d.attrs[f.k], other = v && !f.o.includes(v); return `<div class="attr"><span>${f.n}</span><div class="chips chips--s">${f.o.map(o => `<button type="button" data-at="${f.k}" data-v="${esc(o)}" aria-pressed="${v === o}">${esc(o)}</button>`).join("")}<button type="button" data-at="${f.k}" data-v="__other" aria-pressed="${!!other || d.other[f.k] != null}">Другое</button></div>${other || d.other[f.k] != null ? `<div class="field field--sm"><input data-other="${f.k}" maxlength="30" placeholder=" " value="${esc(other ? v : d.other[f.k] || "")}"><label>Свой вариант</label><em>Проверьте текст</em></div>` : ""}</div>`; }
         if (f.t === "range") return `<div class="field field--sm"><input data-num="${f.k}" inputmode="numeric" placeholder=" " value="${d.attrs[f.k] != null ? d.attrs[f.k] : ""}"><label>${f.n}</label></div>`;
         if (f.t === "toggle") return `<label class="switch-l"><input type="checkbox" data-tg="${f.k}"${d.attrs[f.k] ? " checked" : ""}><span class="sw"></span>${f.n}</label>`;
       }).join("")}</div>` : ""}`;
   }
   function stepPhoto() {
-    return `<h2>Фотографии</h2><p class="muted">До ${MAX_PHOTOS} фото. Первое станет обложкой. Данные о месте съёмки мы удаляем.</p>
-      <div class="photos" id="pPhotos">${d.photos.map((p, i) => `<div class="photo${i === 0 ? " photo--cover" : ""}"><img src="${p}" alt="Фото ${i + 1}">${i === 0 ? "<em>Обложка</em>" : ""}<div class="photo__bar">${i ? `<button type="button" data-mv="${i}" data-dir="-1" aria-label="Левее">‹</button><button type="button" data-cover="${i}" title="Сделать обложкой">★</button>` : ""}${i < d.photos.length - 1 ? `<button type="button" data-mv="${i}" data-dir="1" aria-label="Правее">›</button>` : ""}<button type="button" data-rm="${i}" aria-label="Удалить">×</button></div></div>`).join("")}
-      ${d.photos.length < MAX_PHOTOS ? `<label class="drop drop--tile"><input type="file" id="pPhoto" accept="image/jpeg,image/png,image/webp" multiple hidden><span class="drop__ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><b>${d.photos.length ? "Ещё фото" : "Добавить фото"}</b><small>или перетащите сюда</small></label>` : ""}</div>
-      <div class="ptips"><b>Как снять, чтобы купили быстрее</b><ul><li>При дневном свете, без вспышки</li><li>Общий вид, детали и недостатки</li><li>Однотонный фон без лишних вещей</li></ul></div>
+    return `<h2>Фотографии</h2><p class="muted">До ${MAX_PHOTOS} фото. Первое станет обложкой — порядок меняется перетаскиванием. Перед загрузкой мы уменьшаем фото и удаляем из него служебные данные: место съёмки, модель телефона, дату.</p>
+      <div class="photos" id="pPhotos">${d.photos.map((p, i) => `<div class="photo${i === 0 ? " photo--cover" : ""}" data-i="${i}" title="Зажмите и перетащите, чтобы поменять порядок"><img src="${p}" alt="Фото ${i + 1}" draggable="false">${i === 0 ? "<em>Обложка</em>" : ""}<div class="photo__bar">${i ? `<button type="button" data-mv="${i}" data-dir="-1" aria-label="Левее">‹</button><button type="button" data-cover="${i}" title="Сделать обложкой">★</button>` : ""}${i < d.photos.length - 1 ? `<button type="button" data-mv="${i}" data-dir="1" aria-label="Правее">›</button>` : ""}<button type="button" data-rm="${i}" aria-label="Удалить">×</button></div></div>`).join("")}${Array.from({ length: busy }, () => `<div class="photo photo--busy"><i class="spin"></i><small>Обрабатываем…</small></div>`).join("")}
+      ${d.photos.length + busy < MAX_PHOTOS ? `<label class="drop drop--tile"><input type="file" id="pPhoto" accept="image/jpeg,image/png,image/webp" multiple hidden><span class="drop__ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><b>${d.photos.length ? "Ещё фото" : "Добавить фото"}</b><small>или перетащите сюда</small></label>` : ""}</div>
+      <div class="ptips"><b>Как снять, чтобы купили быстрее</b><ul><li>При дневном свете, без вспышки</li><li>Общий вид, детали и недостатки</li><li>Однотонный фон без лишних вещей</li><li>Без чужих фото из интернета, текста и номеров телефона на снимке</li></ul><small class="muted">JPG, PNG или WebP · до 20 МБ · от 200 × 200 пикселей</small></div>
       ${d.photos.length ? "" : `<p class="muted">Без фото объявление тоже можно опубликовать — подставим картинку категории.</p>`}`;
   }
   function stepPrice() {
     const sim = VO.allAds().filter(a => a.cat === d.cat && a.price > 0 && !a.mine).map(a => a.price).sort((a, b) => a - b);
     const per = d.cat === "job" ? ["в месяц", "за смену", "в час"] : d.cat === "service" ? ["за услугу", "в час", "за выезд"] : null;
     return `<h2>Цена и передача</h2>
-      <div class="row2"><div class="field"><input id="pPrice" inputmode="numeric" placeholder=" " value="${d.free ? "" : d.price}"${d.free ? " disabled" : ""}><label for="pPrice">${d.cat === "job" ? "Зарплата, ₽" : "Цена, ₽"}</label><em>Укажите цену или отметьте «Отдам даром»</em></div>
+      <div class="row2"><div class="field"><input id="pPrice" inputmode="numeric" placeholder=" " value="${d.free ? "" : d.price}"${d.free ? " disabled" : ""}><label for="pPrice">${d.cat === "job" ? "Зарплата, ₽" : "Цена, ₽"}</label><em id="pPriceE">Укажите цену или отметьте «Отдам даром»</em></div>
         ${d.cat === "job" ? "" : `<label class="switch-l"><input type="checkbox" id="pFree"${d.free ? " checked" : ""}><span class="sw"></span>Отдам даром</label>`}
         <label class="switch-l"><input type="checkbox" id="pBargain"${d.bargain ? " checked" : ""}${d.free ? " disabled" : ""}><span class="sw"></span>Торг</label></div>
       ${per ? `<div class="chips chips--s">${per.map(p => `<button type="button" data-per="${p}" aria-pressed="${(d.per || per[0]) === p}">${p}</button>`).join("")}</div>` : ""}
       ${sim.length ? `<div class="pricehint">Похожие объявления в этой категории: <b>от ${VO.rub(sim[0])} до ${VO.rub(sim[sim.length - 1])}</b>. Цена чуть ниже рынка — и откликов больше.</div>` : ""}
       ${["job", "service", "realty"].includes(d.cat) ? "" : `<div class="fs"><h4>Как передать</h4><div class="vis vis--row">${[["meet", "Встреча", "в вашем городе"], ["ship", "Отправка", "Почта, СДЭК, Boxberry"], ["courier", "Привезу сам(а)", "по договорённости"]].map(([k, t, s]) => `<label><input type="checkbox" data-dv="${k}"${d.delivery.includes(k) ? " checked" : ""}><span><b>${t}</b><small>${s}</small></span></label>`).join("")}</div></div>`}
       <div class="row2 row2--eq"><div class="field"><input id="pCity" maxlength="60" placeholder=" " value="${esc(d.city)}"><label for="pCity">Город или населённый пункт</label><em>Укажите, где находится</em></div>
-        <div class="field"><input id="pDistrict" maxlength="60" placeholder=" " value="${esc(d.district)}"><label for="pDistrict">Район или метро (необязательно)</label></div></div>`;
+        <div class="field"><input id="pDistrict" maxlength="50" placeholder=" " value="${esc(d.district)}"><label for="pDistrict">Район или метро (необязательно)</label><em>Проверьте текст</em></div></div>`;
   }
   function stepDesc() {
     const u = VO.user(), vis = { none: "никому — только сообщения", auth: "только вошедшим", all: "всем" }[u.phoneVis || "none"];
     return `<h2>Описание</h2>
-      <div class="field field--area"><textarea id="pDesc" rows="8" maxlength="3000" placeholder=" ">${esc(d.desc)}</textarea><label for="pDesc">Расскажите подробнее</label><small class="count">${d.desc.length} / 3000</small></div>
+      <div class="field field--area"><textarea id="pDesc" rows="8" maxlength="${DMAX}" placeholder=" ">${esc(d.desc)}</textarea><label for="pDesc">Расскажите подробнее</label><em>Проверьте текст</em><small class="count">${d.desc.length} / ${DMAX}</small></div>
       <div class="dtips">${["Состояние и недостатки", "Что в комплекте", "Почему продаёте", "Когда удобно показать"].map(t => `<button type="button" data-tip="${t}">+ ${t}</button>`).join("")}</div>
       <div class="contact-way"><b>Как с вами свяжутся</b><span>Сообщения на сайте — всегда. Номер телефона: ${vis}. <a href="#/me/profile">Изменить в профиле</a></span></div>`;
   }
@@ -4737,29 +5135,43 @@ window.VO_BRAND_ICONS = {
 
   function toAd() {
     const attrs = { ...d.attrs };
-    Object.entries(d.other).forEach(([k, v]) => { if (v && v.trim()) attrs[k] = v.trim(); });
+    Object.entries(d.other).forEach(([k, v]) => { v = G.clean(v).slice(0, 30); if (v) attrs[k] = v; });
     const price = d.free ? 0 : +String(d.price).replace(/\D/g, "") || 0;
-    return { cat: d.cat || "tech", sub: d.sub, title: d.title.trim(), attrs, price, bargain: !d.free && d.bargain,
+    return { cat: d.cat || "tech", sub: d.sub, title: G.clean(d.title).slice(0, TMAX), attrs, price, bargain: !d.free && d.bargain,
       per: d.cat === "job" ? (d.per || "в месяц").replace(/^в /, "") : d.cat === "service" ? (d.per || "за услугу") : null,
-      cond: d.free ? "Даром" : d.cat === "job" ? "Работа" : d.cat === "service" ? "Услуга" : d.cond, delivery: d.delivery, district: d.district.trim(),
-      city: d.city.trim() || "Москва", desc: d.desc.trim(), photos: d.photos, photo: d.photos[0] || null, ill: window.VO_CAT_ILL[d.cat || "tech"], bg: window.VO_CAT_BG[d.cat || "tech"] };
+      cond: d.free ? "Даром" : d.cat === "job" ? "Работа" : d.cat === "service" ? "Услуга" : d.cond, delivery: d.delivery, district: G.clean(d.district).slice(0, 50),
+      city: G.clean(d.city).slice(0, 60) || "Москва", desc: G.clean(d.desc, { multiline: true, maxLines: 60 }).slice(0, DMAX), photos: d.photos, photo: d.photos[0] || null, ill: window.VO_CAT_ILL[d.cat || "tech"], bg: window.VO_CAT_BG[d.cat || "tech"] };
   }
   const previewCard = () => { const a = { ...toAd(), id: "preview", created: Date.now() }; if (!a.title) a.title = "Название объявления"; if (!d.free && !a.price) { a.price = null; a.cond = d.cond; } return VO.cardHTML(a).replace(/ data-fav="[^"]*"/, " disabled tabindex=\"-1\"").replace('class="card', 'class="card in'); };
   function problems() {
-    const p = [], t = d.title + " " + d.desc;
+    const p = [], add = (where, m) => m && !p.includes(where + m) && p.push(where + m);
     if (!d.cat) p.push("Выберите категорию");
-    if (d.title.trim().length < 5) p.push("Название слишком короткое — минимум 5 символов");
-    if (!d.free && !(+String(d.price).replace(/\D/g, "") > 0)) p.push("Укажите цену или отметьте «Отдам даром»");
-    if (d.city.trim().length < 2) p.push("Укажите город");
-    if (BANNED.test(t)) p.push("Похоже на запрещённый товар — такие объявления не публикуются (см. Правила размещения)");
-    if (LINK.test(t)) p.push("Уберите ссылки из текста — это частый приём мошенников");
-    if (PHONE.test(t)) p.push("Не пишите телефон в тексте — включите его показ в профиле");
+    if (G.clean(d.title).length < 5) p.push("Название слишком короткое — минимум 5 символов");
+    else add("Название: ", G.text(d.title, "title"));
+    if (d.desc.trim()) add("Описание: ", G.text(d.desc, "desc"));
+    // запрещёнку ищем и в связке «название + описание»
+    add("", !p.length && G.banned(d.title + "\n" + d.desc) ? "Похоже на запрещённое к продаже — см. Правила размещения" : null);
+    Object.values(d.other).forEach(v => v && v.trim() && add("Характеристики: ", G.text(v, "other")));
+    const pr = +String(d.price).replace(/\D/g, "");
+    if (!d.free && !(pr > 0)) p.push("Укажите цену или отметьте «Отдам даром»");
+    else if (!d.free && pr > pmax()) p.push(`Проверьте цену — для этой категории не больше ${VO.rub(pmax())}`);
+    if (G.clean(d.city).length < 2) p.push("Укажите город");
+    else add("Город: ", G.text(d.city, "place"));
+    if (d.district.trim()) add("Район: ", G.text(d.district, "place"));
     return p;
   }
   function validStep(i) {
     if (i === 0 && !d.cat) { VO.toast("Выберите категорию"); return false; }
-    if (i === 1 && d.title.trim().length < 5) { const f = $("#pTitle", page); VO.check(f.parentElement, false); f.focus(); return false; }
-    if (i === 3) { const okP = d.free || +String(d.price).replace(/\D/g, "") > 0, okC = d.city.trim().length > 1; VO.check($("#pPrice", page).parentElement, okP); VO.check($("#pCity", page).parentElement, okC); if (!okP || !okC) return false; }
+    if (i === 1) {
+      const f = $("#pTitle", page); if (!G.field(f, "title", { min: 5 })) { f.focus(); return false; }
+      const bad = $$("[data-other]", page).filter(x => x.value.trim() && !G.field(x, "other")); if (bad.length) { bad[0].focus(); return false; }
+    }
+    if (i === 3) {
+      const pr = +String(d.price).replace(/\D/g, ""), okP = G.mark($("#pPrice", page), d.free || pr > 0 ? (d.free || pr <= pmax() ? null : `Не больше ${VO.rub(pmax())} — проверьте, нет ли лишних нулей`) : "Укажите цену или отметьте «Отдам даром»");
+      const okC = G.field($("#pCity", page), "place", { min: 2 }), okD = G.field($("#pDistrict", page), "place", { optional: true });
+      if (!okP || !okC || !okD) return false;
+    }
+    if (i === 4 && !G.field($("#pDesc", page), "desc", { optional: true })) { $("#pDesc", page).focus(); return false; }
     return true;
   }
 
@@ -4780,6 +5192,7 @@ window.VO_BRAND_ICONS = {
     if (stepI === 3) VO.cityField($("#pCity", page), v => { d.city = v; refresh(); });
     if (focusId) { const el = $("#" + focusId, page); if (el) { el.focus(); const v = el.value; el.value = ""; el.value = v; } }
   }
+  let busy = 0;
   const refresh = () => { $("#wizPrev", page).innerHTML = previewCard(); $("#quality", page).innerHTML = quality(); saveDraft(); };
   const go = i => { stepI = Math.max(0, Math.min(STEPS.length - 1, i)); render(); scrollTo({ top: 0, behavior: "smooth" }); saveDraft(); };
 
@@ -4800,14 +5213,22 @@ window.VO_BRAND_ICONS = {
   });
   page.addEventListener("input", e => {
     const t = e.target, fl = t.closest(".field"); if (fl) fl.classList.remove("bad");
-    if (t.id === "pTitle") { d.title = t.value; fl.querySelector(".count").textContent = `${t.value.length} / 70`; }
-    if (t.id === "pDesc") { d.desc = t.value; fl.querySelector(".count").textContent = `${t.value.length} / 3000`; }
+    if (t.id === "pTitle") { d.title = t.value; fl.querySelector(".count").textContent = `${t.value.length} / ${TMAX}`; }
+    if (t.id === "pDesc") { d.desc = t.value; fl.querySelector(".count").textContent = `${t.value.length} / ${DMAX}`; }
     if (t.id === "pPrice") { t.value = t.value.replace(/\D/g, "").slice(0, 10).replace(/\B(?=(\d{3})+(?!\d))/g, " "); d.price = t.value; }
     if (t.id === "pCity") d.city = t.value;
     if (t.id === "pDistrict") d.district = t.value;
-    if (t.dataset.other) d.other[t.dataset.other] = t.value.slice(0, 40);
+    if (t.dataset.other) d.other[t.dataset.other] = t.value.slice(0, 30);
     if (t.dataset.num) { t.value = t.value.replace(/\D/g, "").slice(0, 9); if (t.value) d.attrs[t.dataset.num] = +t.value; else delete d.attrs[t.dataset.num]; }
     refresh();
+  });
+  // подсказка об ошибке — сразу, как только человек ушёл с поля
+  page.addEventListener("focusout", e => {
+    const t = e.target; if (!t.value || !t.value.trim()) return;
+    if (t.id === "pTitle") G.field(t, "title", { min: 5 });
+    if (t.id === "pDesc") G.field(t, "desc");
+    if (t.id === "pDistrict") G.field(t, "place");
+    if (t.dataset.other) G.field(t, "other");
   });
   page.addEventListener("change", e => {
     const t = e.target;
@@ -4816,22 +5237,78 @@ window.VO_BRAND_ICONS = {
     if (t.id === "pBargain") d.bargain = t.checked;
     if (t.dataset.tg) { if (t.checked) d.attrs[t.dataset.tg] = true; else delete d.attrs[t.dataset.tg]; }
     if (t.dataset.dv) { d.delivery = $$("[data-dv]", page).filter(x => x.checked).map(x => x.dataset.dv); }
-    if (t.id === "pPhoto") [...t.files].slice(0, MAX_PHOTOS - d.photos.length).forEach(takePhoto);
+    if (t.id === "pPhoto") { addPhotos(t.files); t.value = ""; }
     refresh();
   });
   ["dragover", "dragenter"].forEach(ev => page.addEventListener(ev, e => { const x = e.target.closest(".drop"); if (x) { e.preventDefault(); x.classList.add("over"); } }));
   page.addEventListener("dragleave", e => { const x = e.target.closest(".drop"); if (x) x.classList.remove("over"); });
-  page.addEventListener("drop", e => { const x = e.target.closest(".drop"); if (x) { e.preventDefault(); [...e.dataTransfer.files].slice(0, MAX_PHOTOS - d.photos.length).forEach(takePhoto); } });
-  function takePhoto(file) {
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return VO.toast("Подойдут JPG, PNG или WebP");
-    if (file.size > 15e6) return VO.toast("Фото больше 15 МБ — выберите поменьше");
-    const img = new Image(), url = URL.createObjectURL(file);
-    img.onload = () => { const k = Math.min(1, 900 / Math.max(img.width, img.height)), cv = document.createElement("canvas"); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k); cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); if (d.photos.length < MAX_PHOTOS) d.photos.push(cv.toDataURL("image/jpeg", .78)); render(); saveDraft(); };
-    img.onerror = () => VO.toast("Не получилось открыть изображение");
-    img.src = url;
+  page.addEventListener("drop", e => { const x = e.target.closest(".drop"); if (x) { e.preventDefault(); x.classList.remove("over"); addPhotos(e.dataTransfer.files); } });
+  // Фото обрабатываем по одному: проверка формата по содержимому, размеров, пересжатие без EXIF
+  async function addPhotos(list) {
+    let files = [...list];
+    const room = MAX_PHOTOS - d.photos.length - busy;
+    if (files.length > room) { VO.toast(room > 0 ? `Можно добавить ещё ${room} фото — лишние не загрузили` : `Уже ${MAX_PHOTOS} фото — это максимум`); files = files.slice(0, Math.max(0, room)); }
+    if (!files.length) return;
+    const w = G.rate("photo", 60, 36e5); if (w) return VO.toast(`Слишком много загрузок. Попробуйте через ${G.wait(w)}`);
+    busy += files.length; if (stepI === 2) render();
+    const errs = [];
+    for (const f of files) {
+      try {
+        const url = await G.image(f);
+        if (d.photos.includes(url)) errs.push("Это фото уже добавлено");
+        else if (d.photos.length < MAX_PHOTOS) d.photos.push(url);
+      } catch (err) { errs.push(err.message); }
+      busy--; if (stepI === 2 && !drag) render(); saveDraft();
+    }
+    [...new Set(errs)].slice(0, 3).forEach((m, i) => setTimeout(() => VO.toast(m, 5200), i * 250));
   }
+
+  /* ---------- перетаскивание фото: мышью сразу, пальцем — после короткого удержания ---------- */
+  let drag = null;
+  const photoEls = () => $$("#pPhotos .photo[data-i]", page);
+  page.addEventListener("pointerdown", e => {
+    const ph = e.target.closest(".photo[data-i]"); if (!ph || e.target.closest("button") || e.button > 0) return;
+    drag = { el: ph, x: e.clientX, y: e.clientY, on: false, touch: e.pointerType !== "mouse" };
+    if (drag.touch) drag.timer = setTimeout(() => drag && startDrag(drag.x, drag.y), 260);
+  });
+  function startDrag(x, y) {
+    const r = drag.el.getBoundingClientRect();
+    drag.on = true; drag.dx = x - r.left; drag.dy = y - r.top;
+    const g = drag.ghost = drag.el.cloneNode(true); g.classList.add("photo--ghost"); g.removeAttribute("data-i");
+    Object.assign(g.style, { width: r.width + "px", height: r.height + "px", left: r.left + "px", top: r.top + "px" });
+    document.body.appendChild(g); drag.el.classList.add("photo--hole"); page.classList.add("is-sorting");
+    if (navigator.vibrate) navigator.vibrate(12);
+  }
+  addEventListener("pointermove", e => {
+    if (!drag) return;
+    if (!drag.on) { if (drag.touch) { if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) { clearTimeout(drag.timer); drag = null; } return; } if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return; startDrag(drag.x, drag.y); }
+    drag.x = e.clientX; drag.y = e.clientY;
+    drag.ghost.style.transform = `translate(${e.clientX - drag.dx - parseFloat(drag.ghost.style.left)}px, ${e.clientY - drag.dy - parseFloat(drag.ghost.style.top)}px) rotate(-3deg) scale(1.05)`;
+    const over = document.elementFromPoint(e.clientX, e.clientY), tgt = over && over.closest("#pPhotos .photo[data-i]");
+    if (!tgt || tgt === drag.el) return;
+    const els = photoEls(), before = new Map(els.map(x => [x, x.getBoundingClientRect()]));
+    const a = els.indexOf(drag.el), b = els.indexOf(tgt);
+    tgt.parentNode.insertBefore(drag.el, a < b ? tgt.nextSibling : tgt);
+    els.forEach(x => { if (x === drag.el) return; const o = before.get(x), n = x.getBoundingClientRect(); if (o.left !== n.left || o.top !== n.top) x.animate([{ transform: `translate(${o.left - n.left}px, ${o.top - n.top}px)` }, { transform: "none" }], { duration: 220, easing: "cubic-bezier(.2,.8,.2,1)" }); });
+  });
+  // пока тянем пальцем — страница не прокручивается
+  page.addEventListener("touchmove", e => { if (drag && drag.on) e.preventDefault(); }, { passive: false });
+  const endDrag = () => {
+    if (!drag) return; clearTimeout(drag.timer);
+    if (drag.on) {
+      const order = photoEls().map(x => +x.dataset.i), moved = order.some((v, i) => v !== i);
+      drag.ghost.remove(); page.classList.remove("is-sorting");
+      const stop = ev => { ev.stopPropagation(); ev.preventDefault(); }; page.addEventListener("click", stop, { capture: true, once: true }); setTimeout(() => page.removeEventListener("click", stop, true), 60);
+      drag = null;
+      if (moved) { d.photos = order.map(i => d.photos[i]); saveDraft(); }
+      render();
+    } else drag = null;
+  };
+  addEventListener("pointerup", endDrag); addEventListener("pointercancel", endDrag);
+  page.addEventListener("contextmenu", e => { if (e.target.closest(".photo[data-i]")) e.preventDefault(); });
   function publish() {
     const p = problems(); if (p.length) return VO.toast(p[0]);
+    if (busy) return VO.toast("Подождите — фото ещё обрабатываются");
     const u = VO.user(), ad = toAd();
     if (!editId && S.mine.filter(a => a.owner === u.email && Date.now() - (a.first || a.created) < 864e5).length >= DAY_LIMIT) return VO.toast(`Можно размещать до ${DAY_LIMIT} объявлений в сутки. Попробуйте завтра`);
     if (editId) { const i = S.mine.findIndex(a => a.id === editId), old = S.mine[i]; S.mine[i] = { ...old, ...ad, id: editId, owner: u.email, created: old.created, first: old.first || old.created, status: old.status }; }
@@ -5084,18 +5561,20 @@ window.VO_BRAND_ICONS = {
         <div class="sent" id="sent" hidden><div class="sent__bub"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12.5 4 4 8-9"/></svg></div><b>Почти готово</b><span>Открыли вашу почтовую программу с готовым письмом — осталось нажать «Отправить». Не открылась? Напишите на <a href="mailto:${C.email}">${C.email}</a>. Обращение сохранено в личном кабинете в разделе «Обращения».</span><button class="btn btn--ghost" type="button" id="sentAgain">Написать ещё</button></div>
       </form>
     </div></div>`);
-  const cf = $("#contactForm", contact);
+  const cf = $("#contactForm", contact); VO.guard.trap(cf);
   cf.addEventListener("input", e => {
     const f = e.target.closest(".field"); if (f) f.classList.remove("bad");
-    if (e.target.id === "cMsg") { $("#cCount", contact).textContent = `${e.target.value.length} / 2000`; const p = $("#cPrev", contact); p.hidden = !e.target.value.trim(); p.textContent = e.target.value.trim().slice(0, 220) + (e.target.value.length > 220 ? "…" : ""); }
+    if (e.target.id === "cMsg") { $("#cCount", contact).textContent = `${e.target.value.length} / 2000`; const p = $("#cPrev", contact), v = VO.guard.clean(e.target.value, { multiline: true, maxLines: 5 }).replace(/\n{2,}/g, "\n"); p.hidden = !v; p.textContent = v.length > 180 || v.split("\n").length >= 5 ? v.slice(0, 180).trimEnd() + "…" : v; }
   });
   cf.addEventListener("submit", e => {
     e.preventDefault();
-    const name = $("#cName", cf).value.trim(), mail = $("#cMail", cf).value.trim(), msg = $("#cMsg", cf).value.trim(), topic = new FormData(cf).get("topic");
-    const ok = [VO.check($("#cName", cf).parentElement, name.length > 1), VO.check($("#cMail", cf).parentElement, VO.MAIL_RX.test(mail)), VO.check($("#cMsg", cf).parentElement, msg.length > 4)].every(Boolean);
+    const G = VO.guard, name = G.clean($("#cName", cf).value).slice(0, 60), mail = $("#cMail", cf).value.trim().toLowerCase(), msg = G.clean($("#cMsg", cf).value, { multiline: true, maxLines: 40 }).slice(0, 2000), topic = new FormData(cf).get("topic");
+    const ok = [G.field($("#cName", cf), "name", { min: 2 }), G.mark($("#cMail", cf), VO.MAIL_RX.test(mail) && mail.length <= 120 ? null : "Проверьте адрес"), G.field($("#cMsg", cf), "ticket", { min: 5 })].every(Boolean);
     if (!ok) return;
     if (!$("#cAgree", cf).checked) return VO.toast("Отметьте согласие на обработку данных — иначе мы не сможем ответить");
+    const bot = G.isBot(cf, 3000); if (bot) return VO.toast(bot);
     const last = VO.store.get("vo_contact_t", 0); if (Date.now() - last < 30e3) return VO.toast("Сообщение уже отправлено. Подождите полминуты перед следующим");
+    const w = G.rate("ticket", 5, 36e5) || G.rate("ticket:d", 15, 864e5); if (w) return VO.toast(`Слишком много обращений. Попробуйте через ${G.wait(w)}`);
     VO.store.set("vo_contact_t", Date.now());
     // обращение сохраняем: оно появится в кабинете — по почте или по этому устройству, даже если войти позже
     VO.store.set("vo_tickets", [{ id: "t" + Date.now().toString(36), email: mail.toLowerCase(), name, topic, msg, t: Date.now(), device: VO.device(), status: "sent" }, ...VO.store.get("vo_tickets", [])]);

@@ -1285,7 +1285,7 @@ a.note-i:hover { background: var(--mist); }
 .wiz__card > .muted { margin: -8px 0 0; }
 .wiz__nav { display: flex; justify-content: space-between; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); margin-top: 6px; }
 .wiz__side { position: sticky; top: 100px; display: grid; gap: 14px; }
-.wiz__prev { pointer-events: none; }
+.wiz__prev .card { cursor: default; }
 .wiz__prev .heart-b { opacity: .5; }
 .ctiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 10px; }
 .ctile { display: grid; grid-template-rows: auto 1fr; justify-items: center; align-items: start; gap: 10px; height: 116px; padding: 16px 8px 10px; border-radius: 20px; border: 1.5px solid var(--line); background: #fff; font: inherit; cursor: pointer; transition: all .25s var(--spring); min-width: 0; }
@@ -1389,3 +1389,65 @@ a.note-i:hover { background: var(--mist); }
 
 html.in-chat .fab { display: none; }
 @media (max-width: 1000px) { .wiz__side { display: none; } }
+
+/* ===== Длинный текст никогда не раздвигает страницу ===== */
+html { overflow-x: clip; }
+body { overflow-wrap: anywhere; }
+img, video, svg { max-width: 100%; }
+.card__title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.adp > *, .wiz > *, .cab > *, .chats > *, .contact > * { min-width: 0; }
+.adp__title, .adp h1 { overflow-wrap: anywhere; }
+.note-i > div { min-width: 0; }
+.note-i span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cform__prev { max-height: 7.6em; overflow: hidden; white-space: pre-line; }
+.ticket p { max-height: 14em; overflow: auto; white-space: pre-line; }
+.hp { position: absolute !important; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+/* ===== Несколько фото на карточке ===== */
+.card__art .card__ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .18s; }
+.card__art .card__ph.on { opacity: 1; }
+.card__bars--ph { z-index: 2; }
+.card__bars--ph i { background: rgba(255,255,255,.55); box-shadow: 0 0 0 .5px rgba(0,0,0,.08); }
+.card__bars--ph i.on { background: #fff; }
+.card__media:has(.card__ph) .card__bars { opacity: 1; }
+
+/* ===== Галерея объявления: в рамке — кадр, по клику — фото целиком ===== */
+.gal__ph { object-fit: cover; background: none; cursor: zoom-in; }
+.gal__thumbs { overflow-x: auto; scrollbar-width: thin; padding-bottom: 4px; scroll-snap-type: x proximity; }
+.gal__thumbs button { flex: none; scroll-snap-align: start; }
+.sheet--lbx .sheet__back { background: rgba(10,11,14,.92); }
+.sheet--lbx .sheet__box { width: 100%; height: 100%; max-height: none; padding: 0; background: transparent; border-radius: 0; overflow: hidden; display: grid; }
+.sheet--lbx .sheet__x { background: rgba(255,255,255,.14); color: #fff; z-index: 3; }
+.lbx { position: relative; display: grid; place-items: center; min-height: 0; }
+.lbx__stage { width: 100%; height: calc(100vh - 32px); display: grid; place-items: center; }
+.lbx__img { max-width: min(100%, calc(100vw - 140px)); max-height: calc(100vh - 40px); object-fit: contain; border-radius: 6px; user-select: none; animation: fade .25s both; }
+.lbx__nav { position: absolute; top: calc(50% - 26px); width: 52px; height: 52px; border-radius: 50%; border: 0; background: rgba(255,255,255,.14); color: #fff; font-size: 30px; cursor: pointer; transition: background-color .2s; }
+.lbx__nav:hover { background: rgba(255,255,255,.26); }
+.lbx__nav--l { left: 8px; } .lbx__nav--r { right: 8px; }
+.lbx__count { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); color: #fff; font-weight: 700; font-size: 13px; background: rgba(255,255,255,.14); padding: 5px 12px; border-radius: 999px; }
+.msg__ph { cursor: zoom-in; object-fit: cover; }
+
+/* ===== Быстрые ответы: листаются ===== */
+.chat__qw { position: relative; }
+.chat__quick { scroll-behavior: auto; cursor: grab; user-select: none; padding-right: 16px; }
+.chat__quick.drag { cursor: grabbing; } .chat__quick.drag button { pointer-events: none; }
+.chat__qa { position: absolute; top: 10px; z-index: 2; width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; font-size: 18px; line-height: 1; cursor: pointer; display: grid; place-items: center; box-shadow: 0 6px 16px -8px rgba(22,24,29,.35); }
+.chat__qa[hidden] { display: none; }
+.chat__qa--l { left: 6px; } .chat__qa--r { right: 6px; }
+.chat__qw::before, .chat__qw::after { content: ""; position: absolute; top: 10px; bottom: 0; width: 48px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 1; }
+.chat__qw::before { left: 0; background: linear-gradient(90deg, #fff 30%, rgba(255,255,255,0)); }
+.chat__qw::after { right: 0; background: linear-gradient(270deg, #fff 30%, rgba(255,255,255,0)); }
+.chat__qw.fade-l::before, .chat__qw.fade-r::after { opacity: 1; }
+
+/* ===== Фото в мастере: перетаскивание ===== */
+.photo[data-i] { cursor: grab; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.is-sorting, .is-sorting * { cursor: grabbing !important; }
+.photo--hole { opacity: .28; outline: 2px dashed var(--muted); outline-offset: -2px; }
+.photo--hole .photo__bar { display: none; }
+.photo--ghost { position: fixed; z-index: 9999; margin: 0; pointer-events: none; animation: none; box-shadow: 0 24px 50px -18px rgba(22,24,29,.55); transition: none; }
+.photo--ghost .photo__bar { display: none; }
+.photo--busy { display: grid; place-items: center; align-content: center; gap: 8px; color: var(--muted); font-size: 12.5px; font-weight: 700; border: 1.5px dashed var(--line); background: #fff; }
+.spin { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (hover: none) { .photo__bar { opacity: 1; } }
+.ptips small { display: block; margin-top: 8px; }

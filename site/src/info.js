@@ -219,18 +219,20 @@
         <div class="sent" id="sent" hidden><div class="sent__bub"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12.5 4 4 8-9"/></svg></div><b>Почти готово</b><span>Открыли вашу почтовую программу с готовым письмом — осталось нажать «Отправить». Не открылась? Напишите на <a href="mailto:${C.email}">${C.email}</a>. Обращение сохранено в личном кабинете в разделе «Обращения».</span><button class="btn btn--ghost" type="button" id="sentAgain">Написать ещё</button></div>
       </form>
     </div></div>`);
-  const cf = $("#contactForm", contact);
+  const cf = $("#contactForm", contact); VO.guard.trap(cf);
   cf.addEventListener("input", e => {
     const f = e.target.closest(".field"); if (f) f.classList.remove("bad");
-    if (e.target.id === "cMsg") { $("#cCount", contact).textContent = `${e.target.value.length} / 2000`; const p = $("#cPrev", contact); p.hidden = !e.target.value.trim(); p.textContent = e.target.value.trim().slice(0, 220) + (e.target.value.length > 220 ? "…" : ""); }
+    if (e.target.id === "cMsg") { $("#cCount", contact).textContent = `${e.target.value.length} / 2000`; const p = $("#cPrev", contact), v = VO.guard.clean(e.target.value, { multiline: true, maxLines: 5 }).replace(/\n{2,}/g, "\n"); p.hidden = !v; p.textContent = v.length > 180 || v.split("\n").length >= 5 ? v.slice(0, 180).trimEnd() + "…" : v; }
   });
   cf.addEventListener("submit", e => {
     e.preventDefault();
-    const name = $("#cName", cf).value.trim(), mail = $("#cMail", cf).value.trim(), msg = $("#cMsg", cf).value.trim(), topic = new FormData(cf).get("topic");
-    const ok = [VO.check($("#cName", cf).parentElement, name.length > 1), VO.check($("#cMail", cf).parentElement, VO.MAIL_RX.test(mail)), VO.check($("#cMsg", cf).parentElement, msg.length > 4)].every(Boolean);
+    const G = VO.guard, name = G.clean($("#cName", cf).value).slice(0, 60), mail = $("#cMail", cf).value.trim().toLowerCase(), msg = G.clean($("#cMsg", cf).value, { multiline: true, maxLines: 40 }).slice(0, 2000), topic = new FormData(cf).get("topic");
+    const ok = [G.field($("#cName", cf), "name", { min: 2 }), G.mark($("#cMail", cf), VO.MAIL_RX.test(mail) && mail.length <= 120 ? null : "Проверьте адрес"), G.field($("#cMsg", cf), "ticket", { min: 5 })].every(Boolean);
     if (!ok) return;
     if (!$("#cAgree", cf).checked) return VO.toast("Отметьте согласие на обработку данных — иначе мы не сможем ответить");
+    const bot = G.isBot(cf, 3000); if (bot) return VO.toast(bot);
     const last = VO.store.get("vo_contact_t", 0); if (Date.now() - last < 30e3) return VO.toast("Сообщение уже отправлено. Подождите полминуты перед следующим");
+    const w = G.rate("ticket", 5, 36e5) || G.rate("ticket:d", 15, 864e5); if (w) return VO.toast(`Слишком много обращений. Попробуйте через ${G.wait(w)}`);
     VO.store.set("vo_contact_t", Date.now());
     // обращение сохраняем: оно появится в кабинете — по почте или по этому устройству, даже если войти позже
     VO.store.set("vo_tickets", [{ id: "t" + Date.now().toString(36), email: mail.toLowerCase(), name, topic, msg, t: Date.now(), device: VO.device(), status: "sent" }, ...VO.store.get("vo_tickets", [])]);

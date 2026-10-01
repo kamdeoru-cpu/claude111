@@ -37,10 +37,15 @@
   function push(c, m) { c.msgs.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t: Date.now(), ...m }); save(); }
   function sys(c, text) { push(c, { from: "sys", text }); }
   function send(c, text, photo) {
-    if (c.blocked) return VO.toast("Вы заблокировали собеседника — сначала разблокируйте");
-    text = (text || "").trim().slice(0, 2000); if (!text && !photo) return;
+    if (c.blocked) { VO.toast("Вы заблокировали собеседника — сначала разблокируйте"); return false; }
+    const G = VO.guard;
+    text = G.clean(text, { multiline: true, maxLines: 30 }).slice(0, 2000); if (!text && !photo) return false;
+    const bad = text && G.text(text, "chat"); if (bad) { VO.toast(bad); return false; }
+    const mineM = c.msgs.filter(m => m.from === "me").slice(-2);
+    if (text && mineM.length === 2 && mineM.every(m => m.text === text)) { VO.toast("Вы уже отправили это сообщение"); return false; }
+    const w = G.rate("msg", 20, 60e3) || G.rate("msg:h", 300, 36e5); if (w) { VO.toast(`Слишком много сообщений подряд. Подождите ${G.wait(w)}`); return false; }
     push(c, { from: "me", text, photo: photo || null, seen: false });
-    botTurn(c, text);
+    botTurn(c, text); return true;
   }
 
   /* ---------- ДЕМО: автоответы ---------- */
@@ -182,7 +187,7 @@
       ${dealBar(c)}
       <div class="chat__body" id="chatBody">${html}<div class="msg msg--peer chat__typing" hidden><div class="msg__b"><span class="bub--typing"><i></i><i></i><i></i></span></div></div></div>
       ${c.blocked ? `<div class="chat__blocked">Вы заблокировали ${esc(p.name)}. Пользователь не сможет вам писать. <button class="link" type="button" data-cm="block">Разблокировать</button></div>` : `
-      <div class="chat__quick">${quick.map(q => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <div class="chat__qw"><button class="chat__qa chat__qa--l" type="button" data-qs="-1" aria-label="Прокрутить влево" hidden>‹</button><div class="chat__quick" id="chatQuick">${quick.map(q => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div><button class="chat__qa chat__qa--r" type="button" data-qs="1" aria-label="Прокрутить вправо" hidden>›</button></div>
       <form class="chat__f" id="chatF">
         <label class="icb chat__att" title="Прикрепить фото" aria-label="Прикрепить фото"><input type="file" accept="image/jpeg,image/png,image/webp" hidden id="chatPh"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 7"/></svg></label>
         <textarea id="chatT" rows="1" maxlength="2000" placeholder="Сообщение"></textarea>
@@ -196,7 +201,22 @@
     if (open) { let ch = false; open.msgs.forEach(m => { if (m.from === "peer" && !m.read) { m.read = true; ch = true; } }); if (ch) save(); }
     host.innerHTML = `<div class="chats${open ? " has-open" : ""}">${listHTML()}<div class="chats__c">${open ? convHTML(open) : `<div class="chats__none"><svg width="120" height="96" viewBox="0 0 120 96"><path d="M20 12h50a24 24 0 0 1 0 48H40L20 80Z" fill="#F4F5F7"/><path d="M60 40h34a16 16 0 0 1 0 32H80L68 82V72a16 16 0 0 1-8-32Z" fill="#FFEDEA"/></svg><b>Выберите диалог</b><span>Здесь будет переписка, этапы сделки и быстрые ответы.</span></div>`}</div></div>`;
     const body = $("#chatBody", host); if (body) body.scrollTop = body.scrollHeight;
+    quickArrows();
   }
+  // быстрые ответы: лента листается колесом, перетаскиванием и стрелками
+  function quickArrows() {
+    const q = page && $("#chatQuick", page); if (!q) return;
+    const l = $(".chat__qa--l", page), r = $(".chat__qa--r", page), max = q.scrollWidth - q.clientWidth;
+    l.hidden = q.scrollLeft < 4; r.hidden = q.scrollLeft > max - 4 || max < 4;
+    q.parentElement.classList.toggle("fade-l", !l.hidden); q.parentElement.classList.toggle("fade-r", !r.hidden);
+  }
+  document.addEventListener("scroll", e => { if (e.target.id === "chatQuick") quickArrows(); }, true);
+  addEventListener("resize", () => quickArrows());
+  document.addEventListener("wheel", e => { const q = e.target.closest && e.target.closest("#chatQuick"); if (!q || Math.abs(e.deltaX) > Math.abs(e.deltaY) || q.scrollWidth <= q.clientWidth) return; e.preventDefault(); q.scrollLeft += e.deltaY; }, { passive: false });
+  let qd = null;
+  document.addEventListener("pointerdown", e => { const q = e.pointerType === "mouse" && e.target.closest && e.target.closest("#chatQuick"); if (q) qd = { q, x: e.clientX, s: q.scrollLeft, moved: false }; });
+  document.addEventListener("pointermove", e => { if (!qd) return; const dx = e.clientX - qd.x; if (Math.abs(dx) > 5) { qd.moved = true; qd.q.classList.add("drag"); } if (qd.moved) qd.q.scrollLeft = qd.s - dx; });
+  document.addEventListener("pointerup", () => { if (qd) { const q = qd; setTimeout(() => q.q.classList.remove("drag"), 0); if (q.moved) { const stop = ev => { ev.stopPropagation(); ev.preventDefault(); }; document.addEventListener("click", stop, { capture: true, once: true }); setTimeout(() => document.removeEventListener("click", stop, true), 50); } qd = null; } });
   function paintIfOpen(id) {
     if (!page || VO.current() !== "me" || !/^#\/me\/msg/.test(location.hash)) return;
     const keep = $("#chatT", page) ? $("#chatT", page).value : "";
@@ -209,7 +229,9 @@
     if (!page || !page.contains(e.target)) return;
     const t = e.target;
     const cf = t.closest("[data-cf]"); if (cf) { filter = cf.dataset.cf; return render(page, open && open.id); }
-    const q = t.closest("[data-q]"); if (q && open) { send(open, q.dataset.q); return render(page, open.id); }
+    const qs = t.closest("[data-qs]"); if (qs) { const q = $("#chatQuick", page); q.scrollBy({ left: +qs.dataset.qs * q.clientWidth * .7, behavior: "smooth" }); return; }
+    const ph = t.closest(".msg__ph"); if (ph) return VO.lightbox([ph.src], 0);
+    const q = t.closest("[data-q]"); if (q && open) { if (send(open, q.dataset.q)) render(page, open.id); return; }
     const cm = t.closest("[data-cm]");
     if (cm && open) {
       const k = cm.dataset.cm;
@@ -247,14 +269,13 @@
   document.addEventListener("keydown", e => { if (e.target.id === "chatT" && e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#chatF", page).requestSubmit(); } });
   document.addEventListener("submit", e => {
     if (e.target.id !== "chatF" || !open) return; e.preventDefault();
-    const ta = $("#chatT", page); send(open, ta.value); ta.value = ""; render(page, open.id); $("#chatT", page).focus();
+    const ta = $("#chatT", page); if (!send(open, ta.value)) return; ta.value = ""; render(page, open.id); $("#chatT", page).focus();
   });
   document.addEventListener("change", e => {
     if (e.target.id !== "chatPh" || !open) return;
-    const f = e.target.files[0]; if (!f || !/^image\//.test(f.type)) return;
-    const img = new Image(), url = URL.createObjectURL(f);
-    img.onload = () => { const k = Math.min(1, 800 / Math.max(img.width, img.height)), cv = document.createElement("canvas"); cv.width = img.width * k; cv.height = img.height * k; cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); send(open, "", cv.toDataURL("image/jpeg", .75)); render(page, open.id); };
-    img.src = url;
+    const f = e.target.files[0], c = open; e.target.value = ""; if (!f) return;
+    const w = VO.guard.rate("msgph", 10, 6e5); if (w) return VO.toast(`Слишком много фото подряд. Подождите ${VO.guard.wait(w)}`);
+    VO.guard.image(f, { side: 1280, budget: 170e3 }).then(url => { if (send(c, "", url)) render(page, c.id); }).catch(err => VO.toast(err.message));
   });
 
   function startDeal(c) {

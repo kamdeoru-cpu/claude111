@@ -94,7 +94,7 @@
 
   /* ---------- форматирование ---------- */
   VO.rub = n => n.toLocaleString("ru-RU") + " ₽";
-  VO.price = a => a.price == null ? '<span class="muted">Цена не указана</span>' : a.price === 0 ? '<span class="free">Даром</span>' : `${VO.rub(a.price)}${a.per ? `<small>${a.per === "выезд" ? "за выезд" : "в " + a.per}</small>` : ""}`;
+  VO.price = a => a.price == null ? '<span class="muted">Цена не указана</span>' : a.price === 0 ? '<span class="free">Даром</span>' : `${VO.rub(a.price)}${a.per ? `<small>${/^(за|в) /.test(a.per) ? a.per : a.per === "выезд" ? "за выезд" : "в " + a.per}</small>` : ""}`;
   VO.minutesAgo = a => a.created ? Math.floor((Date.now() - a.created) / 60000) : a.ago + Math.floor((Date.now() - LOADED) / 60000);
   VO.agoText = a => {
     const m = VO.minutesAgo(a);
@@ -105,6 +105,10 @@
   };
   VO.plural = (n, a, b, c) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c; };
   VO.media = a => a.photo ? `<img src="${a.photo}" alt="">` : (window.VO_ILL[a.ill] || "");
+  // несколько фото: на карточке листаются движением мыши (как на крупных площадках)
+  const PH = VO._ph = {};
+  const multi = a => a.photos && a.photos.length > 1;
+  VO.cardMedia = a => { if (!multi(a)) return VO.media(a); PH[a.id] = a.photos; return a.photos.map((p, i) => `<img class="card__ph${i ? "" : " on"}" ${i ? `data-k="${i}"` : `src="${p}"`} alt="">`).join(""); };
   VO.tag = a => a.status === "archived" ? '<span class="card__tag">Снято</span>' : a.status === "sold" ? '<span class="card__tag">Продано</span>' : a.price === 0 ? '<span class="card__tag card__tag--free">Даром</span>'
     : a.cond === "Новое" ? '<span class="card__tag card__tag--new">Новое</span>' : `<span class="card__tag">${esc(a.cond)}</span>`;
   VO.heart = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.3-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.7 12 20 12 20Z"/></svg>';
@@ -122,9 +126,9 @@
   VO.cardHTML = (a, i = 0) => `<article class="card${a.mine ? " card--mine" : ""}" data-id="${a.id}" tabindex="0" style="--d:${Math.min(i, 12) * 45}ms" aria-label="${esc(a.title)}">
       <div class="card__media" data-v="0" style="--bg:${a.bg}">
         <span class="card__blob"></span>
-        <div class="card__art">${VO.media(a)}</div>
+        <div class="card__art">${VO.cardMedia(a)}</div>
         ${VO.tag(a)}
-        ${a.photo ? "" : '<span class="card__bars"><i></i><i></i><i></i></span>'}
+        ${multi(a) ? `<span class="card__bars card__bars--ph">${a.photos.map((_, i) => `<i${i ? "" : ' class="on"'}></i>`).join("")}</span>` : a.photo ? "" : '<span class="card__bars"><i></i><i></i><i></i></span>'}
       </div>
       <button class="heart-b${S.favs.has(a.id) ? " is-on" : ""}" type="button" data-fav="${a.id}" aria-pressed="${S.favs.has(a.id)}" aria-label="В избранное">${VO.heart}</button>
       <div class="card__body">
@@ -140,9 +144,31 @@
   // «фото» на карточке меняются при движении мыши
   document.addEventListener("pointermove", e => {
     const m = e.target.closest && e.target.closest(".card .card__media"); if (!m) return;
-    const r = m.getBoundingClientRect(); m.dataset.v = Math.min(2, Math.floor((e.clientX - r.left) / r.width * 3));
+    const r = m.getBoundingClientRect(), imgs = m.querySelectorAll(".card__ph");
+    if (imgs.length) return phTo(m, Math.min(imgs.length - 1, Math.max(0, Math.floor((e.clientX - r.left) / r.width * imgs.length))));
+    m.dataset.v = Math.min(2, Math.floor((e.clientX - r.left) / r.width * 3));
   });
-  document.addEventListener("pointerout", e => { const m = e.target.closest && e.target.closest(".card .card__media"); if (m && !m.contains(e.relatedTarget)) m.dataset.v = 0; });
+  function phTo(m, k) {
+    const imgs = m.querySelectorAll(".card__ph"), id = m.closest(".card").dataset.id;
+    imgs.forEach((im, i) => { if (i === k && !im.src && PH[id]) im.src = PH[id][i]; im.classList.toggle("on", i === k); });
+    m.querySelectorAll(".card__bars--ph i").forEach((b, i) => b.classList.toggle("on", i === k));
+  }
+  document.addEventListener("pointerout", e => { const m = e.target.closest && e.target.closest(".card .card__media"); if (m && !m.contains(e.relatedTarget)) { m.dataset.v = 0; if (m.querySelector(".card__ph")) phTo(m, 0); } });
+
+  /* ---------- просмотр фото на весь экран ---------- */
+  VO.lightbox = (list, k = 0) => {
+    let i = k;
+    const el = VO.sheet(`<div class="lbx"><div class="lbx__stage"><img class="lbx__img" alt=""></div>${list.length > 1 ? `<button class="lbx__nav lbx__nav--l" type="button" data-lb="-1" aria-label="Предыдущее фото">‹</button><button class="lbx__nav lbx__nav--r" type="button" data-lb="1" aria-label="Следующее фото">›</button><div class="lbx__count"></div>` : ""}</div>`, { cls: "sheet--lbx" });
+    const img = el.querySelector(".lbx__img"), cnt = el.querySelector(".lbx__count");
+    const show = n => { i = (n + list.length) % list.length; img.src = list[i]; if (cnt) cnt.textContent = `${i + 1} / ${list.length}`; };
+    show(i);
+    el.addEventListener("click", e => { const b = e.target.closest("[data-lb]"); if (b) show(i + +b.dataset.lb); });
+    const key = e => { if (!document.body.contains(el)) return removeEventListener("keydown", key); if (e.key === "ArrowRight") show(i + 1); if (e.key === "ArrowLeft") show(i - 1); };
+    addEventListener("keydown", key);
+    let sx = null; el.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+    el.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1)); sx = null; });
+    return el;
+  };
 
   /* ---------- избранное ---------- */
   VO.toggleFav = (id, btn) => {

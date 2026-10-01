@@ -68,13 +68,17 @@
     e.preventDefault();
     const m = $("#aMail", page).value.trim().toLowerCase();
     if (!VO.check($("#aMail", page).parentElement, VO.MAIL_RX.test(m) && m.length <= 120)) return;
+    if (VO.guard.tempMail(m)) return VO.guard.mark($("#aMail", page), "Одноразовые почтовые ящики не подходят — укажите постоянную почту");
+    const bot = VO.guard.isBot($("#authMail", page), 600); if (bot) return VO.toast(bot);
+    const w = VO.guard.rate("otp:" + m, 5, 36e5) || VO.guard.rate("otp", 12, 36e5); if (w) return VO.toast(`Слишком много запросов кода. Попробуйте через ${VO.guard.wait(w)}`);
     if (lock() > Date.now()) return VO.toast(`Слишком много попыток. Попробуйте через ${Math.ceil((lock() - Date.now()) / 60000)} мин`);
     pending = { email: m }; $("#aMailShow", page).textContent = m;
     step("code"); clearCells(); sendCode(); setTimeout(() => cells[0].focus(), 80);
   });
   $("#aMail", page).addEventListener("input", () => $("#aMail", page).parentElement.classList.remove("bad"));
   $("[data-back]", page).addEventListener("click", () => { step("mail"); $("#inbox", page).hidden = true; $("#aMail", page).focus(); });
-  $("#resend", page).addEventListener("click", () => { clearCells(); sendCode(); });
+  $("#resend", page).addEventListener("click", () => { const w = VO.guard.rate("otp:" + pending.email, 5, 36e5); if (w) return VO.toast(`Слишком много запросов кода. Попробуйте через ${VO.guard.wait(w)}`); clearCells(); sendCode(); });
+  VO.guard.trap($("#authMail", page));
   $("#inboxFill", page).addEventListener("click", () => { [...pending.code].forEach((d, i) => { cells[i].value = d; cells[i].classList.add("filled"); }); check(); });
   function clearCells() { cells.forEach(c => { c.value = ""; c.classList.remove("filled"); }); otp.classList.remove("bad", "ok"); err.textContent = ""; }
   function fail(msg) { otp.classList.remove("bad"); void otp.offsetWidth; otp.classList.add("bad"); err.textContent = msg; setTimeout(() => { cells.forEach(c => { c.value = ""; c.classList.remove("filled"); }); cells[0].focus(); }, 380); }
@@ -132,7 +136,7 @@
     const f = $("#onbF", el), name = $("#oName", el), phone = $("#oPhone", el), city = $("#oCity", el);
     let type = "person";
     requestAnimationFrame(VO.syncInks);
-    VO.cityField(city);
+    VO.cityField(city); VO.guard.trap(f);
     $("#oType", el).addEventListener("click", e => { const b = e.target.closest("[data-ty]"); if (!b) return; type = b.dataset.ty; VO.selectTab($("#oType", el), b); $("#oCompW", el).hidden = type !== "company"; });
     name.addEventListener("input", () => { $("#onbAva", el).textContent = (name.value.trim()[0] || "?").toUpperCase(); name.parentElement.classList.remove("bad"); });
     phone.addEventListener("input", () => { phone.value = phone.value ? VO.phoneMask(phone.value) : ""; phone.parentElement.classList.remove("bad"); });
@@ -143,12 +147,14 @@
     f.addEventListener("submit", e => {
       e.preventDefault();
       const pp = VO.phoneProblem(phone.value); $("#oPhoneE", el).textContent = pp || "";
-      const ok = [VO.check(name.parentElement, name.value.trim().length > 0), VO.check(phone.parentElement, !pp), VO.check(city.parentElement, city.value.trim().length > 1), type !== "company" || VO.check($("#oComp", el).parentElement, $("#oComp", el).value.trim().length > 1)].every(Boolean);
+      const G = VO.guard;
+      const ok = [G.field(name, "name", { min: 2 }), VO.check(phone.parentElement, !pp), G.field(city, "place", { min: 2 }), type !== "company" || G.field($("#oComp", el), "company", { min: 2 })].every(Boolean);
       const agree = $("#oAgree", el).checked;
       $("#oErr", el).textContent = !agree && ok ? "Нужно согласие на обработку данных — без него мы не можем хранить ваш профиль" : "";
       if (!ok || !agree) return;
+      const bot = G.isBot(f); if (bot) return ($("#oErr", el).textContent = bot);
       const vis = f.querySelector("[name=vis]:checked").value;
-      Object.assign(u, { type, company: type === "company" ? $("#oComp", el).value.trim() : "", name: name.value.trim().slice(0, 40), phone: phone.value, phoneVis: vis, showPhone: vis !== "none", city: city.value.trim().slice(0, 60), onboarded: true, consentAt: Date.now() });
+      Object.assign(u, { type, company: type === "company" ? G.clean($("#oComp", el).value).slice(0, 60) : "", name: G.clean(name.value).slice(0, 40), phone: phone.value, phoneVis: vis, showPhone: vis !== "none", city: G.clean(city.value).slice(0, 60), onboarded: true, consentAt: Date.now() });
       VO.closeSheet(true); VO.saveUser(u);
       VO.toast(`Готово, ${esc(u.name)}! Профиль заполнен`);
     });

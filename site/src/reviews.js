@@ -68,16 +68,18 @@
     const paintS = () => { $$("#revS [data-s]", el).forEach(b => b.classList.toggle("on", +b.dataset.s <= stars)); $("#revSL", el).textContent = L[stars] || "Поставьте оценку"; };
     const paintV = () => { const v = doneDeal(me, target, role); $("#revV", el).innerHTML = v ? `<span class="rev__v">✓ Будет отмечен «Сделка на сайте»</span>` : `<span class="rev__nv">Сделки на сайте не было — отзыв будет с отметкой «Без сделки на сайте»</span>`; };
     paintS(); paintV(); requestAnimationFrame(VO.syncInks);
+    VO.guard.trap($("#revF", el));
     $("#revRole", el).addEventListener("click", e => { const b = e.target.closest("[data-r]"); if (!b) return; role = b.dataset.r; VO.selectTab($("#revRole", el), b); paintV(); });
     $("#revS", el).addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (b) { stars = +b.dataset.s; paintS(); } });
     $("#revS", el).addEventListener("mouseover", e => { const b = e.target.closest("[data-s]"); if (b) $$("#revS [data-s]", el).forEach(x => x.classList.toggle("hov", +x.dataset.s <= +b.dataset.s)); });
     $("#revS", el).addEventListener("mouseleave", () => $$("#revS [data-s]", el).forEach(x => x.classList.remove("hov")));
     $("#revF", el).addEventListener("submit", e => {
       e.preventDefault();
-      const text = $("#revT", el).value.trim();
+      const G = VO.guard, text = G.clean($("#revT", el).value, { multiline: true, maxLines: 15 }).slice(0, 1000);
       if (!stars) return VO.toast("Поставьте оценку от 1 до 5");
-      if (!VO.check($("#revT", el).parentElement, text.length >= 10)) return;
-      if (/(https?:\/\/|www\.|\+?7[\d\s()-]{9,})/i.test(text)) return VO.toast("Уберите из отзыва ссылки и номера телефонов");
+      if (!G.field($("#revT", el), "review", { min: 10 })) return;
+      const bot = G.isBot(e.target); if (bot) return VO.toast(bot);
+      if (!ex) { const w = G.rate("review", 5, 864e5); if (w) return VO.toast(`Можно оставить до 5 отзывов в сутки. Попробуйте через ${G.wait(w)}`); }
       const u = VO.user(), deal = doneDeal(me, target, role) && VO.chats.all().find(c => VO.uid(c.owner) === me && c.peer === target && c.deal && c.deal.stage === "done");
       R.add({ target, author: me, authorName: VO.displayName(u) || u.name, role, stars, text, verified: !!deal, ad: deal ? deal.ad.title : null });
       VO.closeSheet(true); VO.toast("Спасибо! Отзыв опубликован"); VO.emit("reviews-ui");
@@ -90,8 +92,8 @@
     const rp = e.target.closest("[data-rev-reply]");
     if (rp) {
       const r = own.find(x => x.id === rp.dataset.revReply); if (!r) return;
-      const el = VO.sheet(`<form id="rpl"><h3>Ответ на отзыв</h3><p class="muted">Ответ увидят все. Спокойно и по делу — так вы вызовете больше доверия.</p><div class="field field--area"><textarea id="rplT" rows="4" maxlength="600" placeholder=" "></textarea><label for="rplT">Ваш ответ</label></div><button class="btn btn--ink btn--wide" type="submit">Ответить</button></form>`, { cls: "sheet--sm" });
-      $("#rpl", el).addEventListener("submit", ev => { ev.preventDefault(); const v = $("#rplT", el).value.trim(); if (v.length < 3) return; r.reply = v.slice(0, 600); save(); VO.closeSheet(true); VO.emit("reviews-ui"); VO.toast("Ответ опубликован"); });
+      const el = VO.sheet(`<form id="rpl"><h3>Ответ на отзыв</h3><p class="muted">Ответ увидят все. Спокойно и по делу — так вы вызовете больше доверия.</p><div class="field field--area"><textarea id="rplT" rows="4" maxlength="600" placeholder=" "></textarea><label for="rplT">Ваш ответ</label><em>Проверьте текст</em></div><button class="btn btn--ink btn--wide" type="submit">Ответить</button></form>`, { cls: "sheet--sm" });
+      $("#rpl", el).addEventListener("submit", ev => { ev.preventDefault(); const G = VO.guard; if (!G.field($("#rplT", el), "reply", { min: 3 })) return; r.reply = G.clean($("#rplT", el).value, { multiline: true, maxLines: 10 }).slice(0, 600); save(); VO.closeSheet(true); VO.emit("reviews-ui"); VO.toast("Ответ опубликован"); });
     }
   });
   document.addEventListener("change", e => { const v = e.target.closest("[data-rev-v]"); const box = v && v.closest("[data-revs]"); if (box) { const role = ($("[data-rev-role][aria-pressed=true]", box) || {}).dataset?.revRole || "all"; box.outerHTML = R.block(box.dataset.revs, { role, v: v.checked }); } });
