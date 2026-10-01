@@ -252,7 +252,7 @@
     ctx.mode = mode;
     ctx.cat = mode === "cat" ? parts[1] : mode === "search" ? params.get("cat") : null;
     if (mode === "cat" && !VO.CATS.some(c => c.id === ctx.cat)) { location.hash = "#/"; return; }
-    ctx.q = mode === "search" ? (parts.slice(1).join("/") || "").trim() : null;
+    ctx.q = mode === "search" ? (VO.guard ? VO.guard.clean(parts.slice(1).join("/") || "") : (parts.slice(1).join("/") || "").trim()).slice(0, 80) : null;
     ctx.p = mode === "search" ? VO.search.parse(ctx.q) : null;
     ctx.F = readF(params, ctx.cat);
     ctx.sort = params.get("sort") || "new";

@@ -198,7 +198,7 @@ html.intro-on { overflow: hidden; }
 .ico:active { transform: scale(.92); }
 .ico .tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translate(-50%, -4px); background: var(--ink); color: #fff; font-size: 12px; font-weight: 700; padding: 5px 9px; border-radius: 8px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s, transform .3s var(--spring); }
 .ico:hover .tip { opacity: 1; transform: translate(-50%, 0); transition-delay: .35s; }
-.badge { position: absolute; top: 6px; right: 5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px #fff; }
+.badge { position: absolute; top: 1px; right: -1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 800; line-height: 16px; letter-spacing: -.02em; text-align: center; box-shadow: 0 0 0 2px #fff; }
 .ico:hover .badge { animation: badge-pop .45s var(--spring); }
 @keyframes badge-pop { 40% { transform: scale(1.3); } }
 
@@ -487,6 +487,16 @@ html.intro-on { overflow: hidden; }
 .pop--me small { margin-left: auto; color: var(--muted); font-weight: 700; }
 @media (max-width: 1180px) { .me__name { display: none; } .me { padding: 0 5px; } }
 @media (max-width: 760px) { .pop { position: fixed; left: 12px; right: 12px; top: 64px; width: auto; } }
+
+/* история поиска: длинные запросы обрезаются, у каждого — крестик */
+.chip-s--x { padding: 0; gap: 0; max-width: 100%; }
+.chip-s--x a { padding: 7px 4px 7px 12px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; text-decoration: none; }
+.chip-s--x button { width: 26px; height: 26px; margin-right: 3px; border: 0; border-radius: 50%; background: none; color: var(--muted); font-size: 16px; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: background-color .2s, color .2s; }
+.chip-s--x button:hover { background: #fff; color: var(--accent); }
+.recent-clear { border: 0; background: none; font: inherit; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; padding: 7px 6px; }
+.recent-clear:hover { color: var(--accent); }
+.region .txt { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.city__bad { padding: 10px 12px; font-size: 13px; font-weight: 600; color: var(--muted); line-height: 1.4; }
 
 
 /* ===== cookie ===== */
@@ -2100,6 +2110,9 @@ img, video, svg { max-width: 100%; }
 @media (hover: none) { .photo__bar { opacity: 1; } }
 .ptips small { display: block; margin-top: 8px; }
 
+.feed-title { overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.city__own b { overflow-wrap: anywhere; }
+
 
 /* ===== панель проверки (убрать перед запуском) ===== */
 .qa { position: fixed; left: 50%; transform: translateX(-50%); top: 8px; z-index: 8000; display: flex; gap: 6px; align-items: center; padding: 6px 6px 6px 12px; border-radius: 999px; background: rgba(22, 24, 29, .88); color: #fff; font: 700 12px/1 "Manrope", Arial, sans-serif; backdrop-filter: blur(6px); }
@@ -2193,7 +2206,7 @@ img, video, svg { max-width: 100%; }
         </button>
         <label class="search__field">
           <span class="search__ph" aria-hidden="true"><span class="def">Поиск среди объявлений</span><span class="typed"><span class="pre">Найти</span><span class="word"></span><span class="caret"></span></span></span>
-          <input class="search__input" id="q" type="search" autocomplete="off" aria-label="Поиск по объявлениям">
+          <input class="search__input" id="q" type="search" autocomplete="off" maxlength="80" aria-label="Поиск по объявлениям">
         </label>
         <button class="region" type="button" id="regionBtn" aria-haspopup="listbox" aria-expanded="false">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2208,7 +2221,7 @@ img, video, svg { max-width: 100%; }
       </div>
 
       <div class="city" role="dialog" aria-label="Выбор города">
-        <input type="text" placeholder="Город или регион" aria-label="Найти город">
+        <input type="text" placeholder="Город или регион" maxlength="40" aria-label="Найти город">
         <ul role="listbox"></ul>
       </div>
 
@@ -2623,7 +2636,7 @@ if (document.getElementById("intro")) {
   search.addEventListener("submit", e => {
     e.preventDefault();
     go.classList.remove("is-sent"); void go.offsetWidth; go.classList.add("is-sent");
-    const q = input.value.trim(); remember(q);
+    const q = input.value.replace(/[\u0000-\u001F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g, "").replace(/\s+/g, " ").trim().slice(0, 80); remember(q);
     search.classList.remove("is-focus"); input.blur();
     location.hash = q ? "#/s/" + encodeURIComponent(q) : "#/";
   });
@@ -2633,16 +2646,23 @@ if (document.getElementById("intro")) {
   const HKEY = "vo_recent";
   const recent = () => { try { return JSON.parse(localStorage.getItem(HKEY)) || []; } catch (e) { return []; } };
   function remember(q) {
-    q = q.trim(); if (!q) return;
+    q = q.trim().slice(0, 80); if (!q) return;
     const list = [q, ...recent().filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6);
     try { localStorage.setItem(HKEY, JSON.stringify(list)); } catch (e) {}
   }
   function renderRecent() {
     const list = recent(), wrap = $(".suggest__recent"), head = wrap.previousElementSibling;
-    wrap.innerHTML = list.map(q => `<a class="chip-s" href="#">${q.replace(/[<>&"]/g, "")}</a>`).join("");
+    const e = s => String(s).slice(0, 80).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    wrap.innerHTML = list.map((q, i) => `<span class="chip-s chip-s--x"><a href="#" data-q="${e(q)}" title="${e(q)}">${e(q)}</a><button type="button" data-rm="${i}" aria-label="Удалить из истории">×</button></span>`).join("")
+      + (list.length > 1 ? `<button type="button" class="recent-clear" data-clear>Очистить</button>` : "");
     wrap.hidden = head.hidden = !list.length;
   }
-  $(".suggest__recent").addEventListener("click", e => { const a = e.target.closest("a"); if (a) { e.preventDefault(); input.value = a.textContent; syncValue(); search.requestSubmit(); } });
+  $(".suggest__recent").addEventListener("pointerdown", e => { if (e.target.closest("button")) e.preventDefault(); });   // поле поиска не теряет фокус
+  $(".suggest__recent").addEventListener("click", e => {
+    const rm = e.target.closest("[data-rm]"), cl = e.target.closest("[data-clear]");
+    if (rm || cl) { e.preventDefault(); e.stopPropagation(); const list = cl ? [] : recent().filter((_, i) => i !== +rm.dataset.rm); try { localStorage.setItem(HKEY, JSON.stringify(list)); } catch (er) {} renderRecent(); input.focus(); return; }
+    const a = e.target.closest("a[data-q]"); if (a) { e.preventDefault(); input.value = a.dataset.q; syncValue(); search.requestSubmit(); }
+  });
 
   /* ---------- выбор города ---------- */
   const CITIES = ["Вся Россия", "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону", "Уфа", "Красноярск", "Воронеж", "Пермь", "Волгоград", "Краснодар", "Тюмень", "Саратов", "Ижевск"];
@@ -2654,11 +2674,12 @@ if (document.getElementById("intro")) {
   const topCities = () => ["Вся Россия", ...(window.VO_CITIES_TOP || CITIES.slice(1, 13))];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function renderCities() {
-    const raw = cityInput.value.trim(), q = raw.toLowerCase().replace(/ё/g, "е");
+    const raw = cityInput.value.replace(/[^\p{L}\p{N}\s.,'’\-()№]/gu, "").replace(/\s+/g, " ").trim().slice(0, 40), q = raw.toLowerCase().replace(/ё/g, "е");
     const norm = c => c.toLowerCase().replace(/ё/g, "е");
     let list = q ? allCities().filter(c => norm(c).startsWith(q)).concat(allCities().filter(c => !norm(c).startsWith(q) && norm(c).includes(q))).slice(0, 40) : topCities();
     let html = list.map(c => `<li><button type="button" role="option" aria-selected="${c === city}">${esc(c)}</button></li>`).join("");
-    if (raw.length > 1 && !allCities().some(c => norm(c) === q)) html += `<li><button type="button" role="option" class="city__own" data-own="${esc(raw)}">Другой населённый пункт: <b>${esc(raw)}</b></button></li>`;
+    const bad = raw.length > 1 && window.VO && VO.guard ? VO.guard.text(raw, "place") : null;
+    if (raw.length > 1 && !allCities().some(c => norm(c) === q)) html += bad ? `<li class="city__bad">${esc(bad)}</li>` : `<li><button type="button" role="option" class="city__own" data-own="${esc(raw)}">Другой населённый пункт: <b>${esc(raw)}</b></button></li>`;
     if (!q) html = `<li class="empty">Популярные города. Начните вводить название — найдём любой.</li>` + html;
     cityList.innerHTML = html;
   }
@@ -2670,7 +2691,7 @@ if (document.getElementById("intro")) {
   cityInput.addEventListener("input", renderCities);
   cityList.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
-    city = (b.dataset.own || b.textContent).trim().slice(0, 60); city = city[0].toUpperCase() + city.slice(1); regionBtn.querySelector(".txt").textContent = city;
+    city = (b.dataset.own || b.textContent).trim().slice(0, 40); city = city[0].toUpperCase() + city.slice(1); regionBtn.querySelector(".txt").textContent = city;
     try { localStorage.setItem("vo_city", city); } catch (e) {}
     search.classList.remove("is-city"); regionBtn.setAttribute("aria-expanded", "false");
     window.dispatchEvent(new CustomEvent("city:change", { detail: city }));
@@ -4404,7 +4425,7 @@ window.VO_BRAND_ICONS = {
     ctx.mode = mode;
     ctx.cat = mode === "cat" ? parts[1] : mode === "search" ? params.get("cat") : null;
     if (mode === "cat" && !VO.CATS.some(c => c.id === ctx.cat)) { location.hash = "#/"; return; }
-    ctx.q = mode === "search" ? (parts.slice(1).join("/") || "").trim() : null;
+    ctx.q = mode === "search" ? (VO.guard ? VO.guard.clean(parts.slice(1).join("/") || "") : (parts.slice(1).join("/") || "").trim()).slice(0, 80) : null;
     ctx.p = mode === "search" ? VO.search.parse(ctx.q) : null;
     ctx.F = readF(params, ctx.cat);
     ctx.sort = params.get("sort") || "new";

@@ -65,7 +65,7 @@
         </button>
         <label class="search__field">
           <span class="search__ph" aria-hidden="true"><span class="def">Поиск среди объявлений</span><span class="typed"><span class="pre">Найти</span><span class="word"></span><span class="caret"></span></span></span>
-          <input class="search__input" id="q" type="search" autocomplete="off" aria-label="Поиск по объявлениям">
+          <input class="search__input" id="q" type="search" autocomplete="off" maxlength="80" aria-label="Поиск по объявлениям">
         </label>
         <button class="region" type="button" id="regionBtn" aria-haspopup="listbox" aria-expanded="false">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -80,7 +80,7 @@
       </div>
 
       <div class="city" role="dialog" aria-label="Выбор города">
-        <input type="text" placeholder="Город или регион" aria-label="Найти город">
+        <input type="text" placeholder="Город или регион" maxlength="40" aria-label="Найти город">
         <ul role="listbox"></ul>
       </div>
 

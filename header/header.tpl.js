@@ -43,7 +43,7 @@
   search.addEventListener("submit", e => {
     e.preventDefault();
     go.classList.remove("is-sent"); void go.offsetWidth; go.classList.add("is-sent");
-    const q = input.value.trim(); remember(q);
+    const q = input.value.replace(/[\u0000-\u001F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g, "").replace(/\s+/g, " ").trim().slice(0, 80); remember(q);
     search.classList.remove("is-focus"); input.blur();
     location.hash = q ? "#/s/" + encodeURIComponent(q) : "#/";
   });
@@ -53,16 +53,23 @@
   const HKEY = "vo_recent";
   const recent = () => { try { return JSON.parse(localStorage.getItem(HKEY)) || []; } catch (e) { return []; } };
   function remember(q) {
-    q = q.trim(); if (!q) return;
+    q = q.trim().slice(0, 80); if (!q) return;
     const list = [q, ...recent().filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 6);
     try { localStorage.setItem(HKEY, JSON.stringify(list)); } catch (e) {}
   }
   function renderRecent() {
     const list = recent(), wrap = $(".suggest__recent"), head = wrap.previousElementSibling;
-    wrap.innerHTML = list.map(q => `<a class="chip-s" href="#">${q.replace(/[<>&"]/g, "")}</a>`).join("");
+    const e = s => String(s).slice(0, 80).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    wrap.innerHTML = list.map((q, i) => `<span class="chip-s chip-s--x"><a href="#" data-q="${e(q)}" title="${e(q)}">${e(q)}</a><button type="button" data-rm="${i}" aria-label="Удалить из истории">×</button></span>`).join("")
+      + (list.length > 1 ? `<button type="button" class="recent-clear" data-clear>Очистить</button>` : "");
     wrap.hidden = head.hidden = !list.length;
   }
-  $(".suggest__recent").addEventListener("click", e => { const a = e.target.closest("a"); if (a) { e.preventDefault(); input.value = a.textContent; syncValue(); search.requestSubmit(); } });
+  $(".suggest__recent").addEventListener("pointerdown", e => { if (e.target.closest("button")) e.preventDefault(); });   // поле поиска не теряет фокус
+  $(".suggest__recent").addEventListener("click", e => {
+    const rm = e.target.closest("[data-rm]"), cl = e.target.closest("[data-clear]");
+    if (rm || cl) { e.preventDefault(); e.stopPropagation(); const list = cl ? [] : recent().filter((_, i) => i !== +rm.dataset.rm); try { localStorage.setItem(HKEY, JSON.stringify(list)); } catch (er) {} renderRecent(); input.focus(); return; }
+    const a = e.target.closest("a[data-q]"); if (a) { e.preventDefault(); input.value = a.dataset.q; syncValue(); search.requestSubmit(); }
+  });
 
   /* ---------- выбор города ---------- */
   const CITIES = ["Вся Россия", "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону", "Уфа", "Красноярск", "Воронеж", "Пермь", "Волгоград", "Краснодар", "Тюмень", "Саратов", "Ижевск"];
@@ -74,11 +81,12 @@
   const topCities = () => ["Вся Россия", ...(window.VO_CITIES_TOP || CITIES.slice(1, 13))];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function renderCities() {
-    const raw = cityInput.value.trim(), q = raw.toLowerCase().replace(/ё/g, "е");
+    const raw = cityInput.value.replace(/[^\p{L}\p{N}\s.,'’\-()№]/gu, "").replace(/\s+/g, " ").trim().slice(0, 40), q = raw.toLowerCase().replace(/ё/g, "е");
     const norm = c => c.toLowerCase().replace(/ё/g, "е");
     let list = q ? allCities().filter(c => norm(c).startsWith(q)).concat(allCities().filter(c => !norm(c).startsWith(q) && norm(c).includes(q))).slice(0, 40) : topCities();
     let html = list.map(c => `<li><button type="button" role="option" aria-selected="${c === city}">${esc(c)}</button></li>`).join("");
-    if (raw.length > 1 && !allCities().some(c => norm(c) === q)) html += `<li><button type="button" role="option" class="city__own" data-own="${esc(raw)}">Другой населённый пункт: <b>${esc(raw)}</b></button></li>`;
+    const bad = raw.length > 1 && window.VO && VO.guard ? VO.guard.text(raw, "place") : null;
+    if (raw.length > 1 && !allCities().some(c => norm(c) === q)) html += bad ? `<li class="city__bad">${esc(bad)}</li>` : `<li><button type="button" role="option" class="city__own" data-own="${esc(raw)}">Другой населённый пункт: <b>${esc(raw)}</b></button></li>`;
     if (!q) html = `<li class="empty">Популярные города. Начните вводить название — найдём любой.</li>` + html;
     cityList.innerHTML = html;
   }
@@ -90,7 +98,7 @@
   cityInput.addEventListener("input", renderCities);
   cityList.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
-    city = (b.dataset.own || b.textContent).trim().slice(0, 60); city = city[0].toUpperCase() + city.slice(1); regionBtn.querySelector(".txt").textContent = city;
+    city = (b.dataset.own || b.textContent).trim().slice(0, 40); city = city[0].toUpperCase() + city.slice(1); regionBtn.querySelector(".txt").textContent = city;
     try { localStorage.setItem("vo_city", city); } catch (e) {}
     search.classList.remove("is-city"); regionBtn.setAttribute("aria-expanded", "false");
     window.dispatchEvent(new CustomEvent("city:change", { detail: city }));
