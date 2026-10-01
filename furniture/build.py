@@ -33,7 +33,16 @@ logo = (
     + "</svg>"
 )
 
-for name in ("header", "header-v2"):
+import json
+logo_json = json.dumps({
+    "compass": [re.search(r'd="([^"]+)"', x).group(1) for x in compass],
+    "b": re.search(r'd="([^"]+)"', b_letter).group(1),
+    "drips": [re.search(r'd="([^"]+)"', x).group(1) for x in drips],
+    "d": re.search(r'd="([^"]+)"', d_and_esign[0]).group(1),
+    "esign": [re.search(r'd="([^"]+)"', x).group(1) for x in d_and_esign[1:]],
+})
+
+for name in ("header", "header-v2", "intro"):
     src_path = HERE / name / "src.html"
     if not src_path.exists():
         continue
@@ -44,5 +53,6 @@ for name in ("header", "header-v2"):
         for f in sorted(img_dir.glob("*.webp")):
             uri = "data:image/webp;base64," + base64.b64encode(f.read_bytes()).decode()
             src = src.replace(f"img/{f.name}", uri)
+    src = src.replace("{{LOGO_JSON}}", logo_json)
     (HERE / name / "index.html").write_text(src.replace("{{LOGO}}", logo), encoding="utf-8")
     print(f"{name}/index.html:", len(src) + len(logo), "bytes")

@@ -1,0 +1,274 @@
+<title>Интро BAD Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Интро «Чертёж»: белый лист, графитовые построения, красная краска логотипа. Камера — одна SVG-группа, всё считается из времени t. */
+:root{
+  --paper:#FFFFFF;
+  --red:#BC4242;
+  --red-tint:#FBEFEE;
+  --ink:#333333;
+  --ink-soft:#6F6766;
+  --line:#E9E3E2;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.4 var(--f-body);overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:6px}
+.scene{position:fixed;inset:0 0 56px 0;background:var(--paper)}
+#stage{display:block;width:100%;height:100%}
+.corner{position:fixed;top:16px;font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);pointer-events:none}
+.corner--l{left:16px}.corner--r{right:16px}
+.corner b{color:var(--red);font-weight:500}
+.bar{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;background:var(--paper);border-top:1px solid var(--line)}
+.btn{height:32px;padding:0 12px;border-radius:8px;font:600 12.5px/1 var(--f-body);background:#F4F0EF;color:var(--ink);transition:background-color .2s,color .2s}
+.btn:hover{background:#ECE5E3}
+.btn.is-on{background:var(--ink);color:var(--paper)}
+.btn--main{background:var(--red);color:var(--paper);min-width:88px}
+.btn--main:hover{background:#A83A3A}
+.speeds{display:flex;gap:4px}
+.scrub{flex:1;min-width:60px;accent-color:var(--red);height:4px}
+.time{font:500 12px/1 var(--f-mono);color:var(--ink-soft);min-width:56px;text-align:right;font-variant-numeric:tabular-nums}
+.label{font:600 12px/1 var(--f-body);color:var(--red);min-width:96px}
+@media (max-width:620px){
+  .speeds .btn{padding:0 8px}
+  .label{display:none}
+  .bar{gap:6px;padding:0 10px}
+}
+</style>
+
+<div class="scene"><svg id="stage" aria-label="Интро BAD Design: циркуль чертит логотип, краска заполняет буквы" role="img"></svg></div>
+<div class="corner corner--l"><b>BAD Design</b> · интро «Чертёж»</div>
+<div class="corner corner--r">6,6 с</div>
+<div class="bar">
+  <button class="btn btn--main" id="play" type="button">Пауза</button>
+  <button class="btn" id="again" type="button">Повторить</button>
+  <div class="speeds" role="group" aria-label="Скорость">
+    <button class="btn" type="button" data-speed=".25">0.25×</button>
+    <button class="btn" type="button" data-speed=".5">0.5×</button>
+    <button class="btn is-on" type="button" data-speed="1">1×</button>
+  </div>
+  <input class="scrub" id="scrub" type="range" min="0" max="6.6" step="0.01" value="0" aria-label="Время">
+  <span class="time" id="time">0.00 с</span>
+  <span class="label" id="label">Лист</span>
+</div>
+
+<script>
+(function(){
+  var L = {{LOGO_JSON}};
+  var NS = 'http://www.w3.org/2000/svg', RED = '#BC4242', INK = '#333333', SOFT = '#6F6766';
+  var T = 6.6;
+  var SCENES = [[0,'Лист'],[.5,'Окружность'],[1.3,'Циркуль'],[1.8,'Построение'],[3,'Краска'],[4.6,'Капля'],[5.1,'Подпись'],[6.2,'Финал']];
+  var svg = document.getElementById('stage');
+
+  function el(tag, attrs, parent){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+  function clamp(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function seg(t, a, b){ return clamp((t - a) / (b - a)); }
+  function eio(u){ return u < .5 ? 4*u*u*u : 1 - Math.pow(-2*u + 2, 3) / 2; }
+  function eo(u){ return 1 - Math.pow(1 - u, 3); }
+  function ei(u){ return u * u * u; }
+  function track(keys, t){
+    if (t <= keys[0][0]) return keys[0][1];
+    for (var i = 1; i < keys.length; i++) {
+      if (t <= keys[i][0]) {
+        var a = keys[i-1], b = keys[i], u = eio((t - a[0]) / (b[0] - a[0]));
+        if (typeof a[1] === 'number') return a[1] + (b[1] - a[1]) * u;
+        return a[1].map(function(v, j){ return v + (b[1][j] - v) * u; });
+      }
+    }
+    return keys[keys.length - 1][1];
+  }
+
+  // ── сцена в координатах логотипа (216 × 123) ──
+  var defs = el('defs', {});
+  var pat = el('pattern', {id: 'grid', width: 6, height: 6, patternUnits: 'userSpaceOnUse'}, defs);
+  el('path', {d: 'M6 0H0V6', fill: 'none', stroke: RED, 'stroke-opacity': .16, 'stroke-width': .12}, pat);
+  var cpC = el('rect', {x: 30, y: -10, width: 60, height: 0}, el('clipPath', {id: 'cpC'}, defs));
+  var cpBD = el('path', {d: 'M0 0Z'}, el('clipPath', {id: 'cpBD'}, defs));
+  var cpE = el('rect', {x: 120, y: 40, width: 0, height: 40}, el('clipPath', {id: 'cpE'}, defs));
+  el('rect', {x: 77.1, y: 34.6, width: 139, height: 51.9}, el('clipPath', {id: 'cpD'}, defs));
+
+  var cam = el('g', {});
+  var grid = el('rect', {x: -500, y: -400, width: 1216, height: 923, fill: 'url(#grid)'}, cam);
+
+  // укол иглы и окружность
+  var ring = el('circle', {cx: 108, cy: 62, r: 2, fill: 'none', stroke: RED, 'stroke-width': .35}, cam);
+  var prick = el('circle', {cx: 108, cy: 62, r: 1.4, fill: RED}, cam);
+  var circ = el('circle', {cx: 108, cy: 62, r: 92, fill: 'none', stroke: RED, 'stroke-width': .45, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1, transform: 'rotate(-90 108 62)'}, cam);
+  var radius = el('line', {x1: 108, y1: 62, x2: 108, y2: -30, stroke: RED, 'stroke-width': .25, 'stroke-dasharray': '1.5 1.5'}, cam);
+  var tip = el('circle', {r: 1.3, fill: RED}, cam);
+
+  // линии построения и размеры
+  var CONS = [[-30,35,246,35],[-30,86.5,246,86.5],[-30,54,246,54],[-30,70,246,70],[0,-6,0,130],[44,-6,44,130],[77.5,-6,77.5,130],[121,-6,121,130],[216,-6,216,130]];
+  var cons = CONS.map(function(c, i){
+    return el('path', {d: 'M' + c[0] + ' ' + c[1] + 'L' + c[2] + ' ' + c[3], stroke: INK, 'stroke-opacity': .35, 'stroke-width': .2, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1, fill: 'none'}, cam);
+  });
+  var dims = el('g', {opacity: 0, fill: RED, 'font-family': 'JetBrains Mono, monospace', 'font-size': 3.6, 'text-anchor': 'middle'}, cam);
+  el('path', {d: 'M0 -12H216M0 -14.5V-9.5M216 -14.5V-9.5', stroke: RED, 'stroke-width': .25, fill: 'none'}, dims);
+  el('text', {x: 108, y: -14}, dims).textContent = '216';
+  el('path', {d: 'M232 0V123M229.5 0H234.5M229.5 123H234.5', stroke: RED, 'stroke-width': .25, fill: 'none'}, dims);
+  var t123 = el('text', {x: 238, y: 63, transform: 'rotate(90 238 63)'}, dims); t123.textContent = '123';
+
+  // контуры
+  function outline(d, color, parent){ return el('path', {d: d, fill: 'none', stroke: color, 'stroke-width': .38, 'stroke-linejoin': 'round', pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1}, parent || cam); }
+  var compassG = el('g', {}, cam);
+  var oCompass = L.compass.map(function(d){ return outline(d, RED, compassG); });
+  var fCompass = el('g', {'clip-path': 'url(#cpC)'}, compassG);
+  L.compass.forEach(function(d){ el('path', {d: d, fill: RED}, fCompass); });
+  var oB = outline(L.b, RED);
+  var dG = el('g', {'clip-path': 'url(#cpD)'}, cam);
+  var oD = outline(L.d, RED, dG);
+  var oE = L.esign.map(function(d){ return outline(d, INK); });
+  var fBD = el('g', {'clip-path': 'url(#cpBD)'}, cam);
+  el('path', {d: L.b, fill: RED}, fBD);
+  el('path', {d: L.d, fill: RED, 'clip-path': 'url(#cpD)'}, fBD);
+  L.drips.forEach(function(d){ el('path', {d: d, fill: RED}, fBD); });
+  var fE = el('g', {'clip-path': 'url(#cpE)'}, cam);
+  L.esign.forEach(function(d){ el('path', {d: d, fill: INK}, fE); });
+
+  // капля, всплеск, подпись
+  var drop = el('path', {d: 'M0 0C1.1 2 2.1 3.4 2.1 4.6a2.1 2.1 0 0 1-4.2 0C-2.1 3.4-1.1 2 0 0Z', fill: RED}, cam);
+  var splash = el('ellipse', {cx: 91.7, cy: 146, rx: 0, ry: 0, fill: 'none', stroke: RED, 'stroke-width': .4}, cam);
+  var bits = [[-9,-7],[-5,-11],[3,-12],[8,-8],[12,-4],[-13,-3]].map(function(v){ return {v: v, e: el('circle', {r: .7, fill: RED}, cam)}; });
+  var lineL = el('path', {d: 'M91.7 146H30', stroke: INK, 'stroke-width': .3, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1}, cam);
+  var lineR = el('path', {d: 'M91.7 146H186', stroke: INK, 'stroke-width': .3, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1}, cam);
+  var ticks = el('path', {d: 'M28.5 147.5 31.5 144.5M184.5 147.5 187.5 144.5', stroke: INK, 'stroke-width': .3, opacity: 0}, cam);
+  var TAG = 'МЕБЕЛЬНОЕ ПРОИЗВОДСТВО · С 2014 ГОДА';
+  var tagText = el('text', {x: 108, y: 158, 'text-anchor': 'middle', fill: SOFT, 'font-family': 'Golos Text, sans-serif', 'font-weight': 500, 'font-size': 4.6, 'letter-spacing': 1.15}, cam);
+  var chars = TAG.split('').map(function(c){ var s = el('tspan', {}, tagText); s.textContent = c; return s; });
+
+  // ── камера: точка фокуса, зум, поворот ──
+  var CAM = [[0,[108,62,2.7,-7]],[.45,[108,62,2.6,-6]],[1.6,[96,50,1.85,-3]],[2.6,[78,60,1.65,-1.2]],[3.6,[118,62,1.32,1.2]],[4.6,[104,80,1.1,0]],[5.2,[100,104,1.04,0]],[5.9,[108,92,1,0]],[6.6,[108,92,.985,0]]];
+  var W = 0, H = 0, K = 1;
+  function size(){
+    var r = svg.getBoundingClientRect(); W = r.width; H = r.height;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    K = Math.min(W * .68 / 216, H * .66 / 175);
+  }
+
+  function render(t){
+    var c = track(CAM, t);
+    var bump = t > 5.1 && t < 5.4 ? Math.sin(seg(t, 5.1, 5.4) * Math.PI) * .012 : 0;
+    cam.setAttribute('transform', 'translate(' + W/2 + ' ' + H/2 + ') rotate(' + c[3].toFixed(3) + ') scale(' + (K * (c[2] + bump)).toFixed(4) + ') translate(' + (-c[0]).toFixed(2) + ' ' + (-c[1]).toFixed(2) + ')');
+
+    grid.setAttribute('opacity', (eo(seg(t, 0, .7)) * (1 - .7 * seg(t, 4.6, 5.8))).toFixed(3));
+
+    var pk = seg(t, .12, .42);
+    prick.setAttribute('r', (1.4 * eo(pk) * (1 - .4 * seg(t, 4.4, 5.2))).toFixed(2));
+    prick.setAttribute('opacity', (1 - seg(t, 4.4, 5.2)).toFixed(3));
+    var rg = seg(t, .2, 1);
+    ring.setAttribute('r', (2 + 14 * eo(rg)).toFixed(2));
+    ring.setAttribute('opacity', (rg > 0 ? 1 - rg : 0).toFixed(3));
+
+    var cp = eio(seg(t, .5, 1.6));
+    circ.setAttribute('stroke-dashoffset', (1 - cp).toFixed(4));
+    var cf = 1 - seg(t, 4.3, 5.3);
+    circ.setAttribute('opacity', cf.toFixed(3));
+    var ang = (-90 + 360 * cp) * Math.PI / 180, tx = 108 + 92 * Math.cos(ang), ty = 62 + 92 * Math.sin(ang);
+    tip.setAttribute('cx', tx.toFixed(2)); tip.setAttribute('cy', ty.toFixed(2));
+    tip.setAttribute('opacity', cp > 0 && cp < 1 ? 1 : 0);
+    radius.setAttribute('x2', tx.toFixed(2)); radius.setAttribute('y2', ty.toFixed(2));
+    radius.setAttribute('opacity', (cp > 0 ? (cp < 1 ? .9 : .9 * (1 - seg(t, 1.6, 2))) : 0).toFixed(3));
+
+    var co = eio(seg(t, 1.3, 2.3));
+    oCompass.forEach(function(p){ p.setAttribute('stroke-dashoffset', (1 - co).toFixed(4)); });
+    var sw = track([[1.3,-26],[2.4,7],[2.8,-2.5],[3.1,0]], t);
+    compassG.setAttribute('transform', 'rotate(' + sw.toFixed(2) + ' 53 27)');
+
+    cons.forEach(function(p, i){
+      var u = eio(seg(t, 1.8 + i * .06, 2.5 + i * .06));
+      p.setAttribute('stroke-dashoffset', (1 - u).toFixed(4));
+      p.setAttribute('opacity', u > 0 ? (1 - seg(t, 4.5, 5.3)).toFixed(3) : 0);
+    });
+    dims.setAttribute('opacity', (seg(t, 2.3, 2.7) * (1 - seg(t, 4.5, 5.1))).toFixed(3));
+
+    var ob = eio(seg(t, 1.9, 3)), oe = eio(seg(t, 2.3, 3.2)), fade = 1 - seg(t, 4.2, 4.9);
+    [oB, oD].forEach(function(p){ p.setAttribute('stroke-dashoffset', (1 - ob).toFixed(4)); p.setAttribute('opacity', ob > 0 ? fade.toFixed(3) : 0); });
+    oE.forEach(function(p){ p.setAttribute('stroke-dashoffset', (1 - oe).toFixed(4)); p.setAttribute('opacity', oe > 0 ? fade.toFixed(3) : 0); });
+    oCompass.forEach(function(p){ p.setAttribute('opacity', co > 0 ? fade.toFixed(3) : 0); });
+
+    cpC.setAttribute('height', (135 * eio(seg(t, 3, 3.5))).toFixed(2));
+    var bp = seg(t, 3.15, 4.45), by = -6 + 136 * (bp < .7 ? eio(bp / .7) * .62 : .62 + .38 * ei((bp - .7) / .3)), amp = 1.8 * (1 - bp), d = 'M-30 -30H250V' + by.toFixed(2);
+    for (var x = 250; x >= -30; x -= 10) d += 'L' + x + ' ' + (by + amp * Math.sin(x / 6 + t * 9)).toFixed(2);
+    cpBD.setAttribute('d', d + 'Z');
+    cpE.setAttribute('width', (96 * eio(seg(t, 3.9, 4.6))).toFixed(2));
+
+    var dg = seg(t, 4.62, 4.85), df = ei(seg(t, 4.85, 5.1)), dy = 84.5 + (146 - 4.6 - 84.5) * df;
+    drop.setAttribute('transform', 'translate(91.7 ' + dy.toFixed(2) + ') scale(' + (eo(dg) * (1 + .25 * df)).toFixed(3) + ' ' + (eo(dg) * (1 + .5 * df)).toFixed(3) + ')');
+    drop.setAttribute('opacity', t < 5.1 ? 1 : 0);
+    var sp = seg(t, 5.1, 5.8);
+    splash.setAttribute('rx', (16 * eo(sp)).toFixed(2)); splash.setAttribute('ry', (2.6 * eo(sp)).toFixed(2));
+    splash.setAttribute('opacity', (sp > 0 ? 1 - sp : 0).toFixed(3));
+    var bt = seg(t, 5.1, 5.6);
+    bits.forEach(function(b){
+      b.e.setAttribute('cx', (91.7 + b.v[0] * eo(bt)).toFixed(2));
+      b.e.setAttribute('cy', (146 + b.v[1] * Math.sin(bt * Math.PI) * .8 + 6 * bt * bt).toFixed(2));
+      b.e.setAttribute('opacity', (bt > 0 && bt < 1 ? 1 - bt * .6 : 0).toFixed(3));
+    });
+    var lp = eio(seg(t, 5.1, 5.75));
+    lineL.setAttribute('stroke-dashoffset', (1 - lp).toFixed(4)); lineR.setAttribute('stroke-dashoffset', (1 - lp).toFixed(4));
+    lineL.setAttribute('opacity', lp > 0 ? 1 : 0); lineR.setAttribute('opacity', lp > 0 ? 1 : 0);
+    circ.setAttribute('visibility', cp > 0 ? 'visible' : 'hidden');
+    ticks.setAttribute('opacity', seg(t, 5.6, 5.8).toFixed(3));
+    chars.forEach(function(s, i){
+      var u = eo(seg(t, 5.25 + i * .02, 5.6 + i * .02));
+      s.setAttribute('opacity', u.toFixed(3));
+      s.setAttribute('dy', i === 0 ? (3 * (1 - u)).toFixed(2) : '0');
+    });
+    tagText.setAttribute('transform', 'translate(0 ' + (2 * (1 - eo(seg(t, 5.25, 6)))).toFixed(2) + ')');
+  }
+
+  // ── проигрыватель ──
+  var t = 0, playing = true, speed = 1, last = 0, dragging = false;
+  var playBtn = document.getElementById('play'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time'), labelEl = document.getElementById('label');
+  scrub.max = T;
+  function ui(){
+    playBtn.textContent = playing ? 'Пауза' : (t >= T ? 'Сначала' : 'Играть');
+    if (!dragging) scrub.value = t.toFixed(2);
+    timeEl.textContent = t.toFixed(2) + ' с';
+    var name = SCENES[0][1];
+    SCENES.forEach(function(s){ if (t >= s[0]) name = s[1]; });
+    labelEl.textContent = name;
+  }
+  function loop(now){
+    var dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now;
+    if (playing && !dragging) {
+      t += dt * speed;
+      if (t >= T) { t = T; playing = false; }
+      render(t); ui();
+    }
+    requestAnimationFrame(loop);
+  }
+  playBtn.addEventListener('click', function(){
+    if (t >= T) t = 0;
+    playing = !playing; ui();
+  });
+  document.getElementById('again').addEventListener('click', function(){ t = 0; playing = true; render(t); ui(); });
+  document.querySelectorAll('[data-speed]').forEach(function(b){
+    b.addEventListener('click', function(){
+      speed = +b.dataset.speed;
+      document.querySelectorAll('[data-speed]').forEach(function(x){ x.classList.toggle('is-on', x === b); });
+    });
+  });
+  scrub.addEventListener('input', function(){ dragging = true; playing = false; t = +scrub.value; render(t); ui(); });
+  scrub.addEventListener('change', function(){ dragging = false; ui(); });
+  document.addEventListener('keydown', function(e){ if (e.code === 'Space' && e.target.tagName !== 'BUTTON') { e.preventDefault(); playBtn.click(); } });
+  window.addEventListener('resize', function(){ size(); render(t); });
+
+  size();
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { t = T; playing = false; }
+  render(t); ui();
+  var start = function(){ last = 0; requestAnimationFrame(loop); };
+  if (document.fonts && document.fonts.ready) Promise.race([document.fonts.ready, new Promise(function(r){ setTimeout(r, 700); })]).then(start); else start();
+})();
+</script>
