@@ -1,7 +1,7 @@
 <title>BAD Design — шапка</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Лист чертежа: белый ватман, графитовые линии, красный — краска из логотипа. Шапка живая, ниже — листы с деталями. */
 :root{
@@ -13,6 +13,8 @@
   --ink-soft:#6F6766;
   --line:#E9E3E2;
   --grid:rgba(188,66,66,.055);
+  --ghost:#D9D1CF;
+  --ph:#F5F2F1;
   --f-display:"Dela Gothic One","Arial Black",Impact,sans-serif;
   --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -311,39 +313,39 @@ svg{display:block}
 .cat__t b{font:600 15px/1.2 var(--f-body)}
 .cat__t small{font:400 12.5px/1.3 var(--f-body);color:var(--ink-soft)}
 .wfill{fill:var(--paper)}
-.cat:hover .wfill,.cat:focus-visible .wfill{fill:var(--red-tint)}
+.cat:hover .wfill,.cat:focus-visible .wfill,.pc:hover .wfill{fill:var(--red-tint)}
 /* диван */
 .i-cush{transform-box:fill-box;transform-origin:50% 100%}
-.cat:hover .i-cush,.cat:focus-visible .i-cush{animation:squish .7s var(--ease-spring)}
-.cat:hover .i-cush+.i-cush,.cat:focus-visible .i-cush+.i-cush{animation-delay:.1s}
+.cat:hover .i-cush,.cat:focus-visible .i-cush,.pc:hover .i-cush{animation:squish .7s var(--ease-spring)}
+.cat:hover .i-cush+.i-cush,.cat:focus-visible .i-cush+.i-cush,.pc:hover .i-cush+.i-cush{animation-delay:.1s}
 @keyframes squish{0%{transform:none}35%{transform:scale(1.12,.62)}70%{transform:scale(.96,1.08)}100%{transform:none}}
 /* кресло */
 .i-arm{transform-box:view-box;transform-origin:8px 26px}
-.cat:hover .i-arm,.cat:focus-visible .i-arm{animation:rock 1.2s ease-in-out}
+.cat:hover .i-arm,.cat:focus-visible .i-arm,.pc:hover .i-arm{animation:rock 1.2s ease-in-out}
 @keyframes rock{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}55%{transform:rotate(4deg)}80%{transform:rotate(-2deg)}}
 /* стол */
 .i-dim{stroke:var(--red);stroke-width:1.1;stroke-dasharray:1;stroke-dashoffset:1;opacity:0}
-.cat:hover .i-dim,.cat:focus-visible .i-dim{opacity:1}
+.cat:hover .i-dim,.cat:focus-visible .i-dim,.pc:hover .i-dim{opacity:1}
 .i-dimtxt{fill:var(--red);stroke:none;font:500 5px var(--f-mono);opacity:0;transition:opacity .3s}
 .i-top{transition:transform .5s var(--ease-spring)}
-.cat:hover .i-dim,.cat:focus-visible .i-dim{animation:redraw .6s var(--ease-out) forwards}
-.cat:hover .i-dimtxt,.cat:focus-visible .i-dimtxt{opacity:1;transition-delay:.35s}
+.cat:hover .i-dim,.cat:focus-visible .i-dim,.pc:hover .i-dim{animation:redraw .6s var(--ease-out) forwards}
+.cat:hover .i-dimtxt,.cat:focus-visible .i-dimtxt,.pc:hover .i-dimtxt{opacity:1;transition-delay:.35s}
 /* стул */
 .i-chair{transform-box:view-box;transform-origin:11px 27px}
-.cat:hover .i-chair,.cat:focus-visible .i-chair{animation:tilt 1.3s var(--ease-out)}
+.cat:hover .i-chair,.cat:focus-visible .i-chair,.pc:hover .i-chair{animation:tilt 1.3s var(--ease-out)}
 @keyframes tilt{0%{transform:none}30%{transform:rotate(-12deg)}55%{transform:rotate(-9deg)}70%{transform:rotate(-12deg)}100%{transform:none}}
 /* шкаф */
 .i-door{transform-box:view-box;transform-origin:26px 16px;transition:transform .6s var(--ease-out)}
 .i-hanger{opacity:0;transition:opacity .3s}
-.cat:hover .i-door,.cat:focus-visible .i-door{transform:scaleX(.3)}
-.cat:hover .i-hanger,.cat:focus-visible .i-hanger{opacity:1;transition-delay:.15s}
+.cat:hover .i-door,.cat:focus-visible .i-door,.pc:hover .i-door{transform:scaleX(.3)}
+.cat:hover .i-hanger,.cat:focus-visible .i-hanger,.pc:hover .i-hanger{opacity:1;transition-delay:.15s}
 /* свет */
 .i-lamp{transform-box:view-box;transform-origin:16px 2px}
 .i-cone{fill:var(--red);stroke:none;opacity:0;transition:opacity .4s}
 .i-bulb{transition:fill .3s}
-.cat:hover .i-lamp,.cat:focus-visible .i-lamp{animation:pend 1.6s ease-in-out}
-.cat:hover .i-cone,.cat:focus-visible .i-cone{opacity:.16}
-.cat:hover .i-bulb,.cat:focus-visible .i-bulb{fill:var(--red)}
+.cat:hover .i-lamp,.cat:focus-visible .i-lamp,.pc:hover .i-lamp{animation:pend 1.6s ease-in-out}
+.cat:hover .i-cone,.cat:focus-visible .i-cone,.pc:hover .i-cone{opacity:.16}
+.cat:hover .i-bulb,.cat:focus-visible .i-bulb,.pc:hover .i-bulb{fill:var(--red)}
 @keyframes pend{0%,100%{transform:rotate(0)}20%{transform:rotate(12deg)}45%{transform:rotate(-8deg)}70%{transform:rotate(4deg)}}
 
 .promo{position:relative;display:grid;align-content:space-between;gap:18px;padding:20px;border:1.5px solid var(--ink);border-radius:4px;background:
@@ -465,61 +467,148 @@ svg{display:block}
   .hero__nav{left:16px;right:16px;justify-content:space-between}
 }
 
-/* ───────── Листы ───────── */
-.page{max-width:1360px;margin:0 auto;padding-inline:clamp(16px,3vw,40px);padding-block:56px 80px}
-.intro{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:40px;align-items:end;padding-bottom:44px}
-.eyebrow{font:500 12px/1 var(--f-mono);color:var(--red);letter-spacing:.04em}
-h1{margin:14px 0 18px;font:400 clamp(34px,5.6vw,64px)/1 var(--f-display);text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
-h1 em{font-style:normal;color:var(--red)}
-.lede{margin:0;max-width:60ch;color:var(--ink-soft);font-size:17px}
-.intro__side{display:grid;gap:22px;justify-items:start}
-.intro__side .swatches{width:100%}
-.swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.sw{display:grid;gap:8px;font:500 12px/1.3 var(--f-mono)}
-.sw i{display:block;aspect-ratio:1/1.1;max-width:100%;border-radius:3px;box-shadow:inset 0 0 0 1px var(--line)}
-.sw span{color:var(--ink-soft);font-family:var(--f-body);font-weight:400}
+/* ───────── Манифест ───────── */
+.wrap{max-width:1600px;margin:0 auto;padding-inline:clamp(16px,5vw,88px)}
+.mf{padding-block:clamp(56px,8vw,120px) clamp(64px,9vw,140px)}
+.mf__div{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;height:64px;margin-bottom:clamp(48px,7vw,104px)}
+.mf__ln{position:relative;height:1.5px;background:var(--ink);transform:scaleX(0);transition:transform 1.1s .25s var(--ease-out)}
+.mf__ln::before{content:"";position:absolute;left:0;right:0;bottom:1.5px;height:6px;background:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 12px);opacity:.35}
+.mf__ln::after{content:"";position:absolute;top:-5px;width:1.5px;height:12px;background:var(--ink);transform:rotate(45deg)}
+.mf__ln--l{transform-origin:100% 50%}.mf__ln--l::after{left:0}
+.mf__ln--r{transform-origin:0 50%}.mf__ln--r::before{background-position:right 0 top 0}.mf__ln--r::after{right:0}
+.mf__c{position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px var(--ink);background:var(--paper);transform:scale(.4) rotate(-120deg);opacity:0;transition:transform .9s var(--ease-spring),opacity .4s}
+.mf__c svg{width:34px;height:34px;fill:none;stroke:var(--red);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+.mf__c .arc{stroke-dasharray:1;stroke-dashoffset:1;stroke-width:1.2;transition:stroke-dashoffset 1s 1.1s var(--ease-out)}
+.mf__lab{position:absolute;top:calc(50% + 14px);font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);opacity:0;transition:opacity .6s 1s}
+.mf__lab--l{left:0}.mf__lab--r{right:0}
+.mf__drop{position:absolute;left:50%;top:calc(50% + 30px);width:9px;height:9px;margin-left:-4.5px;background:var(--red);border-radius:0 50% 50% 50%;transform:rotate(45deg) scale(0);opacity:0}
+.is-in .mf__ln{transform:scaleX(1)}
+.is-in .mf__c{transform:none;opacity:1}
+.is-in .mf__c .arc{stroke-dashoffset:0}
+.is-in .mf__lab{opacity:1}
+.is-in .mf__drop{animation:mfdrop 1.6s 1.3s ease-in forwards}
+@keyframes mfdrop{0%{opacity:1;transform:rotate(45deg) scale(0)}25%{opacity:1;transform:rotate(45deg) scale(1.1)}100%{opacity:0;transform:translate(0,90px) rotate(45deg) scale(.6)}}
+.mf__t{margin:0;display:grid;gap:clamp(14px,2vw,28px);font-weight:600}
+.mf__l1{font:600 clamp(36px,6vw,104px)/1 var(--f-body);letter-spacing:-.045em;text-wrap:balance}
+.mf__d{font-family:var(--f-display);font-weight:400;letter-spacing:-.01em}
+.mf__l2{justify-self:end;padding-bottom:.5em;max-width:22ch;font:500 clamp(24px,3vw,50px)/1.18 var(--f-body);letter-spacing:-.03em;text-align:right;text-wrap:balance}
+.sw{color:var(--ghost);transition:color .45s}
+.sw.on{color:var(--ink)}
+.mf__d .sw.on{color:var(--red)}
+.mf__u{position:relative;display:inline-block}
+.mf__u svg{position:absolute;left:-4%;right:-4%;bottom:-.2em;width:108%;height:.42em;overflow:visible;fill:none;stroke:var(--red);stroke-width:3;stroke-linecap:round}
+.mf__u path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1s .15s var(--ease-out)}
+.mf__u.is-on .sw{color:var(--red)}
+.mf__u.is-on path{stroke-dashoffset:0}
+.mf__r{position:relative;display:inline-block}
+.mf__r::after{content:attr(data-text);position:absolute;left:0;top:72%;color:var(--ghost);transform:scaleY(-1);transform-origin:50% 50%;opacity:.0;-webkit-mask-image:linear-gradient(to bottom,transparent 35%,#000 100%);mask-image:linear-gradient(to bottom,transparent 35%,#000 100%);pointer-events:none;transition:opacity .8s,color .45s}
+.mf__r.is-on::after{opacity:.28;color:var(--ink);animation:ripple 2.4s .3s ease-in-out}
+@keyframes ripple{0%,100%{transform:scaleY(-1) skewX(0)}25%{transform:scaleY(-1.04) skewX(4deg)}50%{transform:scaleY(-.97) skewX(-3deg)}75%{transform:scaleY(-1.02) skewX(1.5deg)}}
 
-.sheets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
-.sheet{position:relative;min-width:0;display:grid;grid-template-rows:auto 1fr auto;border:1.5px solid var(--ink);border-left-width:6px;background:var(--paper)}
-.sheet--wide{grid-column:1/-1}
-.sheet__hd{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:18px 22px 0}
-.sheet__hd h2{margin:0;font:400 20px/1.15 var(--f-display);text-transform:uppercase;letter-spacing:.01em}
-.sheet__no{font:500 12px/1 var(--f-mono);color:var(--red);white-space:nowrap}
-.stage{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:28px 36px;margin:18px 22px;padding:40px 20px;min-height:200px;background:
-  linear-gradient(var(--grid) 1px,transparent 1px) -1px -1px/16px 16px,
-  linear-gradient(90deg,var(--grid) 1px,transparent 1px) -1px -1px/16px 16px}
-.stage--logo .logo{width:min(340px,100%)}
-.stage .nav{height:64px}
-.notes{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;padding:0 22px 20px}
-.notes ul{margin:0;padding:0;list-style:none;display:grid;gap:9px;font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
-.notes li{position:relative;padding-left:18px}
-.notes li::before{content:"";position:absolute;left:0;top:.62em;width:9px;height:1.5px;background:var(--red)}
-.notes b{color:var(--ink);font-weight:600}
-.stamp{border-collapse:collapse;font:400 10.5px/1.2 var(--f-mono);color:var(--ink);white-space:nowrap}
-.stamp td{border:1px solid var(--ink);padding:5px 8px}
-.stamp td:first-child{color:var(--ink-soft)}
-.lbl{display:grid;justify-items:center;gap:10px;font:500 11px/1 var(--f-mono);color:var(--ink-soft)}
-.stage .ib{width:64px;height:64px}
-.stage .ib svg{width:32px;height:32px}
-.stage .tag{top:6px;right:-2px}
-.stage .rul{height:64px}
-.stage--cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:24px}
+/* ───────── Новинки ───────── */
+.nv{padding-block:0 clamp(80px,10vw,150px)}
+.nv__head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:28px 40px;margin-bottom:clamp(40px,5vw,72px)}
+.nv__t{position:relative;margin:0;font:400 clamp(52px,7.6vw,124px)/.86 var(--f-display);color:var(--red);text-transform:uppercase;letter-spacing:-.01em}
+.nv__drip{position:absolute;top:calc(100% - .14em);left:var(--x);width:.075em;height:var(--h);background:var(--red);border-radius:0 0 .04em .04em;transform:scaleY(0);transform-origin:50% 0;transition:transform 1.3s var(--d) var(--ease-out)}
+.nv__drip::after{content:"";position:absolute;left:-.02em;bottom:-.05em;width:.115em;height:.115em;border-radius:50%;background:inherit}
+.nv__drip i{position:absolute;left:50%;top:100%;width:.08em;height:.08em;margin-left:-.04em;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:var(--red);opacity:0}
+.is-in .nv__drip{transform:scaleY(1)}
+.is-in .nv__drip i{animation:nvfall 3.6s calc(var(--d) + 1.4s) ease-in infinite}
+@keyframes nvfall{0%{opacity:0;transform:translateY(0) scale(.3)}15%{opacity:1;transform:translateY(0) scale(1)}55%,100%{opacity:0;transform:translateY(1.2em) scale(.8,1.3)}}
+.nv__side{display:flex;flex-wrap:wrap;align-items:center;gap:16px 22px}
+.nv__meta{display:grid;gap:6px;font:500 11.5px/1.2 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.nv__meta b{font:600 15px/1 var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink)}
+.nv__arrs{display:flex;gap:10px}
+.nv__arr{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);transition:background-color .25s,color .25s,opacity .25s,transform .2s}
+.nv__arr svg{width:22px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .4s var(--ease-out)}
+.nv__arr:hover:not(:disabled),.nv__arr:focus-visible{background:var(--ink);color:var(--paper)}
+.nv__arr--p:hover:not(:disabled) svg{transform:translateX(-4px)}
+.nv__arr--n:hover:not(:disabled) svg{transform:translateX(4px)}
+.nv__arr:active:not(:disabled){transform:scale(.94)}
+.nv__arr:disabled{opacity:.25;cursor:default}
+.nv__track{--g:clamp(14px,1.8vw,28px);display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 3*var(--g))/4);gap:var(--g);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding-block:4px 6px;cursor:grab}
+.nv__track::-webkit-scrollbar{display:none}
+.nv__track.is-drag{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.nv__track.is-drag a{pointer-events:none}
 
-/* Мобильная рамка */
-.phoneframe{position:relative;width:min(390px,100%);height:600px;border:1.5px solid var(--ink);border-radius:34px;overflow:hidden;background:var(--paper);box-shadow:0 30px 60px -40px rgba(51,51,51,.5)}
-.phoneframe .hdr{position:absolute;top:0;left:0;right:0}
-.phoneframe .hdr__in{height:72px;padding-inline:16px;gap:10px}
-.phoneframe .logo{width:92px}
-.phoneframe .burger{display:inline-flex}
-.phoneframe .mpanel__in{padding-inline:16px}
-.phoneframe__body{position:absolute;inset:72px 0 0;padding:28px 18px;display:grid;align-content:start;gap:14px;background:
-  linear-gradient(var(--grid) 1px,transparent 1px) 0 0/16px 16px,
-  linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/16px 16px}
-.phoneframe__body p{margin:0;font:400 26px/1.05 var(--f-display);text-transform:uppercase}
-.phoneframe__body span{font-size:14px;color:var(--ink-soft)}
-.ph{display:block;height:180px;border-radius:4px;border:1.5px dashed var(--line)}
+.pc{position:relative;min-width:0;scroll-snap-align:start;transform:translateY(34px);transition:transform 1s calc(var(--k)*.08s) var(--ease-out)}
+.is-in .pc{transform:none}
+.pc__media{position:relative;aspect-ratio:1/1;max-width:100%}
+.ph{position:absolute;inset:0;overflow:hidden;display:grid;place-items:center;background:
+  linear-gradient(var(--grid) 1px,transparent 1px) -1px -1px/24px 24px,
+  linear-gradient(90deg,var(--grid) 1px,transparent 1px) -1px -1px/24px 24px,var(--ph)}
+.ph__paint{position:absolute;inset:-2px;background:var(--red-tint);transform:translateX(-135%) skewX(-14deg);transform-origin:0 100%;transition:transform .75s var(--ease-out)}
+.ph__draw{position:relative;width:58%;height:auto;color:var(--ink);fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;overflow:visible;transition:color .35s,transform .9s var(--ease-out)}
+.ph__draw *{vector-effect:non-scaling-stroke}
+.ph__draw .wfill{fill:var(--paper)}
+.ph__draw text{display:none}
+.ph__dim{position:absolute;left:14%;right:14%;bottom:21%;height:1px;background:var(--ink-soft);opacity:.55;transition:background-color .3s,opacity .3s}
+.ph__dim::before,.ph__dim::after{content:"";position:absolute;top:-4px;width:1px;height:9px;background:inherit;transform:rotate(45deg)}
+.ph__dim::before{left:0}.ph__dim::after{right:0}
+.ph__dim b{position:absolute;left:50%;top:-7px;transform:translateX(-50%);padding:0 8px;background:var(--ph);font:500 10.5px/14px var(--f-mono);letter-spacing:.06em;color:var(--ink-soft);white-space:nowrap;transition:background-color .3s,color .3s}
+.cm{position:absolute;width:16px;height:16px;border:0 solid var(--ink);opacity:.5;transition:transform .45s var(--ease-out),border-color .3s,opacity .3s}
+.cm:nth-of-type(1){left:10px;top:10px;border-left-width:1.5px;border-top-width:1.5px}
+.cm:nth-of-type(2){right:10px;top:10px;border-right-width:1.5px;border-top-width:1.5px}
+.cm:nth-of-type(3){left:10px;bottom:10px;border-left-width:1.5px;border-bottom-width:1.5px}
+.cm:nth-of-type(4){right:10px;bottom:10px;border-right-width:1.5px;border-bottom-width:1.5px}
+.pc:hover .ph__paint{transform:translateX(0) skewX(-14deg) scaleX(1.3)}
+.pc:hover .ph__draw{color:var(--red);transform:scale(1.06)}
+.pc:hover .ph__draw .wfill{fill:var(--paper)}
+.pc:hover .ph__dim{background:var(--red);opacity:1}
+.pc:hover .ph__dim b{background:var(--red-tint);color:var(--red)}
+.pc:hover .cm{border-color:var(--red);opacity:1}
+.pc:hover .cm:nth-of-type(1){transform:translate(-5px,-5px)}
+.pc:hover .cm:nth-of-type(2){transform:translate(5px,-5px)}
+.pc:hover .cm:nth-of-type(3){transform:translate(-5px,5px)}
+.pc:hover .cm:nth-of-type(4){transform:translate(5px,5px)}
+.pc__new{top:16px;left:16px;right:auto;transform:rotate(-8deg)}
+.pc:hover .pc__new{animation:tagswing 1s ease-out}
+.pc__new--soon{background:var(--ink)}
+.pc .pc__fav{position:absolute;top:10px;right:10px;background:var(--paper);box-shadow:0 6px 16px -10px rgba(51,51,51,.5)}
+.pc__add{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;height:46px;padding:0 13px;border-radius:23px;background:var(--ink);color:var(--paper);font:600 13px/1 var(--f-body);letter-spacing:.04em;overflow:hidden;transition:background-color .3s,transform .2s}
+.pc__add svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;transition:transform .45s var(--ease-spring)}
+.pc__add b{display:block;max-width:0;overflow:hidden;white-space:nowrap;font-weight:600;transition:max-width .45s var(--ease-out),margin .45s var(--ease-out)}
+.pc:hover .pc__add{background:var(--red)}
+.pc__add:hover b,.pc__add:focus-visible b{max-width:120px;margin-left:8px}
+.pc__add:hover svg,.pc__add:focus-visible svg{transform:rotate(90deg)}
+.pc__add:active{transform:scale(.95)}
+.pc__info{display:grid;gap:8px;padding-top:20px}
+.pc__cat{font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+.pc__name{justify-self:start;font:600 clamp(15px,1.15vw,18px)/1.3 var(--f-body);letter-spacing:.02em;text-transform:uppercase;color:var(--ink);background:linear-gradient(var(--red),var(--red)) 0 100%/0% 1.5px no-repeat;padding-bottom:3px;transition:color .3s,background-size .5s var(--ease-out)}
+.pc:hover .pc__name,.pc__name:focus-visible{color:var(--red);background-size:100% 1.5px}
+.pc__row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pc__price{font:500 clamp(16px,1.2vw,19px)/1 var(--f-body);font-variant-numeric:tabular-nums;color:var(--ink)}
+.pc__price small{font-size:.8em;color:var(--ink-soft);margin-right:2px}
+.pc__price--tbd{color:var(--ink-soft);font-size:15px}
+.pc__sws{display:flex;gap:6px}
+.pc__sws i{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 0 0 2px var(--paper),0 0 0 3px transparent;transition:transform .3s var(--ease-spring),box-shadow .3s}
+.pc__sws i:first-child{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 0 0 2px var(--paper),0 0 0 3px var(--ink)}
+.pc:hover .pc__sws i{transform:translateY(-2px)}
+.pc:hover .pc__sws i:nth-child(2){transition-delay:.05s}.pc:hover .pc__sws i:nth-child(3){transition-delay:.1s}
 
-.foot{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font:400 12px/1.4 var(--f-mono);color:var(--ink-soft)}
+.nv__bar{position:relative;height:22px;margin-top:clamp(28px,3vw,44px)}
+.nv__rule{position:absolute;left:0;right:0;top:10px;height:1.5px;background:var(--line)}
+.nv__rule::before{content:"";position:absolute;left:0;right:0;top:-6px;height:6px;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 10px),repeating-linear-gradient(90deg,var(--ink-soft) 0 1px,transparent 1px 100px);background-size:100% 4px,100% 6px;background-repeat:no-repeat;background-position:0 2px,0 0;opacity:.6}
+.nv__fill{position:absolute;left:var(--a,0%);width:var(--w,50%);top:9px;height:3.5px;border-radius:2px;background:var(--red);transition:left .35s var(--ease-out),width .35s var(--ease-out)}
+.nv__fill::after{content:"";position:absolute;right:-5px;top:-3px;width:10px;height:10px;border-radius:0 50% 50% 50%;background:var(--red);transform:rotate(45deg)}
+.nv__pos{position:absolute;right:0;top:-18px;font:500 11px/1 var(--f-mono);letter-spacing:.08em;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+.flyx{position:fixed;z-index:300;width:0;height:0;pointer-events:none}
+.flyy{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:0 50% 50% 50%;background:var(--red);transform-origin:center;box-shadow:0 4px 10px -2px rgba(188,66,66,.5)}
+
+@media (max-width:1100px){.nv__track{grid-auto-columns:calc((100% - 2*var(--g))/3)}}
+@media (max-width:760px){
+  .nv__track{grid-auto-columns:calc((100% - var(--g))/2)}
+  .mf__l2{justify-self:start;text-align:left}
+  .mf__lab{display:none}
+  .pc__add{height:40px;padding:0 10px}
+}
+@media (max-width:520px){
+  .nv__track{grid-auto-columns:78%}
+  .nv__arr{width:48px;height:48px}
+  .mf__div{grid-template-columns:1fr auto 1fr;height:52px}
+  .mf__c{width:52px;height:52px}
+}
 
 /* ───────── Адаптив ───────── */
 @media (max-width:1599px){.hdr .acts>.cta{display:none}}
@@ -534,9 +623,7 @@ h1 em{font-style:normal;color:var(--red)}
   .hdr .tape__tel{display:flex}
 }
 @media (max-width:880px){
-  .intro{grid-template-columns:1fr}
-  .sheets{grid-template-columns:1fr}
-  .stage--cats,.cats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
   :root{--hdr-h:70px}
@@ -544,17 +631,13 @@ h1 em{font-style:normal;color:var(--red)}
   .tape__it{font-size:12px}
   .logo{width:100px}
   .hdr.is-compact .logo{width:88px}
-  .notes{grid-template-columns:1fr}
-  .stage{margin-inline:14px;padding:28px 12px}
-  .stage--cats,.cats{grid-template-columns:1fr}
-  .stage .nav{flex-wrap:wrap;height:auto;row-gap:8px;justify-content:center}
-  .stage .nav__link{height:48px}
+  .cats{grid-template-columns:1fr}
   .burger__lbl{display:none}
   .burger{padding:0 6px}
 }
 @media (prefers-reduced-motion:reduce){
   .tape__track{animation:none!important}
-  .seal .rot{animation:none!important}
+  .seal .rot,.nv__drip i{animation:none!important}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}
 }
 </style>
@@ -567,7 +650,7 @@ h1 em{font-style:normal;color:var(--red)}
   <div class="tape"><div class="tape__track"></div><a class="tape__tel" href="tel:+70000000000">+7 (000) 000-00-00</a></div>
   <div class="hdr__in">
     <svg class="tumble" aria-hidden="true"></svg>
-    <a class="logo js-logo" href="#top" aria-label="BAD Design — на главную"></a>
+    <a class="logo js-logo" href="#hero" aria-label="BAD Design — на главную"></a>
     <nav class="nav" aria-label="Основное меню">
       <button class="catbtn" type="button" aria-expanded="false" aria-controls="mega"></button>
       <div class="nav__item has-drop">
@@ -667,136 +750,141 @@ h1 em{font-style:normal;color:var(--red)}
   </div>
 </section>
 
-<main class="page" id="top">
-  <section class="intro">
-    <div>
-      <div class="eyebrow">BAD DESIGN · РЕДИЗАЙН · ШАПКА САЙТА</div>
-      <h1>Шапка, начерченная <em>циркулем</em></h1>
-      <p class="lede">Наведите курсор, нажмите или прокрутите страницу: всё здесь работает по-настоящему. Мотивы взяты из логотипа: циркуль, размерные линии чертежа и стекающая краска. Ниже каждая деталь показана отдельно.</p>
+<main>
+  <section class="mf wrap" id="manifest" aria-label="О студии">
+    <div class="mf__div js-reveal" aria-hidden="true">
+      <i class="mf__ln mf__ln--l"></i>
+      <span class="mf__c"><svg viewBox="0 0 24 24"><path class="arc" pathLength="1" d="M4 21.5a11 6 0 0 0 16 0"/><path d="M12 1.5V4"/><circle cx="12" cy="5.3" r="1.4"/><path d="M11.4 6.6 7.5 19.5M12.6 6.6 16.5 19.5M9.4 13h5.2"/></svg></span>
+      <i class="mf__ln mf__ln--r"></i>
+      <span class="mf__lab mf__lab--l">BAD Design</span>
+      <span class="mf__lab mf__lab--r">Форма · линия · отражение</span>
+      <i class="mf__drop"></i>
     </div>
-    <div class="intro__side">
-    <div class="swatches" aria-label="Цвета">
-      <div class="sw"><i style="background:#BC4242"></i>#BC4242<span>Краска: акценты, заливки</span></div>
-      <div class="sw"><i style="background:#333333"></i>#333333<span>Графит: текст, линии</span></div>
-      <div class="sw"><i style="background:#FFFFFF"></i>#FFFFFF<span>Ватман: основной фон</span></div>
-    </div>
-    <button class="draft js-replay" type="button"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i><i class="draft__pt"></i><i class="draft__pt"></i><i class="draft__pt"></i><i class="draft__pt"></i>Показать появление ещё раз<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
-    </div>
+    <h2 class="mf__t js-fill">
+      <span class="mf__l1"><span class="mf__d">Мебель,</span> как форма мышления</span>
+      <span class="mf__l2">И в каждой её <span class="mf__u">линии<svg viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 15C30 4 80 2 117 12"/></svg></span> — твоё <span class="mf__r" data-text="отражение">отражение</span></span>
+    </h2>
   </section>
 
-  <div class="sheets">
-    <section class="sheet sheet--wide" id="s-intro">
-      <div class="sheet__hd"><h2>Появление шапки</h2><span class="sheet__no">ЛИСТ 1</span></div>
-      <div class="stage"><button class="draft js-replay" type="button"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i><i class="draft__pt"></i><i class="draft__pt"></i><i class="draft__pt"></i><i class="draft__pt"></i>Запустить циркуль<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button></div>
-      <div class="notes">
-        <ul>
-          <li>Шапка открывается пустой. Справа влетает <b>красный циркуль и кувырками</b> идёт через неё: одна ножка стоит, другая перелетает через верх или низ, как при разметке циркулем-измерителем.</li>
-          <li>Кончик ножки оставляет <b>пунктирные дуги</b>, на каждом шаге остаётся капля-отметка.</li>
-          <li>Каждый элемент, мимо которого проходит циркуль, <b>выпрыгивает с брызгами краски</b>: иконки, телефон, меню, «Каталог».</li>
-          <li>Последним шагом циркуль <b>встаёт на место буквы A</b> в логотипе, с букв стекают капли, сверху разворачивается лента, внизу прочерчивается линейка.</li>
-        </ul>
-        <table class="stamp"><tr><td>Элемент</td><td>Появление</td></tr><tr><td>Время</td><td>≈ 2,5 с</td></tr></table>
-      </div>
-    </section>
-
-    <section class="sheet" id="s-logo">
-      <div class="sheet__hd"><h2>Логотип</h2><span class="sheet__no">ЛИСТ 2</span></div>
-      <div class="stage stage--logo"><a class="logo js-logo" href="#s-logo" aria-label="BAD Design"></a></div>
-      <div class="notes">
-        <ul>
-          <li><b>Циркуль качается</b> на шарнире, как будто им только что провели дугу.</li>
-          <li><b>Капли срываются</b> с потёков B, D и ножек циркуля, а потом нарастают заново.</li>
-          <li>При загрузке страницы циркуль качается один раз.</li>
-        </ul>
-        <table class="stamp"><tr><td>Элемент</td><td>Логотип</td></tr><tr><td>Время</td><td>1,1–1,5 с</td></tr></table>
-      </div>
-    </section>
-
-    <section class="sheet" id="s-nav">
-      <div class="sheet__hd"><h2>Навигация</h2><span class="sheet__no">ЛИСТ 3</span></div>
-      <div class="stage"><nav class="nav js-demo-nav" aria-label="Пример навигации"></nav></div>
-      <div class="notes">
-        <ul>
-          <li>Под пунктом прочерчивается <b>размерная линия</b> с засечками, как на чертеже.</li>
-          <li>Слово перекрашивается в красный слева направо, вслед за линией.</li>
-          <li>С правой засечки срывается капля. У текущего раздела капля висит постоянно.</li>
-          <li><b>Каталог</b> — капсула с красными линиями: при наведении линии «отмеряются», при открытии складываются в циркуль.</li>
-        </ul>
-        <table class="stamp"><tr><td>Элемент</td><td>Меню</td></tr><tr><td>Время</td><td>0,45 с</td></tr></table>
-      </div>
-    </section>
-
-    <section class="sheet sheet--wide" id="s-icons">
-      <div class="sheet__hd"><h2>Иконки действий</h2><span class="sheet__no">ЛИСТ 4</span></div>
-      <div class="stage js-demo-icons"></div>
-      <div class="notes">
-        <ul>
-          <li><b>Поиск.</b> Лупа водит по срезу дерева, внутри прорисовываются годичные кольца.</li>
-          <li><b>Избранное — сердце-подушка.</b> При наведении по обивке пробегает строчка, подушка пружинит, проступают пуговицы каретной стяжки. Нажатие обтягивает её красной тканью, из кнопки вылетает пух.</li>
-          <li><b>Корзина.</b> В тележку падает диван, тележка приседает под весом, встаёт на дыбы на задних колёсах и приземляется с облачком пыли. Тележка никуда не уезжает.</li>
-          <li><b>Телефон на рулетке.</b> Номер виден всегда. При наведении катушка крутится, из-под номера вытягивается лента с делениями, цифры перекатываются в красный. Нажатие копирует номер.</li>
-          <li>Счётчики — <b>ценники-бирки</b>, раскачиваются на петельке. Нажмите на корзину или сердце.</li>
-        </ul>
-        <table class="stamp"><tr><td>Элемент</td><td>Иконки 24 px</td></tr><tr><td>Линия</td><td>1,6 px</td></tr></table>
-      </div>
-    </section>
-
-    <section class="sheet sheet--wide" id="s-cats">
-      <div class="sheet__hd"><h2>Иконки каталога</h2><span class="sheet__no">ЛИСТ 5</span></div>
-      <div class="stage stage--cats js-cats"></div>
-      <div class="notes">
-        <ul>
-          <li>Каждая иконка оживает по-своему: подушки дивана проминаются, кресло качается, над столом появляется размер, стул отклоняется на задних ножках, дверца шкафа открывается, лампа раскачивается и светит.</li>
-          <li>Эти же плитки открываются в шапке при наведении на «Каталог».</li>
-        </ul>
-        <table class="stamp"><tr><td>Элемент</td><td>Мега-меню</td></tr><tr><td>Иконки</td><td>32 px</td></tr></table>
-      </div>
-    </section>
-
-    <section class="sheet" id="s-btn">
-      <div class="sheet__hd"><h2>Кнопки</h2><span class="sheet__no">ЛИСТ 6</span></div>
-      <div class="stage" style="flex-direction:column;gap:46px">
-        <a class="cta" href="#s-btn" data-splash></a>
-        <a class="draft" href="#s-cats"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i><i class="draft__pt"></i><i class="draft__pt"></i><i class="draft__pt"></i><i class="draft__pt"></i>Смотреть каталог<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
-      </div>
-      <div class="notes">
-        <ul>
-          <li><b>Главная.</b> Циркуль в кружке чертит дугу, краска разливается по капсуле и стекает каплями. Подпись меняется, при нажатии летят брызги.</li>
-          <li><b>Вторая.</b> Рамка ведёт себя как эскиз: линии построения выходят за углы, в точках пересечения появляются отметки.</li>
-        </ul>
-        <table class="stamp"><tr><td>Элемент</td><td>Кнопки</td></tr><tr><td>Высота</td><td>52 / 48 px</td></tr></table>
-      </div>
-    </section>
-
-    <section class="sheet" id="s-mob">
-      <div class="sheet__hd"><h2>Телефон</h2><span class="sheet__no">ЛИСТ 7</span></div>
-      <div class="stage">
-        <div class="phoneframe">
-          <div class="hdr" data-mscope>
-            <div class="hdr__in">
-              <a class="logo js-logo" href="#s-mob" aria-label="BAD Design"></a>
-              <div class="acts">
-                <button class="ib ib--search" type="button" aria-label="Поиск" data-ico="search"></button>
-                <button class="ib ib--cart" type="button" aria-label="Корзина" data-ico="cart" data-tag="2"></button>
-                <button class="burger" type="button" aria-expanded="false"></button>
-              </div>
-            </div>
-            <div class="mpanel"></div>
-          </div>
-          <div class="phoneframe__body"><p>Мебель с характером</p><span>Здесь будет первый экран сайта.</span><i class="ph"></i></div>
+  <section class="nv wrap" id="new" aria-labelledby="nv-title">
+    <div class="nv__head js-reveal">
+      <h2 class="nv__t" id="nv-title">Новинки<i class="nv__drip" style="--x:8%;--h:.34em;--d:.1s"><i></i></i><i class="nv__drip" style="--x:33%;--h:.2em;--d:.3s"></i><i class="nv__drip" style="--x:61%;--h:.46em;--d:.2s"><i></i></i><i class="nv__drip" style="--x:89%;--h:.16em;--d:.45s"></i></h2>
+      <div class="nv__side">
+        <span class="nv__meta">Новые модели<b>8 позиций</b></span>
+        <div class="nv__arrs">
+          <button class="nv__arr nv__arr--p" type="button" aria-label="Назад"><svg viewBox="0 0 22 12"><path d="M21 6H2M7 1.5 2 6l5 4.5"/></svg></button>
+          <button class="nv__arr nv__arr--n" type="button" aria-label="Вперёд"><svg viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
         </div>
       </div>
-      <div class="notes">
-        <ul>
-          <li><b>Бургер складывается в циркуль:</b> две линии становятся ножками, средняя перекладиной буквы A, сверху появляется шарнир. Подпись меняется с «Меню» на «Закрыть».</li>
-          <li>Меню выезжает сверху, пункты появляются по очереди, по нижнему краю стекает краска.</li>
-        </ul>
-        <table class="stamp"><tr><td>Элемент</td><td>Меню 390 px</td></tr><tr><td>Время</td><td>0,5 с</td></tr></table>
-      </div>
-    </section>
-  </div>
-
-  <footer class="foot"><span>BAD Design · шапка сайта · черновик 1</span><span>Цвета логотипа + белый фон</span></footer>
+    </div>
+    <div class="nv__track js-reveal" tabindex="0" aria-label="Новинки, листайте вбок">
+      <article class="pc" style="--k:0">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Диван Элион модульный уютный"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 15V10a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5"/><path class="wfill" d="M4 15.5a2 2 0 0 1 4 0V19h16v-3.5a2 2 0 0 1 4 0V23H4Z"/><rect class="i-cush wfill" x="8" y="15" width="7.6" height="4" rx="1.2"/><rect class="i-cush wfill" x="16.4" y="15" width="7.6" height="4" rx="1.2"/><path d="M7 23v2.5M25 23v2.5"/></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new">NEW</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Диван Элион модульный уютный" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Диван Элион модульный уютный"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Диван</span>
+          <a class="pc__name" href="#new">Диван Элион модульный уютный</a>
+          <div class="pc__row"><span class="pc__price"><small>от</small> 190 893 ₽</span><span class="pc__sws" aria-label="Цвета обивки"><i style="--c:#5F7461"></i><i style="--c:#8C9A6E"></i><i style="--c:#3B3F3A"></i></span></div>
+        </div>
+      </article>
+      <article class="pc" style="--k:1">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Бренден"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 15V10a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5"/><path class="wfill" d="M4 15.5a2 2 0 0 1 4 0V19h16v-3.5a2 2 0 0 1 4 0V23H4Z"/><rect class="i-cush wfill" x="8" y="15" width="7.6" height="4" rx="1.2"/><rect class="i-cush wfill" x="16.4" y="15" width="7.6" height="4" rx="1.2"/><path d="M7 23v2.5M25 23v2.5"/></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new">NEW</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Бренден" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Бренден"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Диван</span>
+          <a class="pc__name" href="#new">Бренден</a>
+          <div class="pc__row"><span class="pc__price"><small>от</small> 355 631 ₽</span><span class="pc__sws" aria-label="Цвета обивки"><i style="--c:#C08A3E"></i><i style="--c:#8E5A2B"></i><i style="--c:#E3D5C2"></i></span></div>
+        </div>
+      </article>
+      <article class="pc" style="--k:2">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Люриэль"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-cush"><path class="wfill" d="M5 13.5a11 4 0 0 1 22 0v5a11 4 0 0 1-22 0Z"/><path d="M5 13.5a11 4 0 0 0 22 0"/></g><path d="M9.5 22l-1.2 5M22.5 22l1.2 5M16 22.8v4.4"/></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new">NEW</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Люриэль" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Люриэль"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Пуф</span>
+          <a class="pc__name" href="#new">Люриэль</a>
+          <div class="pc__row"><span class="pc__price"><small>от</small> 61 610 ₽</span><span class="pc__sws" aria-label="Цвета обивки"><i style="--c:#46524F"></i><i style="--c:#7E8784"></i><i style="--c:#B9B2A8"></i></span></div>
+        </div>
+      </article>
+      <article class="pc" style="--k:3">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Люриэль"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-arm"><path class="wfill" d="M10 5h12a2 2 0 0 1 2 2v9H8V7a2 2 0 0 1 2-2Z"/><path class="wfill" d="M5 15a2 2 0 0 1 4 0v3h14v-3a2 2 0 0 1 4 0v6H5Z"/><path d="M8 21l-1 5M24 21l1 5"/></g></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new">NEW</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Люриэль" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Люриэль"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Кресло</span>
+          <a class="pc__name" href="#new">Люриэль</a>
+          <div class="pc__row"><span class="pc__price"><small>от</small> 116 725 ₽</span><span class="pc__sws" aria-label="Цвета обивки"><i style="--c:#46524F"></i><i style="--c:#A9A39B"></i><i style="--c:#6B4E3A"></i></span></div>
+        </div>
+      </article>
+      <article class="pc" style="--k:4">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Скоро в каталоге"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-chair"><path d="M11 3v24M11 16.5h11.5M22.5 16.5V27M11 7h2.5v9.5"/></g></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new pc__new--soon">СКОРО</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Скоро в каталоге" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Скоро в каталоге"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Стул</span>
+          <a class="pc__name" href="#new">Скоро в каталоге</a>
+          <div class="pc__row"><span class="pc__price pc__price--tbd">цена уточняется</span></div>
+        </div>
+      </article>
+      <article class="pc" style="--k:5">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Скоро в каталоге"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path class="i-dim" pathLength="1" d="M3 5.5h26M3 3.5v4M29 3.5v4"/><path d="M3 12h26" stroke-width="2.4"/><path d="M7 12l-1 14M25 12l1 14M6.6 19h18.8"/></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new pc__new--soon">СКОРО</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Скоро в каталоге" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Скоро в каталоге"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Стол</span>
+          <a class="pc__name" href="#new">Скоро в каталоге</a>
+          <div class="pc__row"><span class="pc__price pc__price--tbd">цена уточняется</span></div>
+        </div>
+      </article>
+      <article class="pc" style="--k:6">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Скоро в каталоге"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 3h20v24H6ZM8 27v2M24 27v2"/><path class="i-hanger" d="M20.5 8.5v1.5M17 13.5l3.5-3.2 3.5 3.2Z"/><path class="wfill" d="M6 3h10v24H6Z"/><path d="M14 14v3"/><g class="i-door"><path class="wfill" d="M16 3h10v24H16Z"/><path d="M18 14v3"/></g></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new pc__new--soon">СКОРО</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Скоро в каталоге" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Скоро в каталоге"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Шкаф</span>
+          <a class="pc__name" href="#new">Скоро в каталоге</a>
+          <div class="pc__row"><span class="pc__price pc__price--tbd">цена уточняется</span></div>
+        </div>
+      </article>
+      <article class="pc" style="--k:7">
+        <div class="pc__media">
+          <div class="ph" role="img" aria-label="Место для фото товара: Скоро в каталоге"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-lamp"><path class="i-cone" d="M10.5 16 4 30h24l-6.5-14Z"/><path d="M16 2v8"/><path class="wfill" d="M9.5 16a6.5 6.5 0 0 1 13 0Z"/><path class="i-bulb" d="M14.3 16a1.7 1.7 0 0 0 3.4 0"/></g></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div>
+          <span class="tag pc__new pc__new--soon">СКОРО</span>
+          <button class="ib ib--fav pc__fav" type="button" aria-label="В избранное: Скоро в каталоге" aria-pressed="false" data-ico="heart"></button>
+          <button class="pc__add" type="button" aria-label="В корзину: Скоро в каталоге"><svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12"/></svg><b>В корзину</b></button>
+        </div>
+        <div class="pc__info">
+          <span class="pc__cat">Свет</span>
+          <a class="pc__name" href="#new">Скоро в каталоге</a>
+          <div class="pc__row"><span class="pc__price pc__price--tbd">цена уточняется</span></div>
+        </div>
+      </article>
+    </div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill"></span><span class="nv__pos">01–04 / 08</span></div>
+  </section>
 </main>
 
 <script>
@@ -863,27 +951,6 @@ h1 em{font-style:normal;color:var(--red)}
     return '<a class="cat" href="#s-cats"><span class="cat__ic">'+c[2]+'</span><span class="cat__t"><b>'+c[0]+'</b><small>'+c[1]+'</small></span></a>';
   }).join('');
   document.querySelectorAll('.js-cats').forEach(function(el){ el.innerHTML = catsHTML; });
-
-  // демо-навигация
-  document.querySelectorAll('.js-demo-nav').forEach(function(el){
-    el.innerHTML = '<button class="catbtn" type="button" aria-expanded="false"></button>' + LINKS.map(function(t,i){
-      return '<a class="nav__link'+(i===0?' is-active':'')+'" href="#s-nav"><span class="nav__t" data-text="'+t+'">'+t+'</span></a>';
-    }).join('');
-  });
-  document.querySelectorAll('.nav__link').forEach(function(a){ a.insertAdjacentHTML('beforeend','<i class="dim" aria-hidden="true"><s></s><u></u><b></b></i>'); });
-
-  // демо-иконки на листе
-  var demo = document.querySelector('.js-demo-icons');
-  demo.innerHTML =
-    '<span class="lbl"><button class="ib ib--search" type="button" aria-label="Поиск" data-ico="search"></button>Поиск</span>'+
-    '<span class="lbl"><button class="ib ib--fav" type="button" aria-label="Избранное" aria-pressed="false" data-ico="heart" data-tag="0"></button>Избранное</span>'+
-    '<span class="lbl"><button class="ib ib--cart" type="button" aria-label="Корзина" data-ico="cart" data-tag="2"></button>Корзина</span>'+
-    '<span class="lbl"><a class="rul" href="tel:+70000000000"></a>Телефон</span>';
-  demo.querySelectorAll('[data-ico]').forEach(function(el,i){
-    el.insertAdjacentHTML('afterbegin', ICONS[el.dataset.ico].split('{id}').join('hd'+i));
-  });
-  tagIcons(demo);
-  demo.querySelectorAll('.rul').forEach(initRul);
 
   // главная кнопка
   var CTA = '<span class="cta__flood"></span><span class="cta__ico"><svg viewBox="0 0 24 24"><path class="c-arc" pathLength="1" d="M4.5 21.5a11 6 0 0 0 15 0"/><g class="c-comp"><path d="M12 1.5V4"/><circle cx="12" cy="5.3" r="1.4"/><path d="M11.4 6.6 7.5 19.5M12.6 6.6 16.5 19.5M9.4 13h5.2"/></g></svg></span><span class="cta__txt"><b>Дизайн-проект</b><small><span>бесплатно за 3 дня</span><span>начертим под вашу комнату</span></small></span><span class="cta__drips" aria-hidden="true"><i style="left:8%;--h:12px;--d:.3s"></i><i style="left:46%;--h:18px;--d:.42s"></i><i style="left:80%;--h:9px;--d:.36s"></i></span>';
@@ -987,8 +1054,8 @@ h1 em{font-style:normal;color:var(--red)}
     b.addEventListener('click', function(){
       var on = b.getAttribute('aria-pressed') !== 'true';
       b.setAttribute('aria-pressed', String(on));
-      var tag = b.querySelector('.tag');
-      setTag(tag, Math.max(0, +tag.dataset.n + (on ? 1 : -1)));
+      var tag = b.querySelector('.tag') || hdr.querySelector('.acts > .ib--fav .tag');
+      if (tag) setTag(tag, Math.max(0, +tag.dataset.n + (on ? 1 : -1)));
       if (on) featherBurst(b);
     });
   });
@@ -1078,15 +1145,6 @@ h1 em{font-style:normal;color:var(--red)}
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ setTimeout(run, 120); });
     setTimeout(run, 900);
   }
-  document.querySelectorAll('.js-replay').forEach(function(b){
-    b.addEventListener('click', function(){
-      if (still.matches) return;
-      var wait = window.scrollY > 10 ? 550 : 0;
-      window.scrollTo({top: 0, behavior: 'smooth'});
-      setTimeout(playIntro, wait);
-    });
-  });
-
   // сжатие шапки и линейка прокрутки
   var bar = hdr.querySelector('.ruler i');
   function onScroll(){
@@ -1243,5 +1301,126 @@ h1 em{font-style:normal;color:var(--red)}
   else { first.addEventListener('load', function(){ setTimeout(open, 100); }); first.addEventListener('error', open); }
   setTimeout(open, 1500);
   par();
+})();
+</script>
+
+<script>
+(function(){
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // появление при прокрутке
+  var rev = document.querySelectorAll('.js-reveal');
+  if ('IntersectionObserver' in window && !still.matches) {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+    }, {rootMargin: '0px 0px -12% 0px'});
+    rev.forEach(function(el){ io.observe(el); });
+  } else rev.forEach(function(el){ el.classList.add('is-in'); });
+
+  // манифест: слова проявляются по мере прокрутки
+  var fill = document.querySelector('.js-fill'), words = [];
+  if (fill) {
+    (function walk(node){
+      [].slice.call(node.childNodes).forEach(function(ch){
+        if (ch.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          ch.textContent.split(/(\s+)/).forEach(function(part){
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+            var w = document.createElement('span'); w.className = 'sw'; w.textContent = part;
+            frag.appendChild(w); words.push(w);
+          });
+          node.replaceChild(frag, ch);
+        } else if (ch.nodeType === 1 && ch.namespaceURI !== 'http://www.w3.org/2000/svg') walk(ch);
+      });
+    })(fill);
+    var special = fill.querySelectorAll('.mf__u, .mf__r'), lastN = -1, tick = false;
+    function paint(){
+      tick = false;
+      var r = fill.getBoundingClientRect(), vh = window.innerHeight;
+      var p = still.matches ? 1 : (vh * .88 - r.top) / (r.height + vh * .32);
+      var n = Math.round(Math.max(0, Math.min(1, p)) * words.length);
+      if (n === lastN) return;
+      lastN = n;
+      words.forEach(function(w, i){ w.classList.toggle('on', i < n); });
+      special.forEach(function(el){ var w = el.querySelector('.sw'); el.classList.toggle('is-on', !!w && w.classList.contains('on')); });
+    }
+    window.addEventListener('scroll', function(){ if (!tick) { tick = true; requestAnimationFrame(paint); } }, {passive: true});
+    window.addEventListener('resize', paint);
+    paint();
+  }
+
+  // новинки: стрелки, перетаскивание, линейка-прогресс
+  var track = document.querySelector('.nv__track');
+  if (!track) return;
+  var cards = track.querySelectorAll('.pc'), prev = document.querySelector('.nv__arr--p'), next = document.querySelector('.nv__arr--n');
+  var fillEl = document.querySelector('.nv__fill'), pos = document.querySelector('.nv__pos');
+  function step(){ return cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : track.clientWidth; }
+  function pad(n){ return ('0' + n).slice(-2); }
+  function sync(){
+    var max = track.scrollWidth - track.clientWidth, x = track.scrollLeft;
+    prev.disabled = x < 4; next.disabled = x > max - 4;
+    var vis = Math.max(1, Math.round(track.clientWidth / step()));
+    var first = Math.min(cards.length - vis, Math.round(x / step())) + 1;
+    pos.textContent = (vis > 1 ? pad(first) + '–' + pad(Math.min(cards.length, first + vis - 1)) : pad(first)) + ' / ' + pad(cards.length);
+    var w = track.clientWidth / track.scrollWidth;
+    fillEl.style.setProperty('--w', (w * 100).toFixed(2) + '%');
+    fillEl.style.setProperty('--a', (max > 0 ? x / max * (1 - w) * 100 : 0).toFixed(2) + '%');
+  }
+  prev.addEventListener('click', function(){ track.scrollBy({left: -step(), behavior: still.matches ? 'auto' : 'smooth'}); });
+  next.addEventListener('click', function(){ track.scrollBy({left: step(), behavior: still.matches ? 'auto' : 'smooth'}); });
+  track.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') { e.preventDefault(); next.click(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev.click(); }
+  });
+  var st = false;
+  track.addEventListener('scroll', function(){ if (!st) { st = true; requestAnimationFrame(function(){ st = false; sync(); }); } }, {passive: true});
+  window.addEventListener('resize', sync);
+  sync();
+
+  // перетаскивание мышью
+  var down = false, sx = 0, sl = 0, moved = false;
+  track.addEventListener('pointerdown', function(e){
+    if (e.pointerType !== 'mouse' || e.target.closest('button')) return;
+    down = true; moved = false; sx = e.clientX; sl = track.scrollLeft;
+  });
+  window.addEventListener('pointermove', function(e){
+    if (!down) return;
+    var dx = e.clientX - sx;
+    if (!moved && Math.abs(dx) > 6) { moved = true; track.classList.add('is-drag'); }
+    if (moved) track.scrollLeft = sl - dx;
+  });
+  window.addEventListener('pointerup', function(){
+    if (!down) return;
+    down = false;
+    if (moved) {
+      var target = Math.round(track.scrollLeft / step()) * step();
+      track.classList.remove('is-drag');
+      track.scrollTo({left: target, behavior: still.matches ? 'auto' : 'smooth'});
+    }
+  });
+  track.addEventListener('click', function(e){ if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+
+  // «В корзину»: капля краски летит по дуге в корзину шапки
+  var cart = document.querySelector('#hdr .acts > .ib--cart');
+  track.querySelectorAll('.pc__add').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if (!cart) return;
+      if (still.matches || !Element.prototype.animate) { cart.click(); return; }
+      var a = btn.getBoundingClientRect(), b = cart.getBoundingClientRect();
+      var x0 = a.left + 23, y0 = a.top + a.height / 2, dx = b.left + b.width / 2 - x0, dy = b.top + b.height / 2 - y0;
+      var o = document.createElement('i'), d = document.createElement('i');
+      o.className = 'flyx'; d.className = 'flyy'; o.appendChild(d);
+      o.style.left = x0 + 'px'; o.style.top = y0 + 'px';
+      document.body.appendChild(o);
+      var t = 820;
+      o.animate([{transform: 'translateX(0)'}, {transform: 'translateX(' + dx + 'px)'}], {duration: t, easing: 'cubic-bezier(.45,0,.55,1)', fill: 'forwards'});
+      d.animate([
+        {transform: 'translateY(0) rotate(45deg) scale(1)'},
+        {transform: 'translateY(' + (Math.min(0, dy) - 140) + 'px) rotate(180deg) scale(1.25)', offset: .42},
+        {transform: 'translateY(' + dy + 'px) rotate(405deg) scale(.45)'}
+      ], {duration: t, easing: 'cubic-bezier(.3,0,.6,1)', fill: 'forwards'}).onfinish = function(){ o.remove(); cart.click(); };
+    });
+  });
 })();
 </script>
