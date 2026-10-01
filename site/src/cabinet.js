@@ -103,6 +103,7 @@
     const t = e.target.closest("[data-t]"); if (t && t.closest("#adsTabs")) { adsTab = t.dataset.t; return ads(); }
     const act = e.target.closest("[data-act]"); if (!act) return;
     const id = act.closest("[data-id]").dataset.id, m = S.mine.find(a => a.id === id);
+    if (act.dataset.act === "renew") { m.renewed = Date.now(); VO.saveMine(); VO.emit("mine"); VO.toast("Продлено — объявление снова в ленте"); return ads(); }
     if (act.dataset.act === "share") return VO.share({ title: m.title, url: location.href.split("#")[0] + "#/ad/" + id });
     if (act.dataset.act === "arch") { m.status = m.status === "active" ? "archived" : "active"; VO.saveMine(); VO.emit("mine"); VO.toast(m.status === "archived" ? "Снято с публикации" : "Снова в ленте"); return ads(); }
     if (act.dataset.act === "del") confirmBox("Удалить объявление?", `«${esc(m.title)}» исчезнет навсегда. Если просто продали — лучше снять с публикации.`, "Удалить", () => { S.mine = S.mine.filter(a => a.id !== id); VO.state.mine = S.mine; VO.saveMine(); VO.emit("mine"); VO.toast("Объявление удалено"); ads(); });
@@ -195,6 +196,7 @@
     if (m.state === "blocked" && live) return `<span class="pill pill--bad"${why}>Заблокировано ${esc(VO.adm.until(m))}</span>${m.reason ? `<small class="row-ad__why">Причина: ${esc(m.reason)}</small>` : ""}`;
     if (m.state === "hidden" && live) return `<span class="pill"${why}>Скрыто модератором</span>${m.reason ? `<small class="row-ad__why">Причина: ${esc(m.reason)}</small>` : ""}`;
     if (a.mod === "pending") return `<span class="pill pill--wait">На проверке</span>`;
+    if (VO.adm && VO.adm.expired(a) && a.status !== "archived" && a.status !== "sold") return `<span class="pill pill--wait">Срок публикации истёк</span><button type="button" class="link row-ad__renew" data-act="renew">Продлить ещё на ${VO.adm.cfg().adTTL} дн.</button>`;
     if (a.mod === "rejected") return `<span class="pill pill--bad">Отклонено</span>${m.reason ? `<small class="row-ad__why">Причина: ${esc(m.reason)}. Исправьте и сохраните — проверим снова.</small>` : ""}`;
     return `<span class="pill ${a.status === "active" ? "pill--on" : ""}">${a.status === "archived" ? "Снято" : a.status === "sold" ? "Продано" : "В ленте"}</span>`;
   }

@@ -571,3 +571,50 @@ html.ed-on .hdr-space ~ * :is(h1, h2, h3, p, a, button, span, label, li, small, 
 .abars__c:nth-child(-n+3)::after { left: 0; transform: translate(0, 4px); }
 .abars__c:nth-child(-n+3):hover::after { transform: none; }
 .acard p a, .ahead a { color: var(--accent); font-weight: 700; }
+
+/* ---------- отмена, правила, модерация переписки ---------- */
+.toasts { z-index: 9990 !important; }
+.toast .toast__t { flex: 1; }
+.toast__undo { margin-left: auto; flex: none; border: 0; border-radius: 10px; background: rgba(255,255,255,.16); color: #fff; font: inherit; font-weight: 800; font-size: 13px; padding: 7px 11px; cursor: pointer; transition: background-color .15s; }
+.toast__undo:hover { background: var(--accent); }
+.toast__undo:disabled { opacity: .4; }
+.abulk__all { color: #fff !important; text-decoration: underline; text-underline-offset: 3px; margin-left: 0 !important; }
+.arules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.arules h3 { display: flex; align-items: center; gap: 8px; }
+.arules h3 svg { color: var(--accent); }
+.arule { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid #F1F2F4; cursor: pointer; }
+.arule > span:first-child { display: grid; gap: 3px; min-width: 0; }
+.arule b { font-size: 14.5px; font-weight: 800; }
+.arule small { color: var(--muted); font-size: 12.5px; font-weight: 600; line-height: 1.4; }
+.arule .atog i { display: block; }
+.arule__n { width: 84px; height: 40px; flex: none; border-radius: 11px; border: 1.5px solid var(--line-a); font: inherit; font-weight: 800; font-size: 15px; text-align: center; outline: 0; }
+.arule__n:focus, .arule__s:focus { border-color: #16181D; }
+.arule__s { height: 40px; flex: none; border-radius: 11px; border: 1.5px solid var(--line-a); font: inherit; font-weight: 700; font-size: 13.5px; padding: 0 10px; background: #fff; }
+.alim--good.is-on { border-color: #BFE6D2; background: #F1FAF5; }
+.alim--good.is-on small { color: #1F7A52; }
+.afeed__x { position: relative; padding-right: 80px !important; }
+.afeed__x .link { position: absolute; right: 0; top: 10px; font-size: 12.5px; }
+.aparts { display: grid; gap: 8px; }
+.apart { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; border: 1px solid var(--line-a); border-radius: 16px; }
+.apart > span:not(.aava) { flex: 1; min-width: 160px; display: grid; gap: 2px; }
+.apart small { color: var(--muted); font-size: 12.5px; font-weight: 600; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.athread__m { position: relative; }
+.athread__act { position: absolute; top: -12px; right: 8px; display: flex; gap: 4px; opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .15s; }
+.athread__m:hover .athread__act, .athread__m:focus-within .athread__act { opacity: 1; transform: none; }
+.athread__act button { border: 0; border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 12px; font-weight: 800; padding: 5px 8px; cursor: pointer; box-shadow: 0 4px 14px -6px rgba(22,24,29,.4); }
+.athread__act button:hover { color: var(--accent); }
+.athread__m.is-hidden { opacity: .45; border: 1.5px dashed #C9CDD4; }
+.athread__m.is-rep { box-shadow: 0 0 0 2px #F6C9C2, 0 6px 16px -12px rgba(22,24,29,.35); }
+@media (hover: none) { .athread__act { opacity: 1; transform: none; position: static; margin-top: 6px; } }
+@media (max-width: 1000px) { .arules { grid-template-columns: 1fr; } }
+/* на сайте */
+.msg { position: relative; }
+.msg__rep { position: absolute; top: 4px; right: -30px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: #fff; color: var(--muted); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .15s, color .15s; box-shadow: 0 4px 12px -6px rgba(22,24,29,.35); }
+.msg:hover .msg__rep, .msg__rep:focus-visible { opacity: 1; }
+.msg__rep:hover { color: var(--accent); }
+@media (hover: none) { .msg__rep { opacity: .7; } }
+.msg--hidden .msg__b { background: transparent !important; border: 1.5px dashed var(--line); color: var(--muted) !important; }
+.msg--hidden .msg__b p { font-style: italic; font-size: 13.5px; }
+.rp-quote { margin: 0; padding: 10px 12px; border-left: 3px solid var(--accent); background: #F6F7F9; border-radius: 0 10px 10px 0; font-size: 14px; color: var(--ink-2); }
+.row-ad__renew { display: block; margin-top: 4px; font-size: 13px; }
+.athread { align-content: start; }

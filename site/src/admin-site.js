@@ -133,11 +133,14 @@
   const SW = ["#FF4F3A", "#E5397A", "#8A5CF6", "#2F7DE1", "#0EA5A4", "#2F9E6E", "#E0913A", "#16181D"];
   SEC.brand = { group: "site", name: "Логотип и цвет", perm: "site", render() {
     const b = A.brand(), acc = b.accent || "#FF4F3A";
-    const logoHTML = b.logo ? `<img src="${b.logo}" alt="">` : `<span class="abr__def">${($("#hdr .logo") || {}).innerHTML || ""}</span>`;
+    // исходный логотип: берём статичную копию из подвала (в шапке он анимированный и зависит от её стилей)
+    const foot = $(".foot__logo svg"), def = foot ? foot.outerHTML : "";
+    const logoLight = b.logo ? `<img src="${b.logo}" alt="">` : `<span class="abr__def">${def.replace(/fill="#fff"/g, 'fill="#16181D"').replace(/stroke="#fff"/g, 'stroke="#16181D"').replace(/ id="footW\d"/g, "")}</span>`;
+    const logoDark = b.logo ? `<img src="${b.logo}" alt="">` : `<span class="abr__def">${def.replace(/ id="footW\d"/g, "")}</span>`;
     return `<div class="agrid2 agrid2--wide">
       <section class="acard"><h3>Логотип</h3><p class="muted">Показывается в шапке и подвале. Лучше SVG или PNG с прозрачным фоном, по ширине — как сейчас.</p>
-        <div class="abr__mock abr__mock--light"><div class="abr__logo">${logoHTML}</div><i></i><i></i><u style="background:${acc}"></u></div>
-        <div class="abr__mock abr__mock--dark"><div class="abr__logo">${logoHTML}</div><small>подвал</small></div>
+        <div class="abr__mock abr__mock--light"><div class="abr__logo">${logoLight}</div><i></i><i></i><u style="background:${acc}"></u></div>
+        <div class="abr__mock abr__mock--dark"><div class="abr__logo">${logoDark}</div><small>подвал</small></div>
         <div class="abtns"><label class="adm-btn">Загрузить логотип<input type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" hidden data-br="logo"></label>${b.logo ? `<button type="button" class="adm-btn adm-btn--ghost" data-a="brreset" data-k="logo">Вернуть исходный</button>` : ""}</div></section>
       <section class="acard"><h3>Значок</h3><p class="muted">Квадратная картинка: вкладка браузера и маленькие аватарки «Команды». Если не загрузить — возьмём логотип.</p>
         <div class="abr__tab"><span class="abr__fav">${b.mark ? `<img src="${b.mark}" alt="">` : `<svg viewBox="0 0 150 214" width="11"><g transform="translate(20 4)" stroke-linejoin="round" stroke-width="10"><path d="M5 5H78A38 38 0 0 1 78 81H5Z" fill="#FF4F3A" stroke="#FF4F3A"/><path d="M5 97H84A44 44 0 0 1 84 185H30L5 207Z" fill="#16181D" stroke="#16181D"/></g></svg>`}</span><span>Все объявления</span><b>×</b></div>

@@ -4,7 +4,10 @@
 (() => {
   const { $, $$, esc, store } = VO;
   const COLORS = ["#16181D", "#FF4F3A", "#2F7DE1", "#2F9E6E", "#8A5CF6", "#E0913A"];
-  const TTL = 10 * 60e3, MAX_TRIES = 5, LOCK = 5 * 60e3;
+  // число попыток и время блокировки настраиваются в админке
+  const TTL = 10 * 60e3;
+  let MAX_TRIES = 5, LOCK = 5 * 60e3;
+  const otpRules = () => { const c = VO.adm ? VO.adm.cfg() : {}; MAX_TRIES = c.otpTries || 5; LOCK = (c.otpLockMin || 5) * 60e3; };
   const page = VO.page("login");
   page.classList.add("page--bare");
 
@@ -71,7 +74,8 @@
     const A = VO.adm, acc = VO.state.accounts[m];
     if (A && !acc && !A.cfg().regOpen && !A.role(m)) return VO.guard.mark($("#aMail", page), "Регистрация новых пользователей временно закрыта");
     if (A && acc) { const ban = A.limits(VO.uid(m)).ban; if (ban) return VO.guard.mark($("#aMail", page), `Аккаунт заблокирован ${A.until(ban)}${ban.reason ? ". Причина: " + ban.reason : ""}`); }
-    if (VO.guard.tempMail(m)) return VO.guard.mark($("#aMail", page), "Одноразовые почтовые ящики не подходят — укажите постоянную почту");
+    otpRules();
+    if (VO.guard.tempMail(m) && (!A || A.cfg().blockTempMail !== false)) return VO.guard.mark($("#aMail", page), "Одноразовые почтовые ящики не подходят — укажите постоянную почту");
     const bot = VO.guard.isBot($("#authMail", page), 600); if (bot) return VO.toast(bot);
     const w = VO.guard.rate("otp:" + m, 5, 36e5) || VO.guard.rate("otp", 12, 36e5); if (w) return VO.toast(`Слишком много запросов кода. Попробуйте через ${VO.guard.wait(w)}`);
     if (lock() > Date.now()) return VO.toast(`Слишком много попыток. Попробуйте через ${Math.ceil((lock() - Date.now()) / 60000)} мин`);
@@ -91,7 +95,7 @@
     if (Date.now() > pending.exp) return fail("Код устарел — отправьте новый");
     if (v !== pending.code) {
       pending.tries++;
-      if (pending.tries >= MAX_TRIES) { store.set("vo_otp_lock", Date.now() + LOCK); pending.code = null; return fail("Слишком много неверных попыток. Попробуйте через 5 минут"); }
+      if (pending.tries >= MAX_TRIES) { store.set("vo_otp_lock", Date.now() + LOCK); pending.code = null; return fail(`Слишком много неверных попыток. Попробуйте через ${Math.round(LOCK / 60e3)} мин`); }
       return fail(`Неверный код. Осталось попыток: ${MAX_TRIES - pending.tries}`);
     }
     otp.classList.add("ok"); err.textContent = "";

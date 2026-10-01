@@ -24,6 +24,9 @@
     all: () => chats,
     // служебный чат «Команда «Все объявления»» — для сообщений и предупреждений от модераторов
     teamGet: email => chats.find(c => c.owner === email && c.team),
+    // модерация: скрыть/вернуть сообщение, отметить диалог проверенным
+    modMsg(chatId, msgId, patch) { const c = chats.find(x => x.id === chatId); const m = c && c.msgs.find(x => x.id === msgId); if (!m) return; Object.assign(m, patch); Object.keys(m).forEach(k => m[k] == null && delete m[k]); save(); },
+    modChat(chatId, patch) { const c = chats.find(x => x.id === chatId); if (!c) return; Object.assign(c, patch); save(); },
     teamSay(email, text, note = true) {
       let c = chats.find(x => x.owner === email && x.team);
       if (!c) { c = { id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), owner: email, team: true, ad: { id: "", title: "Служебные сообщения", price: null, ill: null, bg: "#FFEDEA", photo: null }, peer: "team", role: "buyer", created: Date.now(), msgs: [], pinned: true, muted: false, blocked: false, deal: null }; chats.unshift(c); }
@@ -51,6 +54,11 @@
     const G = VO.guard;
     text = G.clean(text, { multiline: true, maxLines: 30 }).slice(0, 2000); if (!text && !photo) return false;
     const bad = text && G.text(text, "chat"); if (bad) { VO.toast(bad); return false; }
+    const cfg = VO.adm ? VO.adm.cfg() : {};
+    if (cfg.chatNoLinks && !c.team && /(https?:|www\.|t\.me|wa\.me|\b[\w-]+\.(ru|com|рф|net|org)\b)/i.test(text)) { VO.toast("Ссылки в сообщениях запрещены правилами сайта"); return false; }
+    if (photo && cfg.chatPhotos === false) { VO.toast("Отправка фото в сообщениях отключена"); return false; }
+    // новые аккаунты (первые сутки) пишут реже — защита от спам-рассылок
+    const acc = S.accounts[S.session]; if (acc && Date.now() - (acc.created || 0) < 864e5 && cfg.newUserMsgPerHour) { const w0 = G.rate("msg:new", cfg.newUserMsgPerHour, 36e5); if (w0) { VO.toast(`Новые аккаунты могут писать до ${cfg.newUserMsgPerHour} сообщений в час. Подождите ${G.wait(w0)}`); return false; } }
     const mineM = c.msgs.filter(m => m.from === "me").slice(-2);
     if (text && mineM.length === 2 && mineM.every(m => m.text === text)) { VO.toast("Вы уже отправили это сообщение"); return false; }
     const w = G.rate("msg", 20, 60e3) || G.rate("msg:h", 300, 36e5); if (w) { VO.toast(`Слишком много сообщений подряд. Подождите ${G.wait(w)}`); return false; }
@@ -185,8 +193,9 @@
     c.msgs.forEach(m => {
       const dl = dayLabel(m.t); if (dl !== lastDay) { html += `<div class="msg-day"><span>${dl}</span></div>`; lastDay = dl; }
       if (m.from === "sys") { html += `<div class="msg-sys">${esc(m.text)}</div>`; return; }
-      const risk = m.from === "peer" && RISK.test(m.text || "");
-      html += `<div class="msg msg--${m.from}"><div class="msg__b">${m.photo ? `<img src="${m.photo}" alt="Фото" class="msg__ph">` : ""}${m.text ? `<p>${esc(m.text)}</p>` : ""}<span class="msg__t">${fmtTime(m.t)}${m.from === "me" ? `<i class="tick${m.seen ? " seen" : ""}" title="${m.seen ? "Прочитано" : "Доставлено"}">${m.seen ? "✓✓" : "✓"}</i>` : ""}</span></div>${risk ? `<div class="msg__risk">Осторожно: похоже на просьбу о предоплате, коде или ссылке. Не переводите деньги заранее и не сообщайте коды. <a href="#/safety">Подробнее</a></div>` : ""}</div>`;
+      if (m.hidden) { html += `<div class="msg msg--${m.from} msg--hidden"><div class="msg__b"><p>Сообщение скрыто модератором</p><span class="msg__t">${fmtTime(m.t)}</span></div></div>`; return; }
+      const risk = m.from === "peer" && (!VO.adm || VO.adm.cfg().chatRiskWarn !== false) && RISK.test(m.text || "");
+      html += `<div class="msg msg--${m.from}">${m.from === "peer" && !c.team ? `<button type="button" class="msg__rep" data-rep-msg="${m.id}" title="Пожаловаться на это сообщение" aria-label="Пожаловаться на сообщение"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4h11l-2 4 2 4H5"/></svg></button>` : ""}<div class="msg__b">${m.photo ? `<img src="${m.photo}" alt="Фото" class="msg__ph">` : ""}${m.text ? `<p>${esc(m.text)}</p>` : ""}<span class="msg__t">${fmtTime(m.t)}${m.from === "me" ? `<i class="tick${m.seen ? " seen" : ""}" title="${m.seen ? "Прочитано" : "Доставлено"}">${m.seen ? "✓✓" : "✓"}</i>` : ""}</span></div>${risk ? `<div class="msg__risk">Осторожно: похоже на просьбу о предоплате, коде или ссылке. Не переводите деньги заранее и не сообщайте коды. <a href="#/safety">Подробнее</a></div>` : ""}</div>`;
     });
     if (!c.msgs.length) html = `<div class="chat__hello"><b>Начните разговор</b><span>Выберите быстрый вопрос ниже или напишите свой. Номер телефона в чате не показывается.</span></div>`;
     const quick = c.team ? [] : QUICK[c.role === "buyer" ? "buyer" : "seller"];
@@ -203,7 +212,7 @@
       ${c.blocked ? `<div class="chat__blocked">Вы заблокировали ${esc(p.name)}. Пользователь не сможет вам писать. <button class="link" type="button" data-cm="block">Разблокировать</button></div>` : `
       <div class="chat__qw"><button class="chat__qa chat__qa--l" type="button" data-qs="-1" aria-label="Прокрутить влево" hidden>‹</button><div class="chat__quick" id="chatQuick">${quick.map(q => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div><button class="chat__qa chat__qa--r" type="button" data-qs="1" aria-label="Прокрутить вправо" hidden>›</button></div>
       <form class="chat__f" id="chatF">
-        <label class="icb chat__att" title="Прикрепить фото" aria-label="Прикрепить фото"><input type="file" accept="image/jpeg,image/png,image/webp" hidden id="chatPh"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 7"/></svg></label>
+        <label class="icb chat__att" title="Прикрепить фото" aria-label="Прикрепить фото"${VO.adm && VO.adm.cfg().chatPhotos === false ? " hidden" : ""}><input type="file" accept="image/jpeg,image/png,image/webp" hidden id="chatPh"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4L15.5 7"/></svg></label>
         <textarea id="chatT" rows="1" maxlength="2000" placeholder="Сообщение"></textarea>
         <button class="chat__send" type="submit" aria-label="Отправить"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
       </form><div class="chat__warn" id="chatWarn" hidden></div>`}
@@ -243,6 +252,7 @@
     if (!page || !page.contains(e.target)) return;
     const t = e.target;
     const cf = t.closest("[data-cf]"); if (cf) { filter = cf.dataset.cf; return render(page, open && open.id); }
+    const rpm = t.closest("[data-rep-msg]"); if (rpm && open) { const m = open.msgs.find(x => x.id === rpm.dataset.repMsg); if (m) report(open, m); return; }
     const qs = t.closest("[data-qs]"); if (qs) { const q = $("#chatQuick", page); q.scrollBy({ left: +qs.dataset.qs * q.clientWidth * .7, behavior: "smooth" }); return; }
     const ph = t.closest(".msg__ph"); if (ph) return VO.lightbox([ph.src], 0);
     const q = t.closest("[data-q]"); if (q && open) { if (send(open, q.dataset.q)) render(page, open.id); return; }
@@ -310,10 +320,10 @@
     const el = VO.sheet(`<form id="cnF"><h3>Отменить сделку?</h3><div class="report__r">${R.map((r, i) => `<label><input type="radio" name="r" value="${r}"${i ? "" : " checked"}><span>${r}</span></label>`).join("")}</div><button class="btn btn--ink btn--wide" type="submit">Отменить сделку</button></form>`, { cls: "sheet--sm" });
     $("#cnF", el).addEventListener("submit", e => { e.preventDefault(); VO.closeSheet(true); step(c, "cancelled", "me", { reason: new FormData(e.target).get("r").toLowerCase() }); render(page, c.id); });
   }
-  function report(c) {
+  function report(c, msg) {
     const R = ["Мошенничество или просьба о предоплате", "Спам или реклама", "Оскорбления", "Просит перейти по ссылке", "Другое"];
-    const el = VO.sheet(`<form id="rpF"><h3>Пожаловаться на пользователя</h3><p class="muted">Переписку проверит модератор. Собеседник не узнает, кто пожаловался.</p><div class="report__r">${R.map((r, i) => `<label><input type="radio" name="r" value="${r}"${i ? "" : " checked"}><span>${r}</span></label>`).join("")}</div><label class="check"><input type="checkbox" id="rpB" checked><span></span><span>Заодно заблокировать пользователя</span></label><button class="btn btn--ink btn--wide" type="submit">Отправить жалобу</button></form>`, { cls: "sheet--sm" });
-    $("#rpF", el).addEventListener("submit", e => { e.preventDefault(); const reps = store.get("vo_reports", []); reps.push({ chat: c.id, peer: c.peer, reason: new FormData(e.target).get("r"), t: Date.now() }); store.set("vo_reports", reps); if ($("#rpB", el).checked) { c.blocked = true; save(); } VO.closeSheet(true); VO.toast("Жалоба отправлена. Спасибо!"); render(page, c.id); });
+    const el = VO.sheet(`<form id="rpF"><h3>${msg ? "Пожаловаться на сообщение" : "Пожаловаться на пользователя"}</h3>${msg ? `<blockquote class="rp-quote">${esc((msg.text || "Фото").slice(0, 300))}</blockquote>` : ""}<p class="muted">Переписку проверит модератор. Собеседник не узнает, кто пожаловался.</p><div class="report__r">${R.map((r, i) => `<label><input type="radio" name="r" value="${r}"${i ? "" : " checked"}><span>${r}</span></label>`).join("")}</div><label class="check"><input type="checkbox" id="rpB" checked><span></span><span>Заодно заблокировать пользователя</span></label><button class="btn btn--ink btn--wide" type="submit">Отправить жалобу</button></form>`, { cls: "sheet--sm" });
+    $("#rpF", el).addEventListener("submit", e => { e.preventDefault(); const reps = store.get("vo_reports", []); reps.push({ chat: c.id, peer: c.peer, reason: new FormData(e.target).get("r"), t: Date.now(), ...(msg ? { msg: msg.id, text: (msg.text || "Фото").slice(0, 300) } : {}) }); store.set("vo_reports", reps); if ($("#rpB", el).checked) { c.blocked = true; save(); } VO.closeSheet(true); VO.toast("Жалоба отправлена. Спасибо!"); render(page, c.id); });
   }
   addEventListener("storage", e => { if (e.key === "vo_chats") { chats = store.get("vo_chats", []); VO.emit("chats"); paintIfOpen(); } });
   VO.on("user", () => { chats = store.get("vo_chats", []); });

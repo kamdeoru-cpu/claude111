@@ -145,6 +145,9 @@
       if (reps.some(r => r.ad === a.id)) { VO.closeSheet(); return VO.toast("Вы уже жаловались на это объявление — мы проверяем"); }
       reps.push({ ad: a.id, reason: new FormData(e.target).get("r"), text: G.clean($("#repT", el).value, { multiline: true, maxLines: 10 }).slice(0, 500), t: Date.now() });
       VO.store.set("vo_reports", reps); VO.closeSheet(); VO.toast("Спасибо! Проверим объявление в ближайшее время");
+      // много жалоб — объявление скрывается само до проверки модератором
+      const A = VO.adm, n = A ? A.cfg().autoHideReports : 0;
+      if (n && reps.filter(r => r.ad === a.id).length >= n && A.visible(VO.findAd(a.id) || a)) { A.setAd(a.id, {}, { state: "hidden", until: null, reason: `Скрыто автоматически: ${n} жалоб, ждёт проверки` }); A.log("Автоскрытие по жалобам", a.title, `${n} жалоб`, { system: true }); }
     });
   }
   // клавиши ← → листают фото

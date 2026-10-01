@@ -98,6 +98,9 @@
     if (G.clean(d.title).length < 5) p.push("Название слишком короткое — минимум 5 символов");
     else add("Название: ", G.text(d.title, "title"));
     if (d.desc.trim()) add("Описание: ", G.text(d.desc, "desc"));
+    const rc = VO.adm ? VO.adm.cfg() : {};
+    if (rc.minDesc && d.desc.trim().length < rc.minDesc) p.push(`Описание — хотя бы ${rc.minDesc} символов`);
+    if (rc.requirePhoto && !d.photos.length) p.push("Добавьте хотя бы одно фото — так требуют правила сайта");
     // запрещёнку ищем и в связке «название + описание»
     add("", !p.length && G.banned(d.title + "\n" + d.desc) ? "Похоже на запрещённое к продаже — см. Правила размещения" : null);
     Object.values(d.other).forEach(v => v && v.trim() && add("Характеристики: ", G.text(v, "other")));
@@ -261,7 +264,11 @@
     const u = VO.user(), ad = toAd(); limits();
     const lim = VO.restrict && VO.restrict("noPost"); if (lim) return VO.toast(`Размещение объявлений ограничено ${VO.adm.until(lim)}${lim.reason ? ". Причина: " + lim.reason : ""}`, 5000);
     // проверка модератором: если включена в правилах или объявление раньше отклоняли
-    const old = editId && S.mine.find(a => a.id === editId), premod = VO.adm && VO.adm.cfg().premod;
+    const old = editId && S.mine.find(a => a.id === editId), rc = VO.adm ? VO.adm.cfg() : {}, rec = VO.adm ? VO.adm.u(VO.uid(u.email)) : {};
+    if (old && old.adm && old.adm.locked) return VO.toast("Редактирование этого объявления закрыто модератором. Напишите в поддержку");
+    // проверка: всем, новым аккаунтам или первым N объявлениям; «доверенным» — без проверки
+    const ageDays = (Date.now() - (u.created || 0)) / 864e5, count = S.mine.filter(a => a.owner === u.email).length;
+    const premod = !rec.trusted && (rc.premod || (rc.premodNewDays && ageDays < rc.premodNewDays) || (rc.premodFirstN && count < rc.premodFirstN + (editId ? 1 : 0)));
     ad.mod = premod || (old && old.mod === "rejected") ? "pending" : old ? old.mod : undefined;
     if (old && old.mod === "rejected" && old.adm) { old.adm = { ...old.adm }; delete old.adm.reason; }
     if (!editId && S.mine.filter(a => a.owner === u.email && Date.now() - (a.first || a.created) < 864e5).length >= DAY_LIMIT) return VO.toast(`Можно размещать до ${DAY_LIMIT} объявлений в сутки. Попробуйте завтра`);
@@ -283,6 +290,7 @@
     if (id) {
       const ad = S.mine.find(a => a.id === id && a.owner === VO.user().email);
       if (!ad) { VO.toast("Это объявление нельзя редактировать"); location.hash = "#/me/ads"; return; }
+      if (ad.adm && ad.adm.locked) { VO.toast("Редактирование этого объявления закрыто модератором"); location.hash = "#/me/ads"; return; }
       editId = id; stepI = 1;
       const defs = window.VO_FILTERS[ad.cat] || [], attrs = {}, other = {};
       Object.entries(ad.attrs || {}).forEach(([k, v]) => { const f = defs.find(x => x.k === k); if (f && f.t === "chips" && !f.o.includes(v)) other[k] = v; else attrs[k] = v; });

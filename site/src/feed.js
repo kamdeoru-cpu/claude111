@@ -255,7 +255,7 @@
     ctx.q = mode === "search" ? (VO.guard ? VO.guard.clean(parts.slice(1).join("/") || "") : (parts.slice(1).join("/") || "").trim()).slice(0, 80) : null;
     ctx.p = mode === "search" ? VO.search.parse(ctx.q) : null;
     ctx.F = readF(params, ctx.cat);
-    ctx.sort = params.get("sort") || "new";
+    ctx.sort = params.get("sort") || (VO.adm && VO.adm.cfg().defSort) || "new";
     VO.show("home", ctx.mode === "cat" ? VO.catName(ctx.cat) : ctx.mode === "search" ? "Поиск: " + ctx.q : "");
     $("#filters").classList.remove("is-open");
     render();

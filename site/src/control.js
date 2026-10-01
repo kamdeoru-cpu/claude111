@@ -15,6 +15,12 @@
     maint: { on: false, text: "Сайт обновляется. Вернёмся совсем скоро — объявления и переписки сохранены." },
     banner: { on: false, text: "", tone: "accent", link: "" },
     words: [], team: [],
+    // тонкие настройки (раздел «Правила сайта»)
+    premodNewDays: 0, premodFirstN: 0, autoHideReports: 3, adTTL: 0, minDesc: 0, requirePhoto: false,
+    blockTempMail: true, newUserMsgPerHour: 30, autoBanWarns: 0,
+    chatNoLinks: false, chatPhotos: true, chatRiskWarn: true,
+    reviewsOnlyDeal: false, reviewsPremod: false,
+    otpTries: 5, otpLockMin: 5, defSort: "new",
   };
   let cfgCache = null;
   A.cfg = () => cfgCache || (cfgCache = { ...DEF, ...store.get("vo_adm_cfg", {}) });
@@ -39,11 +45,16 @@
   A.can = what => { const r = A.me(); if (!r) return false; const l = CAN[r] || []; return l.includes(what) || (what === "support" && l.includes("manage")); };
 
   /* ---------- журнал действий ---------- */
-  A.log = (act, target = "", info = "") => {
-    const u = VO.user(), l = store.get("vo_adm_log", []);
-    l.unshift({ id: now().toString(36) + Math.random().toString(36).slice(2, 5), t: now(), who: u ? u.email : "система", act, target: String(target), info: String(info) });
+  // extra.undo — снимки «как было» для кнопки «Отменить»
+  A.log = (act, target = "", info = "", extra = {}) => {
+    const u = VO.user(), l = store.get("vo_adm_log", []), id = now().toString(36) + Math.random().toString(36).slice(2, 5);
+    l.unshift({ id, t: now(), who: extra.system ? "система" : u ? u.email : "система", act, target: String(target), info: String(info), ...(extra.undo ? { undo: extra.undo } : {}) });
+    // снимки отмены храним только у 200 последних записей — экономим место
+    l.slice(200).forEach(x => delete x.undo);
     store.set("vo_adm_log", l.slice(0, 2000));
+    return id;
   };
+  A.markUndone = id => { const l = store.get("vo_adm_log", []), x = l.find(e => e.id === id); if (x) { x.undone = now(); delete x.undo; store.set("vo_adm_log", l); } };
   A.logs = () => store.get("vo_adm_log", []);
 
   /* ---------- контакты владельца ---------- */
@@ -155,6 +166,11 @@
   A.u = id => UC[id] || {};
   A.setU = (id, patch) => { UC[id] = { ...A.u(id), ...patch }; Object.keys(UC[id]).forEach(k => UC[id][k] == null && delete UC[id][k]); store.set("vo_adm_users", UC); VO.emit("adm-users"); };
   const live = s => !!s && (!s.until || s.until > now());
+  // снимки для отмены действий
+  A.snapU = id => UC[id] ? JSON.parse(JSON.stringify(UC[id])) : null;
+  A.restoreU = (id, snap) => { if (snap) UC[id] = snap; else delete UC[id]; store.set("vo_adm_users", UC); VO.emit("adm-users"); };
+  // владельца и самого себя ограничить нельзя
+  A.protectedId = id => { const u = VO.user(); return id === uid0(ownerMail()) || id === VO.uid(ownerMail()) || (u && id === VO.uid(u.email)); };
   A.live = live;
   A.isBanned = id => live(A.u(id).ban);
   A.limits = id => { const r = A.u(id); return { ban: live(r.ban) ? r.ban : null, noPost: live(r.noPost) ? r.noPost : null, noMsg: live(r.noMsg) ? r.noMsg : null }; };
@@ -181,6 +197,16 @@
   const isMine = id => S.mine.some(a => a.id === id);
   A.ad = id => { const m = S.mine.find(a => a.id === id); return m ? (m.adm || {}) : ((AO[id] || {}).adm || {}); };
   // patch — поля объявления (название, цена…), meta — служебное: state, until, reason, rank, featured, bump, deleted
+  const NOSNAP = ["photos", "photo"];
+  A.snapAd = id => { const m = S.mine.find(a => a.id === id); if (m) { const c = {}; Object.keys(m).forEach(k => { if (!NOSNAP.includes(k)) c[k] = JSON.parse(JSON.stringify(m[k] ?? null)); }); return { mine: true, v: c }; } return { mine: false, v: AO[id] ? JSON.parse(JSON.stringify(AO[id])) : null }; };
+  A.restoreAd = (id, snap) => {
+    if (!snap) return;
+    if (snap.mine) { const m = S.mine.find(a => a.id === id); if (!m) return; Object.keys(m).forEach(k => { if (!NOSNAP.includes(k) && !(k in snap.v)) delete m[k]; }); Object.assign(m, snap.v); VO.saveMine(); }
+    else { if (snap.v) AO[id] = snap.v; else delete AO[id]; store.set("vo_adm_ads", AO); }
+    VO.emit("mine"); if (VO.search && VO.search.build) VO.search.build();
+  };
+  // срок публикации: считаем от последнего продления, поднятия или создания
+  A.expired = a => { const d = A.cfg().adTTL; return !!(d && a.owner && now() - Math.max(a.renewed || 0, (a.adm && a.adm.bump) || 0, a.first || a.created || 0) > d * 864e5); };
   A.setAd = (id, patch = {}, meta = null) => {
     const m = S.mine.find(a => a.id === id);
     if (m) { Object.assign(m, patch); if (meta) { m.adm = { ...(m.adm || {}), ...meta }; Object.keys(m.adm).forEach(k => m.adm[k] == null && delete m.adm[k]); } VO.saveMine(); }
@@ -196,6 +222,9 @@
     if (a.mod === "pending" || a.mod === "rejected") return false;
     const c = VO.CATS.find(x => x.id === a.cat); if (c && c.hidden) return false;
     const o = A.ownerId(a); if (o && (A.isBanned(o) || A.u(o).hideAds)) return false;
+    if (A.expired(a)) return false;
+    // «теневой» режим: объявления видит только сам автор
+    if (o && A.u(o).shadow) { const u = VO.user(); if (!u || VO.uid(u.email) !== o) return false; }
     return true;
   };
   const merge = a => { const o = AO[a.id]; let x = o ? { ...a, ...(o.patch || {}), adm: { ...(a.adm || {}), ...(o.adm || {}) } } : a; if (x.adm && x.adm.bump) x = { ...x, created: x.adm.bump }; return x; };
@@ -225,8 +254,11 @@
 
   /* ---------- служебные сообщения от команды ---------- */
   A.warn = (email, text, { chat = true } = {}) => {
-    const id = VO.uid(email), r = A.u(id);
-    A.setU(id, { warns: [...(r.warns || []), { t: now(), text }] });
+    const id = VO.uid(email), r = A.u(id), warns = [...(r.warns || []), { t: now(), text, id: now().toString(36) }];
+    A.setU(id, { warns });
+    // автоблокировка после N предупреждений (если включена в правилах)
+    const n = A.cfg().autoBanWarns;
+    if (n && warns.length >= n && !live(A.u(id).ban)) { A.setU(id, { ban: { until: now() + 7 * 864e5, reason: `Автоматически: ${warns.length} предупреждений`, t: now(), by: "система" } }); A.log("Автоблокировка после предупреждений", email, `${warns.length} предупр.`, { system: true }); }
     VO.addNote("Предупреждение от модератора", text, { cat: "account", owner: email, link: chat ? "#/me/msg" : null });
     if (chat && VO.chats && VO.chats.teamSay) VO.chats.teamSay(email, "⚠️ Предупреждение: " + text);
   };

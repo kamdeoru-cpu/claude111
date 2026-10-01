@@ -18,12 +18,15 @@
     has: (author, target, role) => own.some(r => r.author === author && r.target === target && r.role === role),
     add(r) {
       const ex = own.find(x => x.author === r.author && x.target === r.target && x.role === r.role);
-      if (ex) Object.assign(ex, r, { t: Date.now(), edited: true }); else own.unshift({ id: "r" + Date.now().toString(36), t: Date.now(), ...r });
+      const rid = ex ? ex.id : "r" + Date.now().toString(36);
+      if (ex) Object.assign(ex, r, { t: Date.now(), edited: true }); else own.unshift({ id: rid, t: Date.now(), ...r });
+      // предмодерация отзывов: скрыт, пока модератор не одобрит
+      if (VO.adm && VO.adm.cfg().reviewsPremod) { mod[rid] = { ...(mod[rid] || {}), hidden: true, pending: true }; store.set("vo_adm_rev", mod); }
       save();
       if (r.target === VO.me()) VO.addNote("Новый отзыв", `${r.authorName} оценил(а) вас на ${r.stars} из 5`, { cat: "review", link: "#/me/reviews" });
     },
     star,
-    adminAll: () => raw(),
+    adminAll: () => [...own, ...seed].map(r => mod[r.id] ? { ...r, ...mod[r.id] } : r),
     adminSet(id, patch) { mod[id] = { ...(mod[id] || {}), ...patch }; Object.keys(mod[id]).forEach(k => mod[id][k] == null && delete mod[id][k]); store.set("vo_adm_rev", mod); VO.emit("reviews"); },
   };
   VO.rating = (id, role) => { const l = R.of(id, role); return { n: l.length, avg: l.length ? l.reduce((s, r) => s + r.stars, 0) / l.length : 0 }; };
@@ -85,9 +88,11 @@
       if (!G.field($("#revT", el), "review", { min: 10 })) return;
       const bot = G.isBot(e.target); if (bot) return VO.toast(bot);
       if (!ex) { const w = G.rate("review", 5, 864e5); if (w) return VO.toast(`Можно оставить до 5 отзывов в сутки. Попробуйте через ${G.wait(w)}`); }
+      const rc = VO.adm ? VO.adm.cfg() : {};
+      if (rc.reviewsOnlyDeal && !doneDeal(me, target, role)) return VO.toast("Отзыв можно оставить только после сделки на сайте — так решили правила сайта", 4500);
       const u = VO.user(), deal = doneDeal(me, target, role) && VO.chats.all().find(c => VO.uid(c.owner) === me && c.peer === target && c.deal && c.deal.stage === "done");
       R.add({ target, author: me, authorName: VO.displayName(u) || u.name, role, stars, text, verified: !!deal, ad: deal ? deal.ad.title : null });
-      VO.closeSheet(true); VO.toast("Спасибо! Отзыв опубликован"); VO.emit("reviews-ui");
+      VO.closeSheet(true); VO.toast(rc.reviewsPremod ? "Спасибо! Отзыв появится после проверки модератором" : "Спасибо! Отзыв опубликован"); VO.emit("reviews-ui");
     });
   };
   document.addEventListener("click", e => {

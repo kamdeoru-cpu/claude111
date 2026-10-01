@@ -56,6 +56,24 @@
   const DUR = [["1 час", 36e5], ["1 день", 864e5], ["3 дня", 3 * 864e5], ["7 дней", 7 * 864e5], ["30 дней", 30 * 864e5], ["Навсегда", 0]];
   UI.toast = (t, ms) => VO.toast(t, ms);
 
+  /* ---------- отмена действий ---------- */
+  // items: [{ t: "ad" | "u", id }] — до действия снимаем «как было», после — пишем в журнал с кнопкой «Отменить»
+  UI.undoable = (label, items, fn, target = "", info = "") => {
+    const undo = items.map(x => ({ t: x.t, id: x.id, s: x.t === "ad" ? A.snapAd(x.id) : A.snapU(x.id) }));
+    fn();
+    const id = A.log(label, target, info, { undo });
+    VO.toast(`<span class="toast__t">${esc(label)}</span><button type="button" class="toast__undo" data-undo="${id}">Отменить</button>`, 7000);
+    return id;
+  };
+  UI.undo = id => {
+    const e = A.logs().find(x => x.id === id); if (!e || !e.undo) return VO.toast("Это действие уже нельзя отменить");
+    e.undo.forEach(x => x.t === "ad" ? A.restoreAd(x.id, x.s) : x.t === "cfg" ? A.setCfg({ [x.id]: x.s }) : A.restoreU(x.id, x.s));
+    A.markUndone(id); A.log("Отменено: " + e.act, e.target);
+    VO.toast("Отменено — всё как было", 1800);
+    if (VO.current() === "admin") { UI.render(); if (UI.drawerOpen() && SEC[cur.sec].open && cur.id) SEC[cur.sec].open(cur.id); }
+  };
+  document.addEventListener("click", e => { const b = e.target.closest("[data-undo]"); if (b) { e.preventDefault(); b.disabled = true; UI.undo(b.dataset.undo); } });
+
   /* ---------- окна: подтверждение, причина и срок ---------- */
   UI.ask = (title, text, btn = "Подтвердить", danger = false, typed = null) => new Promise(ok => {
     const el = VO.sheet(`<form class="aform" id="askF"><h3>${title}</h3>${text ? `<p class="muted">${text}</p>` : ""}${typed ? `<div class="field"><input id="askT" placeholder=" " autocomplete="off"><label for="askT">Введите «${esc(typed)}» для подтверждения</label></div>` : ""}<div class="aform__a"><button type="button" class="adm-btn adm-btn--ghost" data-sheet-close>Отмена</button><button class="adm-btn${danger ? " adm-btn--danger" : ""}" type="submit">${btn}</button></div></form>`, { cls: "sheet--sm adm-sheet" });
@@ -101,8 +119,10 @@
 
   /* ---------- таблица с выделением ---------- */
   // cols: [[заголовок, (row) => html, класс]]
+  UI.lastRows = {};
   UI.table = (sec, rows, cols, { empty = "Ничего не найдено", key = r => r.id, open = true } = {}) => {
     const s = sel[sec] || (sel[sec] = new Set());
+    UI.lastRows[sec] = rows.map(key);
     [...s].forEach(id => { if (!rows.some(r => key(r) === id)) s.delete(id); });
     const allOn = rows.length && rows.every(r => s.has(key(r)));
     const lim = q[sec + ":lim"] || 60;
@@ -111,7 +131,7 @@
       ${rows.length > lim ? `<button class="adm-btn adm-btn--ghost adm-more" type="button" data-a="more" data-sec="${sec}">Показать ещё ${Math.min(60, rows.length - lim)} из ${rows.length - lim}</button>` : ""}`
       : `<div class="aempty"><b>${empty}</b><span>Попробуйте изменить поиск или фильтры</span></div>`;
   };
-  UI.bulk = (sec, actions) => { const n = (sel[sec] || new Set()).size; return `<div class="abulk${n ? " is-on" : ""}"><b>Выбрано: ${n}</b>${actions.map(([a, t, tone]) => `<button type="button" class="adm-btn adm-btn--sm${tone ? " adm-btn--" + tone : " adm-btn--ghost"}" data-a="${a}">${t}</button>`).join("")}<button type="button" class="adm-btn adm-btn--sm adm-btn--text" data-a="selnone" data-sec="${sec}">Снять выделение</button></div>`; };
+  UI.bulk = (sec, actions) => { const n = (sel[sec] || new Set()).size, tot = (UI.lastRows[sec] || []).length; return `<div class="abulk${n ? " is-on" : ""}"><b>Выбрано: ${n}</b>${n && tot > n ? `<button type="button" class="adm-btn adm-btn--sm adm-btn--text abulk__all" data-a="selallf" data-sec="${sec}">Выбрать все ${tot} по фильтру</button>` : ""}${actions.map(([a, t, tone]) => `<button type="button" class="adm-btn adm-btn--sm${tone ? " adm-btn--" + tone : " adm-btn--ghost"}" data-a="${a}">${t}</button>`).join("")}<button type="button" class="adm-btn adm-btn--sm adm-btn--text" data-a="selnone" data-sec="${sec}">Снять выделение</button></div>`; };
   UI.selected = sec => [...(sel[sec] || [])];
   UI.tools = (sec, placeholder, filters = []) => `<div class="atools"><label class="asearch">${I(IC.search, 16)}<input type="search" data-q="${sec}" value="${esc(q[sec] || "")}" placeholder="${placeholder}" maxlength="80"></label>${filters.map(([k, opts]) => `<select data-f="${sec}:${k}">${opts.map(([v, n]) => `<option value="${v}"${(q[sec + ":" + k] || "") === v ? " selected" : ""}>${n}</option>`).join("")}</select>`).join("")}</div>`;
   UI.f = (sec, k) => q[sec + ":" + k] || "";
@@ -150,7 +170,7 @@
     const reported = new Set(D.reports().filter(r => r.ad && r.st === "new").map(r => r.ad));
     return D.ads().filter(a => !(a.adm && a.adm.deleted)).map(a => ({ a, why: a.mod === "pending" ? "pending" : reported.has(a.id) && !(a.adm && a.adm.reviewed) ? "report" : D.flag(a) ? "flag" : null })).filter(x => x.why);
   };
-  D.counts = () => ({ mod: D.modQueue().length, reports: D.reports().filter(r => r.st === "new").length, tickets: D.tickets().filter(t => t.status !== "answered" && t.status !== "closed").length });
+  D.counts = () => ({ mod: D.modQueue().length, reports: D.reports().filter(r => r.st === "new").length, tickets: D.tickets().filter(t => t.status !== "answered" && t.status !== "closed").length, reviews: VO.reviews ? VO.reviews.adminAll().filter(r => r.pending && !r.deleted).length : 0 });
   D.kindName = u => u.kind === "seller" ? "тестовый продавец" : u.kind === "demo" ? "демо-покупатель" : "";
 
   /* ---------- каркас ---------- */
@@ -239,6 +259,7 @@
   ACT.dclose = () => UI.closeDrawer();
   ACT.side = () => $("#admSide").classList.toggle("is-open");
   ACT.group = el => { const g = el.dataset.g, first = Object.entries(SEC).find(([, s]) => s.group === g && (!s.perm || A.can(s.perm))); if (first) UI.go(first[0]); };
+  ACT.selallf = el => { const s = sel[el.dataset.sec] || (sel[el.dataset.sec] = new Set()); (UI.lastRows[el.dataset.sec] || []).forEach(id => s.add(id)); UI.render(); };
   ACT.selnone = el => { (sel[el.dataset.sec] || new Set()).clear(); UI.render(); };
   ACT.more = el => { q[el.dataset.sec + ":lim"] = (q[el.dataset.sec + ":lim"] || 60) + 60; UI.render(); };
   ACT.demo = () => { sessionStorage.setItem("vo_adm_demo", VO.user().email); A.log("Открыта админка в демо-режиме", VO.user().email); VO.rerender(); };
@@ -363,7 +384,7 @@
       ])}`;
   }, open: id => adDrawer(id) };
   const adIds = () => UI.selected("ads");
-  const bulkAd = (ids, patch, meta, msg, logAct) => { ids.forEach(id => { A.setAd(id, patch, meta); A.log(logAct, (D.ad(id) || {}).title || id); }); sel.ads && sel.ads.clear(); VO.toast(msg, 1600); UI.render(); };
+  const bulkAd = (ids, patch, meta, msg, logAct) => { if (!ids.length) return; UI.undoable(`${logAct}${ids.length > 1 ? " · " + ids.length : ""}`, ids.map(id => ({ t: "ad", id })), () => ids.forEach(id => A.setAd(id, patch, meta)), ids.length === 1 ? (D.ad(ids[0]) || {}).title || ids[0] : `${ids.length} объявл.`); sel.ads && sel.ads.clear(); UI.render(); };
   ACT.adhide = () => bulkAd(adIds(), {}, { state: "hidden", until: null }, "Скрыто из ленты", "Объявление скрыто");
   ACT.adshow = () => bulkAd(adIds(), {}, { state: null, until: null, reason: null, deleted: null }, "Снова в ленте", "Объявление показано");
   ACT.adbump = () => bulkAd(adIds(), {}, { bump: Date.now() }, "Подняты наверх ленты", "Объявление поднято");
@@ -401,6 +422,7 @@
         <div class="acard"><h4>Место в выдаче</h4><div class="aseg">${[[1, "Закрепить вверху"], [0, "Обычно"], [-1, "Опустить вниз"]].map(([v, n]) => `<button type="button" data-a="ad1" data-op="rank" data-v="${v}" class="${(m.rank || 0) === v ? "on" : ""}">${n}</button>`).join("")}</div>
           <div class="abtns"><button type="button" class="adm-btn adm-btn--ghost" data-a="ad1" data-op="bump">Поднять сейчас (как новое)</button><button type="button" class="adm-btn adm-btn--ghost" data-a="ad1" data-op="feat">${m.featured ? "Снять выделение" : "Выделить цветом"}</button></div>
           <p class="muted">Закреплённые показываются первыми в ленте и категории. Выделенные — с цветной рамкой.</p></div>
+        ${mine ? `<div class="acard"><h4>Автор и доступ</h4><div class="abtns"><button type="button" class="adm-btn adm-btn--ghost" data-a="ad1" data-op="lock">${m.locked ? "Разрешить автору правки" : "Запретить автору правки"}</button><button type="button" class="adm-btn adm-btn--ghost" data-a="ad1" data-op="msg">Написать автору…</button><button type="button" class="adm-btn adm-btn--ghost" data-a="ad1" data-op="transfer">Передать другому…</button>${A.cfg().adTTL ? `<button type="button" class="adm-btn adm-btn--ghost" data-a="ad1" data-op="renew">Продлить срок</button>` : ""}</div>${m.locked ? `<p class="muted">Автор не может редактировать объявление.</p>` : ""}${A.expired(a) ? `<p class="muted">Срок публикации истёк — объявление не видно в ленте.</p>` : ""}</div>` : ""}
         ${mine ? `<div class="acard"><h4>Статус автора</h4><div class="aseg">${[["active", "Активно"], ["sold", "Продано"], ["archived", "Снято"]].map(([v, n]) => `<button type="button" data-a="ad1" data-op="status" data-v="${v}" class="${(a.status || "active") === v ? "on" : ""}">${n}</button>`).join("")}</div></div>` : ""}</div>`,
       stat: () => { const chats = (VO.chats ? VO.chats.all() : []).filter(x => x.ad && x.ad.id === a.id), reps = D.reports().filter(r => r.ad === a.id); return `<div class="akpis akpis--sm"><div class="akpi"><small>Просмотры</small><b>${VO.views(a)}</b></div><div class="akpi"><small>Диалоги</small><b>${chats.length}</b></div><div class="akpi"><small>Сделки</small><b>${chats.filter(x => x.deal).length}</b></div><div class="akpi"><small>Жалобы</small><b>${reps.length}</b></div></div>
         <dl class="adl"><div><dt>Создано</dt><dd>${fmtD(a.first || a.created || Date.now() - (a.ago || 0) * 6e4)}</dd></div><div><dt>Номер</dt><dd>${esc(a.id)}</dd></div><div><dt>Автор</dt><dd>${u ? `<button type="button" class="link" data-a="gouser" data-id="${esc(u.id)}">${esc(u.name)}</button>` : "—"}</dd></div></dl>
@@ -423,7 +445,8 @@
   ACT.phcover = el => { const a = D.ad(cur.id); const p = [...a.photos]; const [x] = p.splice(+el.dataset.i, 1); p.unshift(x); A.setAd(a.id, { photos: p, photo: p[0] }); adDrawer(a.id, "photo"); UI.render(); };
   ACT.ad1 = async el => {
     const a = D.ad(cur.id); if (!a) return; const op = el.dataset.op;
-    const done = (msg, act, info = "") => { A.log(act, a.title, info); VO.toast(msg, 1400); adDrawer(a.id, "vis"); UI.render(); };
+    const snap = A.snapAd(a.id);
+    const done = (msg, act, info = "") => { const lid = A.log(act, a.title, info, { undo: [{ t: "ad", id: a.id, s: snap }] }); VO.toast(`<span class="toast__t">${esc(msg)}</span><button type="button" class="toast__undo" data-undo="${lid}">Отменить</button>`, 6000); adDrawer(a.id, el.dataset.tab || "vis"); UI.render(); };
     if (op === "show") { A.setAd(a.id, {}, { state: null, until: null, reason: null }); return done("Объявление в ленте", "Объявление показано"); }
     if (op === "hide") { A.setAd(a.id, {}, { state: "hidden", until: null }); return done("Скрыто", "Объявление скрыто"); }
     if (op === "block") { const r = await UI.askLimit("Заблокировать объявление", REJECT); if (!r) return; A.setAd(a.id, {}, { state: "blocked", until: r.until, reason: r.reason }); if (a.owner) A.notify(a.owner, "Объявление заблокировано", `«${a.title}» ${A.until(r)}. Причина: ${r.reason}`, "#/me/ads"); return done("Заблокировано", "Объявление заблокировано", r.reason); }
@@ -434,6 +457,15 @@
     if (op === "rank") { A.setAd(a.id, {}, { rank: +el.dataset.v || null }); return done("Порядок изменён", "Изменено место в выдаче", el.textContent); }
     if (op === "bump") { A.setAd(a.id, {}, { bump: Date.now() }); return done("Поднято наверх", "Объявление поднято"); }
     if (op === "feat") { A.setAd(a.id, {}, { featured: m0(a).featured ? null : true }); return done("Готово", m0(a).featured ? "Выделение снято" : "Объявление выделено"); }
+    if (op === "lock") { A.setAd(a.id, {}, { locked: m0(a).locked ? null : true }); return done(m0(D.ad(a.id)).locked ? "Правки автору запрещены" : "Правки автору разрешены", "Доступ к редактированию изменён"); }
+    if (op === "renew") { A.setAd(a.id, { renewed: Date.now() }); return done("Срок публикации продлён", "Объявление продлено"); }
+    if (op === "msg") { const t = await UI.askText("Сообщение автору", "Текст", { hint: "Придёт в уведомления и в служебный чат от команды.", templates: ["Пожалуйста, уберите контакты из описания объявления.", "Уточните, пожалуйста, цену — сейчас она выглядит как ошибка.", "Добавьте, пожалуйста, настоящие фото товара."] }); if (!t) return; VO.chats.teamSay(a.owner, `По объявлению «${a.title}»: ${t}`); A.log("Сообщение автору объявления", a.title, t); return VO.toast("Отправлено"); }
+    if (op === "transfer") {
+      const accs = D.users().filter(x => x.kind === "account" && x.email !== a.owner); if (!accs.length) return VO.toast("Нет других пользователей");
+      const sh = VO.sheet(`<form class="aform" id="trF2"><h3>Передать объявление</h3><p class="muted">Новый владелец увидит его в своём кабинете. Переписки по объявлению останутся у прежних собеседников.</p><label class="asel"><span>Кому</span><select name="to">${accs.map(x => `<option value="${esc(x.email)}">${esc(x.name)} — ${esc(x.email)}</option>`).join("")}</select></label><div class="aform__a"><button type="button" class="adm-btn adm-btn--ghost" data-sheet-close>Отмена</button><button class="adm-btn" type="submit">Передать</button></div></form>`, { cls: "sheet--sm adm-sheet" });
+      $("#trF2", sh).addEventListener("submit", ev => { ev.preventDefault(); const to = new FormData(ev.target).get("to"), from = a.owner; VO.closeSheet(true); A.setAd(a.id, { owner: to }); A.notify(to, "Вам передано объявление", `«${a.title}» теперь в вашем кабинете`, "#/me/ads"); done("Объявление передано", "Объявление передано другому пользователю", `${from} → ${to}`); });
+      return;
+    }
     if (op === "status") { A.setAd(a.id, { status: el.dataset.v }); return done("Статус изменён", "Статус объявления изменён", el.textContent); }
   };
   const m0 = a => a.adm || {};
@@ -463,11 +495,12 @@
   SEC.users = { group: "manage", name: "Пользователи", perm: "manage", render() {
     const st = UI.f("users", "st"), kind = UI.f("users", "kind");
     let L = D.users().filter(u => UI.match("users", `${u.name} ${u.email} ${u.city} ${u.company} ${u.id} ${u.acc && u.acc.phone || ""}`));
-    L = L.filter(u => { const l = A.limits(u.id); return !st || (st === "ban" ? l.ban : st === "lim" ? (l.noPost || l.noMsg) && !l.ban : st === "ok" ? !l.ban && !l.noPost && !l.noMsg : st === "warn" ? (A.u(u.id).warns || []).length : st === "admin" ? u.email && A.role(u.email) : true); });
+    L = L.filter(u => { const l = A.limits(u.id), r = A.u(u.id); return !st || (st === "ban" ? l.ban : st === "lim" ? (l.noPost || l.noMsg) && !l.ban : st === "ok" ? !l.ban && !l.noPost && !l.noMsg : st === "warn" ? (r.warns || []).length : st === "admin" ? u.email && A.role(u.email) : st === "trusted" ? r.trusted : st === "shadow" ? r.shadow : st === "trash" ? false : true); });
     L = L.filter(u => !kind || (kind === "real" ? u.kind === "account" : kind === "test" ? u.kind !== "account" : kind === u.type));
     L.sort((a, b) => (b.kind === "account") - (a.kind === "account") || (b.created || 0) - (a.created || 0));
+    if (st === "trash") { const tr = D.trash(); return `${UI.tools("users", "Имя, почта, телефон или город", [["st", [["", "Все статусы"], ["trash", `Удалённые · ${tr.length}`]]]])}<p class="muted">Удалённые аккаунты хранятся ${TRASH_DAYS} дней, потом стираются. Восстановление вернёт профиль и объявления.</p>${tr.length ? `<ul class="alist">${tr.map((x, i) => `<li>${ava(x.acc.name || x.acc.email, x.acc.color)}<span><b>${esc(x.acc.name || "Без имени")} — ${esc(x.acc.email)}</b><small>Удалён ${fmtD(x.t)} · ${esc(x.by)} · объявлений: ${x.ads.length} · осталось ${Math.max(0, TRASH_DAYS - Math.floor((Date.now() - x.t) / 864e5))} дн.</small></span><button type="button" class="adm-btn adm-btn--ok adm-btn--sm" data-a="utrash" data-i="${i}">Восстановить</button><button type="button" class="adm-btn adm-btn--text adm-btn--sm" data-a="utrashdel" data-i="${i}">Стереть</button></li>`).join("")}</ul>` : `<div class="aempty"><b>Корзина пуста</b><span>Удалённые аккаунты появятся здесь</span></div>`}`; }
     return `<div class="ahead"><p class="muted">Нажмите на человека — откроется карточка: профиль, ограничения, объявления, переписка с командой, история.</p><button class="adm-btn" type="button" data-a="unew">+ Добавить пользователя</button></div>
-      ${UI.tools("users", "Имя, почта, телефон или город", [["st", [["", "Все статусы"], ["ok", "Без ограничений"], ["ban", "Заблокированные"], ["lim", "С ограничениями"], ["warn", "С предупреждениями"], ["admin", "Команда сайта"]]], ["kind", [["", "Все"], ["real", "Настоящие аккаунты"], ["test", "Тестовые и демо"], ["person", "Частные лица"], ["company", "Компании"]]]])}
+      ${UI.tools("users", "Имя, почта, телефон или город", [["st", [["", "Все статусы"], ["ok", "Без ограничений"], ["ban", "Заблокированные"], ["lim", "С ограничениями"], ["warn", "С предупреждениями"], ["admin", "Команда сайта"], ["trusted", "Доверенные"], ["shadow", "В теневом режиме"], ["trash", `Удалённые · ${D.trash().length}`]]], ["kind", [["", "Все"], ["real", "Настоящие аккаунты"], ["test", "Тестовые и демо"], ["person", "Частные лица"], ["company", "Компании"]]]])}
       ${UI.bulk("users", USR_BULK)}
       ${UI.table("users", L, [
         ["Пользователь", u => `<div class="acell-u">${ava(u.name, u.color)}<span><b>${esc(u.company && u.type === "company" ? u.company : u.name)}${u.email && A.role(u.email) ? ` <em class="arole">${A.ROLES[A.role(u.email)]}</em>` : ""}</b><small>${esc(u.email || D.kindName(u))}</small></span></div>`, "w-wide"],
@@ -482,30 +515,47 @@
   const uIds = () => UI.selected("users");
   async function userLimit(ids, kind) {
     const T = { ban: ["Заблокировать", "Не сможет войти, объявления пропадут из ленты."], noPost: ["Запретить размещать объявления", "Сможет входить и переписываться, но не публиковать."], noMsg: ["Запретить писать сообщения", "Сможет пользоваться сайтом, но не писать в чатах."] }[kind];
-    const r = await UI.askLimit(`${T[0]}${ids.length > 1 ? ": " + ids.length : ""}`, BAN_R, { text: T[1] }); if (!r) return;
-    ids.forEach(id => { A.setU(id, { [kind]: { until: r.until, reason: r.reason, t: Date.now(), by: VO.user().email } }); const u = D.user(id); if (u && u.email && kind !== "ban") A.notify(u.email, "Ограничение аккаунта", `${T[0]} ${A.until(r)}. Причина: ${r.reason}`); A.log(T[0], u ? u.email || u.name : id, `${A.until(r)} · ${r.reason}`); });
-    sel.users && sel.users.clear(); VO.toast("Готово", 1400); UI.render(); if (UI.drawerOpen() && cur.sec === "users") userDrawer(cur.id, "lim");
+    const skip = ids.filter(id => A.protectedId(id)); ids = ids.filter(id => !A.protectedId(id));
+    if (skip.length) VO.toast(ids.length ? "Себя и владельца пропустили — их ограничить нельзя" : "Себя и владельца ограничить нельзя"); if (!ids.length) return;
+    const r = await UI.askLimit(`${T[0]}${ids.length > 1 ? ": " + ids.length : ""}`, BAN_R, { text: T[1] + " Снять можно в любой момент — в карточке пользователя или кнопкой «Отменить»." }); if (!r) return;
+    UI.undoable(T[0] + (ids.length > 1 ? " · " + ids.length : ""), ids.map(id => ({ t: "u", id })), () => ids.forEach(id => { A.setU(id, { [kind]: { until: r.until, reason: r.reason, t: Date.now(), by: VO.user().email } }); const u = D.user(id); if (u && u.email && kind !== "ban") A.notify(u.email, "Ограничение аккаунта", `${T[0]} ${A.until(r)}. Причина: ${r.reason}`); }), ids.length === 1 ? (D.user(ids[0]) || {}).email || (D.user(ids[0]) || {}).name : `${ids.length} чел.`, `${A.until(r)} · ${r.reason}`);
+    sel.users && sel.users.clear(); UI.render(); if (UI.drawerOpen() && cur.sec === "users") userDrawer(cur.id, "lim");
   }
   UI.userLimit = userLimit;
   ACT.ubanb = () => uIds().length && userLimit(uIds(), "ban");
   ACT.unopost = () => uIds().length && userLimit(uIds(), "noPost");
   ACT.unomsg = () => uIds().length && userLimit(uIds(), "noMsg");
-  const clearL = (ids, keys, msg) => { ids.forEach(id => { const p = {}; keys.forEach(k => p[k] = null); A.setU(id, p); const u = D.user(id); A.log(msg, u ? u.email || u.name : id); }); sel.users && sel.users.clear(); VO.toast(msg, 1400); UI.render(); };
+  const clearL = (ids, keys, msg) => { if (!ids.length) return; UI.undoable(msg + (ids.length > 1 ? " · " + ids.length : ""), ids.map(id => ({ t: "u", id })), () => ids.forEach(id => { const had = keys.some(k => A.u(id)[k]); const p = {}; keys.forEach(k => p[k] = null); A.setU(id, p); const u = D.user(id); if (had && u && u.email) A.notify(u.email, "Ограничения сняты", "Модератор снял ограничения с вашего аккаунта. Спасибо, что соблюдаете правила!"); }), ids.length === 1 ? (D.user(ids[0]) || {}).email || ids[0] : `${ids.length} чел.`); sel.users && sel.users.clear(); UI.render(); };
   ACT.uunban = () => clearL(uIds(), ["ban"], "Блокировка снята");
   ACT.uclear = () => clearL(uIds(), ["ban", "noPost", "noMsg", "hideAds"], "Ограничения сняты");
-  ACT.uhide = () => { uIds().forEach(id => { A.setU(id, { hideAds: true }); A.log("Объявления пользователя скрыты", (D.user(id) || {}).name || id); }); sel.users.clear(); VO.toast("Объявления скрыты", 1400); UI.render(); };
+  ACT.uhide = () => { const ids = uIds(); if (!ids.length) return; UI.undoable("Объявления пользователей скрыты" + (ids.length > 1 ? " · " + ids.length : ""), ids.map(id => ({ t: "u", id })), () => ids.forEach(id => A.setU(id, { hideAds: true }))); sel.users.clear(); UI.render(); };
   const WARN_T = ["Пожалуйста, не указывайте контакты и ссылки в тексте объявлений.", "Ваши объявления нарушают правила размещения. Следующее нарушение приведёт к блокировке.", "Пожалуйста, общайтесь вежливо — на вас поступили жалобы.", "Не размещайте одинаковые объявления повторно."];
   ACT.uwarn = async () => { const ids = uIds().filter(id => (D.user(id) || {}).email); if (!ids.length) return VO.toast("Предупреждение можно отправить только настоящим аккаунтам"); const t = await UI.askText(`Предупреждение: ${ids.length}`, "Текст предупреждения", { templates: WARN_T, hint: "Придёт в уведомления и в служебный чат от команды." }); if (!t) return; ids.forEach(id => { A.warn(D.user(id).email, t); A.log("Предупреждение", D.user(id).email, t); }); sel.users.clear(); VO.toast("Отправлено"); UI.render(); };
   ACT.umsg = async () => { const ids = uIds().filter(id => (D.user(id) || {}).email); if (!ids.length) return VO.toast("Написать можно только настоящим аккаунтам"); const t = await UI.askText(`Сообщение от команды: ${ids.length}`, "Текст сообщения", { hint: "Появится в переписке как «Команда «Все объявления»»." }); if (!t) return; ids.forEach(id => { VO.chats.teamSay(D.user(id).email, t); A.log("Сообщение от команды", D.user(id).email, t); }); sel.users.clear(); VO.toast("Отправлено"); UI.render(); };
   ACT.ukick = () => { uIds().forEach(id => { const u = D.user(id); if (u && u.acc) { u.acc.kick = Date.now(); u.acc.sessions = []; A.log("Завершены все сеансы", u.email); } }); store.set("vo_accounts", S.accounts); sel.users.clear(); VO.toast("Сеансы завершены", 1400); UI.render(); };
-  ACT.udel = async () => { const ids = uIds().filter(id => (D.user(id) || {}).kind === "account"); if (!ids.length) return VO.toast("Удалить можно только настоящие аккаунты"); if (ids.some(id => D.user(id).email === VO.user().email)) return VO.toast("Себя удалить нельзя"); if (!await UI.ask(`Удалить ${ids.length} ${VO.plural(ids.length, "аккаунт", "аккаунта", "аккаунтов")}?`, "Профили, объявления и уведомления будут удалены. Переписки останутся у собеседников.", "Удалить", true, "удалить")) return; ids.forEach(delUser); sel.users.clear(); UI.closeDrawer(); UI.render(); };
+  ACT.udel = async () => { const ids = uIds().filter(id => (D.user(id) || {}).kind === "account"); if (!ids.length) return VO.toast("Удалить можно только настоящие аккаунты"); if (ids.some(id => D.user(id).email === VO.user().email)) return VO.toast("Себя удалить нельзя"); if (!await UI.ask(`Удалить ${ids.length} ${VO.plural(ids.length, "аккаунт", "аккаунта", "аккаунтов")}?`, `Аккаунты и объявления уйдут в корзину на ${TRASH_DAYS} дней — оттуда их можно вернуть. Переписки останутся у собеседников.`, "Удалить", true, "удалить")) return; ids.forEach(delUser); sel.users.clear(); UI.closeDrawer(); UI.render(); };
+  // удаление — в корзину на 30 дней: профиль и объявления можно вернуть
+  const TRASH_DAYS = 30;
+  D.trash = () => store.get("vo_adm_trash", []).filter(x => Date.now() - x.t < TRASH_DAYS * 864e5);
   function delUser(id) {
     const u = D.user(id); if (!u || !u.acc) return;
-    S.mine = S.mine.filter(a => a.owner !== u.email); VO.state.mine = S.mine; VO.saveMine();
+    const ads = S.mine.filter(a => a.owner === u.email);
+    const tr = D.trash(); tr.unshift({ t: Date.now(), by: VO.user().email, acc: u.acc, ads, uid: id });
+    if (!store.set("vo_adm_trash", tr)) store.set("vo_adm_trash", tr.map((x, i) => i ? x : { ...x, ads: x.ads.map(a => ({ ...a, photos: [], photo: null })) }));
+    S.mine.splice(0, S.mine.length, ...S.mine.filter(a => a.owner !== u.email)); VO.saveMine();
     delete S.accounts[u.email]; store.set("vo_accounts", S.accounts);
-    S.notes = S.notes.filter(n => n.owner !== u.email); store.set("vo_notes", S.notes);
-    A.log("Аккаунт удалён", u.email); VO.emit("mine"); VO.emit("notes");
+    if (S.session === u.email) { S.session = null; store.set("vo_session", null); }
+    A.log("Аккаунт удалён в корзину", u.email, `объявлений: ${ads.length}`); VO.emit("mine");
   }
+  function restoreUser(i) {
+    const tr = D.trash(), x = tr[i]; if (!x) return;
+    if (S.accounts[x.acc.email]) return VO.toast("Аккаунт с этой почтой уже существует");
+    S.accounts[x.acc.email] = x.acc; store.set("vo_accounts", S.accounts);
+    S.mine.push(...x.ads); VO.saveMine(); tr.splice(i, 1); store.set("vo_adm_trash", tr);
+    A.log("Аккаунт восстановлен из корзины", x.acc.email); A.notify(x.acc.email, "Аккаунт восстановлен", "Ваш профиль и объявления снова на сайте."); VO.emit("mine"); VO.toast("Аккаунт и объявления восстановлены"); UI.render();
+  }
+  ACT.utrash = el => restoreUser(+el.dataset.i);
+  ACT.utrashdel = async el => { const tr = D.trash(), x = tr[+el.dataset.i]; if (!x) return; if (!await UI.ask(`Удалить ${esc(x.acc.email)} навсегда?`, "Профиль и объявления будут стёрты без возможности восстановления.", "Удалить навсегда", true)) return; tr.splice(+el.dataset.i, 1); store.set("vo_adm_trash", tr); A.log("Аккаунт удалён навсегда", x.acc.email); UI.render(); };
   ACT.unew = () => {
     const el = VO.sheet(`<form class="aform" id="nuF"><h3>Новый пользователь</h3><p class="muted">Человек сможет войти по этой почте одноразовым кодом.</p>
       <div class="field"><input name="email" type="email" maxlength="120" placeholder=" " required><label>Почта</label></div>
@@ -534,13 +584,15 @@
         <div class="field"><input name="city" maxlength="60" placeholder=" " value="${esc(acc.city || "")}"><label>Город</label></div>
         <div class="field field--area"><textarea name="about" rows="3" maxlength="300" placeholder=" ">${esc(acc.about || "")}</textarea><label>О себе</label></div>
         <div class="arow2"><label class="atog"><input type="checkbox" name="verified"${r.verified ? " checked" : ""}><i></i>Проверенный пользователь</label>${A.can("team") ? `<label class="asel"><span>Роль на сайте</span><select name="role"><option value="">Пользователь</option>${Object.entries(A.ROLES).filter(([k]) => k !== "owner").map(([k, n]) => `<option value="${k}"${A.role(acc.email) === k ? " selected" : ""}>${n}</option>`).join("")}</select></label>` : ""}</div>
-        <div class="aform__a"><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="resetname">Сбросить имя и «о себе»</button><button class="adm-btn" type="submit">Сохранить</button></div>
+        <div class="aform__a"><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="hidephone" data-tab="prof">Скрыть телефон</button><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="resetname">Сбросить имя и «о себе»</button><button class="adm-btn" type="submit">Сохранить</button></div>
         <div class="anote"><b>Вход и пароль</b><span>На сайте нет паролей: вход по одноразовому коду на почту. Поэтому пароль нельзя ни подсмотреть, ни украсть. Чтобы сменить логин — измените почту выше. Зарегистрирован ${fmtD(acc.created)}${acc.byAdmin ? " администратором" : ""}. Согласие на обработку данных: ${acc.consentAt ? fmtD(acc.consentAt) : "нет"}.</span></div></form>`
         : `<div class="anote"><b>${u.kind === "seller" ? "Тестовый продавец" : "Демо-покупатель"}</b><span>Это демонстрационный человек: он отвечает в чате автоматически. Профиль не редактируется, но можно ограничить, скрыть объявления и смотреть историю.</span></div>`,
       lim: () => `${lim("ban", "Блокировка аккаунта", "Не сможет войти, объявления скрыты")}${lim("noPost", "Запрет на размещение", "Не сможет публиковать объявления")}${lim("noMsg", "Запрет на сообщения", "Не сможет писать в чатах")}
         <div class="alim${r.hideAds ? " is-on" : ""}"><div><b>Скрыть все объявления</b><small>Объявления останутся у автора, но пропадут из ленты</small></div><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="u1" data-op="hideads">${r.hideAds ? "Показать" : "Скрыть"}</button></div>
-        <h4>Предупреждения · ${(r.warns || []).length}</h4>${(r.warns || []).length ? `<ul class="afeed">${r.warns.slice().reverse().map(w => `<li><span>${esc(w.text)}</span><small>${fmtD(w.t)}</small></li>`).join("")}</ul>` : `<p class="muted">Предупреждений не было</p>`}
-        ${real ? `<div class="abtns"><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="warn">Отправить предупреждение…</button><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="kick">Выйти на всех устройствах</button><button type="button" class="adm-btn adm-btn--danger" data-a="u1" data-op="del">Удалить аккаунт…</button></div>` : ""}`,
+        <div class="alim${r.shadow ? " is-on" : ""}"><div><b>Теневой режим</b><small>${r.shadow ? "Объявления видит только сам автор — он не знает об ограничении" : "Для спамеров: объявления видит только автор, без уведомления"}</small></div><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="u1" data-op="shadow">${r.shadow ? "Выключить" : "Включить"}</button></div>
+        <div class="alim alim--good${r.trusted ? " is-on" : ""}"><div><b>Доверенный пользователь</b><small>${r.trusted ? "Объявления публикуются без проверки модератором" : "Объявления будут публиковаться без предварительной проверки"}</small></div><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="u1" data-op="trusted">${r.trusted ? "Снять" : "Доверять"}</button></div>
+        <h4>Предупреждения · ${(r.warns || []).length}${A.cfg().autoBanWarns ? ` <small class="muted">из ${A.cfg().autoBanWarns} до автоблокировки</small>` : ""}</h4>${(r.warns || []).length ? `<ul class="afeed">${r.warns.slice().reverse().map(w => `<li class="afeed__x"><span>${esc(w.text)}</span><small>${fmtD(w.t)}</small><button type="button" class="link" data-a="u1" data-op="unwarn" data-w="${esc(String(w.id || w.t))}">Отозвать</button></li>`).join("")}</ul>` : `<p class="muted">Предупреждений не было</p>`}
+        ${real ? `<div class="abtns"><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="warn">Отправить предупреждение…</button><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="kick">Выйти на всех устройствах</button><button type="button" class="adm-btn adm-btn--ghost" data-a="u1" data-op="export">Выгрузить данные (152-ФЗ)</button><button type="button" class="adm-btn adm-btn--danger" data-a="u1" data-op="del">Удалить в корзину…</button></div><p class="muted">Удалённый аккаунт ${TRASH_DAYS} дней можно восстановить: «Пользователи → фильтр «Удалённые»».</p>` : ""}`,
       ads: () => ads.length ? `<ul class="alist">${ads.map(a => { const s = D.status(a); return `<li><span class="amod__th" style="background:${a.bg}">${a.photo ? `<img src="${a.photo}" alt="">` : window.VO_ILL[a.ill] || ""}</span><span><b>${esc(a.title)}</b><small>${a.price ? VO.rub(a.price) : "Даром"} · ${pill(s[1], s[2])}</small></span><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="goad" data-id="${esc(a.id)}">Открыть</button></li>`; }).join("")}</ul>` : `<p class="muted">Объявлений нет</p>`,
       chat: () => { if (!real) return `<p class="muted">Для демо-людей служебного чата нет.</p>`; const c = VO.chats.teamGet(acc.email), other = VO.chats.all().filter(x => x.owner === acc.email && !x.team);
         return `<div class="athread">${c && c.msgs.length ? c.msgs.map(m => `<div class="athread__m athread__m--${m.from === "peer" ? "team" : "user"}"><p>${esc(m.text || "")}</p><small>${m.from === "peer" ? "Команда" : esc(acc.name || "Пользователь")} · ${fmtD(m.t)}</small></div>`).join("") : `<p class="muted">Переписки с командой пока нет.</p>`}</div>
@@ -584,14 +636,20 @@
   ACT.u1 = async el => {
     const id = cur.id, u = D.user(id); if (!u) return; const op = el.dataset.op;
     if (op === "lim") return userLimit([id], el.dataset.k);
-    if (op === "unlim") { A.setU(id, { [el.dataset.k]: null }); A.log("Ограничение снято", u.email || u.name, el.dataset.k); VO.toast("Снято", 1200); userDrawer(id, "lim"); return UI.render(); }
-    if (op === "hideads") { const on = !A.u(id).hideAds; A.setU(id, { hideAds: on || null }); A.log(on ? "Объявления пользователя скрыты" : "Объявления пользователя показаны", u.email || u.name); userDrawer(id, "lim"); return UI.render(); }
+    const one = (label, patch, note) => { UI.undoable(label, [{ t: "u", id }], () => { A.setU(id, patch); if (note && u.email) A.notify(u.email, note[0], note[1]); }, u.email || u.name); userDrawer(id, el.dataset.tab || "lim"); UI.render(); };
+    if (op === "unlim") return one({ ban: "Блокировка снята", noPost: "Запрет на размещение снят", noMsg: "Запрет на сообщения снят" }[el.dataset.k] || "Ограничение снято", { [el.dataset.k]: null }, ["Ограничение снято", "Модератор снял ограничение с вашего аккаунта."]);
+    if (op === "hideads") { const on = !A.u(id).hideAds; return one(on ? "Объявления пользователя скрыты" : "Объявления пользователя показаны", { hideAds: on || null }); }
+    if (op === "trusted") { const on = !A.u(id).trusted; return one(on ? "Пользователь — доверенный" : "Доверие снято", { trusted: on || null }); }
+    if (op === "shadow") { if (A.protectedId(id)) return VO.toast("Себя и владельца ограничить нельзя"); const on = !A.u(id).shadow; return one(on ? "Включён теневой режим" : "Теневой режим выключен", { shadow: on || null }); }
+    if (op === "unwarn") { const w = (A.u(id).warns || []).filter(x => String(x.id || x.t) !== el.dataset.w); return one("Предупреждение отозвано", { warns: w.length ? w : null }, ["Предупреждение отозвано", "Модератор отозвал одно из предупреждений. Спасибо за понимание!"]); }
+    if (op === "hidephone") { u.acc.phoneVis = "none"; u.acc.showPhone = false; store.set("vo_accounts", S.accounts); A.notify(u.email, "Телефон скрыт модератором", "Номер скрыт в объявлениях. Связь — через сообщения на сайте. Показ можно включить снова в профиле."); A.log("Телефон пользователя скрыт", u.email); VO.toast("Телефон скрыт", 1400); return userDrawer(id, "prof"); }
+    if (op === "export") { const acc = u.acc, data = { профиль: acc, объявления: S.mine.filter(a => a.owner === acc.email).map(a => ({ ...a, photos: (a.photos || []).length + " фото" })), переписки: VO.chats.all().filter(c => c.owner === acc.email).map(c => ({ с: VO.person(c.peer).name, объявление: c.ad.title, сообщений: c.msgs.length })), отзывы_о_нём: VO.reviews.of(id), ограничения: A.u(id), обращения: D.tickets().filter(t => t.email === acc.email) }; UI.download(`user-${acc.email}.json`, JSON.stringify(data, null, 2), "application/json"); return A.log("Выгружены данные пользователя", acc.email); }
     if (op === "warn") { const t = await UI.askText("Предупреждение", "Текст предупреждения", { templates: WARN_T, hint: "Придёт в уведомления и в служебный чат." }); if (!t) return; A.warn(u.email, t); A.log("Предупреждение", u.email, t); VO.toast("Отправлено"); return userDrawer(id, "lim"); }
     if (op === "write") return userDrawer(id, "chat");
     if (op === "kick") { u.acc.kick = Date.now(); u.acc.sessions = []; store.set("vo_accounts", S.accounts); A.log("Завершены все сеансы", u.email); return VO.toast("Сеансы завершены", 1400); }
     if (op === "as") { if (await UI.ask(`Войти как ${esc(u.name)}?`, "Вы увидите сайт глазами пользователя и сможете помочь с объявлениями. Действие записывается в журнал. Вернуться — кнопкой внизу экрана.", "Войти")) A.loginAs(u.email); return; }
     if (op === "resetname") { u.acc.name = "Пользователь"; u.acc.about = ""; store.set("vo_accounts", S.accounts); A.notify(u.email, "Профиль изменён модератором", "Имя и описание профиля нарушали правила и были сброшены. Укажите новые в профиле.", "#/me/profile"); A.log("Сброшены имя и «о себе»", u.email); return userDrawer(id, "prof"); }
-    if (op === "del") { if (u.email === VO.user().email) return VO.toast("Себя удалить нельзя"); if (!await UI.ask(`Удалить аккаунт ${esc(u.email)}?`, "Профиль, объявления и уведомления будут удалены без возможности восстановления.", "Удалить", true, "удалить")) return; delUser(id); UI.closeDrawer(); return UI.render(); }
+    if (op === "del") { if (u.email === VO.user().email) return VO.toast("Себя удалить нельзя"); if (!await UI.ask(`Удалить аккаунт ${esc(u.email)}?`, `Профиль и объявления уйдут в корзину на ${TRASH_DAYS} дней — оттуда их можно вернуть.`, "Удалить", true, "удалить")) return; delUser(id); UI.closeDrawer(); return UI.render(); }
   };
   ACT.gochat = el => UI.go("chats", el.dataset.id);
 
@@ -641,46 +699,68 @@
   const RISK = /(предоплат|переведи|переведите|карт[уы] |код из смс|скажите код|https?:\/\/|оплатить по ссылке|безопасн\w* сделк)/i;
   SEC.chats = { group: "manage", name: "Переписки и сделки", perm: "manage", render() {
     const f = UI.f("chats", "f"), all = VO.chats ? VO.chats.all() : [];
-    let L = all.filter(c => !f || (f === "risk" ? c.msgs.some(m => RISK.test(m.text || "")) : f === "deal" ? c.deal : f === "team" ? c.team : f === "done" ? c.deal && c.deal.stage === "done" : true));
+    let L = all.filter(c => !f || (f === "risk" ? !c.checked && c.msgs.some(m => RISK.test(m.text || "")) : f === "rep" ? D.reports().some(r => r.chat === c.id) : f === "deal" ? c.deal : f === "team" ? c.team : f === "done" ? c.deal && c.deal.stage === "done" : true));
     L = L.filter(c => UI.match("chats", `${VO.person(c.peer).name} ${c.owner} ${c.ad.title}`)).sort((a, b) => ((b.msgs[b.msgs.length - 1] || {}).t || b.created) - ((a.msgs[a.msgs.length - 1] || {}).t || a.created));
     const ST = { proposed: "Предложена", agreed: "Договорились", transfer: "Передача", done: "Завершена", cancelled: "Отменена" };
     return `<p class="muted ahead">Читайте переписку только при жалобе или по просьбе пользователя — это личные данные. Каждое открытие записывается в журнал.</p>
-      ${UI.tools("chats", "Имя, почта или объявление", [["f", [["", "Все диалоги"], ["risk", "С подозрительными словами"], ["deal", "Со сделкой"], ["done", "Завершённые сделки"], ["team", "Служебные (от команды)"]]]])}
+      ${UI.tools("chats", "Имя, почта или объявление", [["f", [["", "Все диалоги"], ["risk", "С подозрительными словами (не проверены)"], ["rep", "С жалобами"], ["deal", "Со сделкой"], ["done", "Завершённые сделки"], ["team", "Служебные (от команды)"]]]])}
       ${UI.table("chats", L, [
         ["Диалог", c => `<div class="acell-u">${ava(VO.person(c.peer).name, VO.person(c.peer).color)}<span><b>${esc((S.accounts[c.owner] || {}).name || c.owner)} ↔ ${esc(VO.person(c.peer).name)}</b><small>${c.team ? "служебный чат" : "«" + esc(c.ad.title) + "»"}</small></span></div>`, "w-wide"],
         ["Сообщений", c => c.msgs.length, "num"],
         ["Сделка", c => c.deal ? pill(ST[c.deal.stage] || c.deal.stage, c.deal.stage === "done" ? "green" : c.deal.stage === "cancelled" ? "gray" : "blue") : "—"],
-        ["Риск", c => c.msgs.some(m => RISK.test(m.text || "")) ? pill("Есть", "red") : "—"],
+        ["Риск", c => D.reports().some(r => r.chat === c.id) ? pill("Жалоба", "red") : c.checked ? pill("Проверено", "green") : c.msgs.some(m => RISK.test(m.text || "")) ? pill("Есть", "yellow") : "—"],
         ["Последнее", c => fmtD((c.msgs[c.msgs.length - 1] || {}).t || c.created), "nw hide-m"],
       ], { empty: "Диалогов нет" })}`;
   }, open(id) {
     const c = VO.chats.all().find(x => x.id === id); if (!c) return UI.closeDrawer();
-    A.log("Просмотр переписки", c.owner, c.ad.title);
-    const me = (S.accounts[c.owner] || {}).name || c.owner, p = VO.person(c.peer);
-    UI.drawer(`<div class="adr__h">${ava(p.name, p.color, 48)}<div><h2>${esc(me)} ↔ ${esc(p.name)}</h2><p>${c.team ? "Служебный чат" : "«" + esc(c.ad.title) + "»"}${c.deal ? ` · сделка: ${esc(c.deal.stage)}` : ""}</p></div></div>
-      <div class="athread athread--chat">${c.msgs.map(m => m.from === "sys" ? `<div class="athread__sys">${esc(m.text)}</div>` : `<div class="athread__m athread__m--${m.from === "me" ? "user" : "team"}${RISK.test(m.text || "") ? " is-risk" : ""}">${m.photo ? `<img src="${m.photo}" alt="">` : ""}${m.text ? `<p>${esc(m.text)}</p>` : ""}<small>${m.from === "me" ? esc(me) : esc(p.name)} · ${fmtD(m.t)}</small></div>`).join("") || '<p class="muted">Сообщений нет</p>'}</div>
+    if (!viewed.has(id)) { viewed.add(id); A.log("Просмотр переписки", c.owner, c.team ? "служебный чат" : c.ad.title); }
+    const ownId = VO.uid(c.owner), acc = S.accounts[c.owner] || {}, me = acc.name || c.owner, p = VO.person(c.peer), reps = D.reports().filter(r => r.chat === c.id);
+    const part = (pid, name, color, sub, email) => { const l = A.limits(pid), prot = A.protectedId(pid); return `<div class="apart">${ava(name, color, 38)}<span><b>${esc(name)}</b><small>${esc(sub)}${l.ban ? " · " + pill("Заблокирован", "red") : ""}${l.noMsg ? " · " + pill("Без сообщений", "yellow") : ""}</small></span>
+      <div class="abtns"><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="gouser" data-id="${esc(pid)}">Профиль</button>${email ? `<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="cpart" data-op="warn" data-id="${esc(pid)}">Предупредить</button>` : ""}${prot ? "" : l.noMsg ? `<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="cpart" data-op="unmsg" data-id="${esc(pid)}">Вернуть сообщения</button>` : `<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="cpart" data-op="nomsg" data-id="${esc(pid)}">Запретить писать…</button>`}${prot ? "" : l.ban ? `<button type="button" class="adm-btn adm-btn--ok adm-btn--sm" data-a="cpart" data-op="unban" data-id="${esc(pid)}">Разблокировать</button>` : `<button type="button" class="adm-btn adm-btn--danger adm-btn--sm" data-a="cpart" data-op="ban" data-id="${esc(pid)}">Заблокировать…</button>`}</div></div>`; };
+    const role = c.role === "buyer" ? ["покупатель", "продавец"] : ["продавец", "покупатель"];
+    UI.drawer(`<div class="adr__h">${ava(p.name, p.color, 48)}<div><h2>${esc(me)} ↔ ${esc(p.name)}</h2><p>${c.team ? "Служебный чат" : "«" + esc(c.ad.title) + "»"}${c.deal ? ` · сделка: ${esc(c.deal.stage)}` : ""}${c.checked ? " · " + pill("Проверено", "green") : ""}</p></div></div>
+      ${reps.length ? `<div class="amod__reps"><b>Жалобы на этот диалог (${reps.length}):</b>${reps.map(r => `<span>${esc(r.reason)}${r.text ? ` — «${esc(r.text)}»` : ""}</span>`).join("")}</div>` : ""}
+      <div class="aparts">${part(ownId, me, acc.color, `${role[0]} · ${c.owner}`, c.owner)}${c.team ? "" : part(c.peer, p.name, p.color, `${role[1]}${p.demo ? " · демо" : p.bot ? " · тестовый" : ""}`, p.email)}</div>
+      <div class="abtns">${c.team ? "" : `<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="cchk" data-id="${esc(c.id)}">${c.checked ? "Снять отметку «Проверено»" : "Отметить «Проверено»"}</button>`}${c.ad.id ? `<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-a="goad" data-id="${esc(c.ad.id)}">Объявление</button>` : ""}</div>
+      <p class="muted">Наведите на сообщение — его можно скрыть (собеседники увидят «Сообщение скрыто модератором») или вернуть.</p>
+      <div class="athread athread--chat">${c.msgs.map(m => { if (m.from === "sys") return `<div class="athread__sys">${esc(m.text)}</div>`; const author = m.from === "me" ? me : p.name, aid = m.from === "me" ? ownId : c.peer, rep = reps.some(r => r.msg === m.id);
+        return `<div class="athread__m athread__m--${m.from === "me" ? "user" : "team"}${RISK.test(m.text || "") ? " is-risk" : ""}${m.hidden ? " is-hidden" : ""}${rep ? " is-rep" : ""}">${m.photo ? `<img src="${m.photo}" alt="">` : ""}${m.text ? `<p>${esc(m.text)}</p>` : ""}<small>${esc(author)} · ${fmtD(m.t)}${m.hidden ? " · скрыто" : ""}${rep ? " · есть жалоба" : ""}</small>
+          <div class="athread__act"><button type="button" data-a="cmsg" data-op="${m.hidden ? "show" : "hide"}" data-c="${esc(c.id)}" data-m="${esc(m.id)}">${m.hidden ? "Вернуть" : "Скрыть"}</button>${!c.team || m.from === "me" ? `<button type="button" data-a="cpart" data-op="nomsg" data-id="${esc(aid)}">Запретить писать</button>` : ""}</div></div>`; }).join("") || '<p class="muted">Сообщений нет</p>'}</div>
       ${c.team ? `<form class="athread__f" id="tm2F"><textarea name="t" rows="2" maxlength="2000" placeholder="Ответ от команды"></textarea><button class="adm-btn" type="submit">Отправить</button></form>` : ""}`);
     const f = $("#tm2F"); if (f) f.addEventListener("submit", e => { e.preventDefault(); const t = f.t.value.trim(); if (!t) return; VO.chats.teamSay(c.owner, t); A.log("Сообщение от команды", c.owner, t); SEC.chats.open(id); });
   } };
+  const viewed = new Set();
+  ACT.cmsg = el => { const hide = el.dataset.op === "hide"; VO.chats.modMsg(el.dataset.c, el.dataset.m, { hidden: hide || null, hiddenBy: hide ? VO.user().email : null }); A.log(hide ? "Сообщение скрыто" : "Сообщение возвращено", el.dataset.c); VO.toast(hide ? "Сообщение скрыто" : "Сообщение возвращено", 1400); SEC.chats.open(cur.id); UI.render(); };
+  ACT.cchk = el => { const c = VO.chats.all().find(x => x.id === el.dataset.id); VO.chats.modChat(c.id, { checked: c.checked ? null : Date.now() }); A.log(c.checked ? "Диалог отмечен проверенным" : "Отметка «Проверено» снята", c.owner); SEC.chats.open(c.id); UI.render(); };
+  ACT.cpart = async el => {
+    const id = el.dataset.id, op = el.dataset.op, u = D.user(id) || { name: VO.person(id).name };
+    if (op === "ban") await userLimit([id], "ban");
+    else if (op === "nomsg") await userLimit([id], "noMsg");
+    else if (op === "unban" || op === "unmsg") clearL([id], [op === "unban" ? "ban" : "noMsg"], op === "unban" ? "Блокировка снята" : "Запрет на сообщения снят");
+    else if (op === "warn") { const em = u.email || (VO.person(id) || {}).email; if (!em) return VO.toast("Предупредить можно только настоящий аккаунт"); const t = await UI.askText("Предупреждение", "Текст", { templates: WARN_T }); if (!t) return; A.warn(em, t); A.log("Предупреждение", em, t); VO.toast("Отправлено"); }
+    if (cur.sec === "chats" && cur.id) SEC.chats.open(cur.id);
+  };
 
   /* ---------- Отзывы ---------- */
-  SEC.reviews = { group: "manage", name: "Отзывы", perm: "manage", render() {
-    const f = UI.f("reviews", "f"), L = (VO.reviews ? VO.reviews.adminAll() : []).filter(r => !f || (f === "hidden" ? r.hidden : f === "low" ? r.stars <= 2 : f === "nv" ? !r.verified : f === "v" ? r.verified : true)).filter(r => UI.match("reviews", `${r.text} ${r.authorName} ${VO.person(r.target).name}`)).sort((a, b) => b.t - a.t);
-    return `${UI.tools("reviews", "Текст, автор или о ком", [["f", [["", "Все отзывы"], ["low", "Оценка 1–2"], ["v", "Со сделкой на сайте"], ["nv", "Без сделки"], ["hidden", "Скрытые"]]]])}
-      ${UI.bulk("reviews", [["rvhide", "Скрыть"], ["rvshow", "Показать"], ["rvdel", "Удалить", "danger"]])}
+  SEC.reviews = { group: "manage", name: "Отзывы", perm: "manage", badge: c => c.reviews, render() {
+    const f = UI.f("reviews", "f"), L = (VO.reviews ? VO.reviews.adminAll() : []).filter(r => f === "deleted" ? r.deleted : !r.deleted).filter(r => !f || f === "deleted" || (f === "hidden" ? r.hidden && !r.pending : f === "pending" ? r.pending : f === "low" ? r.stars <= 2 : f === "nv" ? !r.verified : f === "v" ? r.verified : true)).filter(r => UI.match("reviews", `${r.text} ${r.authorName} ${VO.person(r.target).name}`)).sort((a, b) => b.t - a.t);
+    return `${UI.tools("reviews", "Текст, автор или о ком", [["f", [["", "Все отзывы"], ["pending", "Ждут проверки"], ["low", "Оценка 1–2"], ["v", "Со сделкой на сайте"], ["nv", "Без сделки"], ["hidden", "Скрытые"], ["deleted", "Удалённые"]]]])}
+      ${UI.bulk("reviews", f === "deleted" ? [["rvrest", "Восстановить"]] : [["rvok", "Одобрить"], ["rvhide", "Скрыть"], ["rvshow", "Показать"], ["rvdel", "Удалить", "danger"]])}
       ${UI.table("reviews", L, [
         ["Отзыв", r => `<div class="acell-rev"><b>${"★".repeat(r.stars)}<i>${"★".repeat(5 - r.stars)}</i></b><span>${esc(r.text)}</span>${r.reply ? `<small>Ответ: ${esc(r.reply)}</small>` : ""}</div>`, "w-wide"],
         ["Автор", r => esc(r.authorName || "—"), "hide-m"],
         ["О ком", r => esc(VO.person(r.target).name), "hide-m"],
         ["Роль", r => r.role === "buyer" ? "о покупателе" : "о продавце", "hide-m"],
         ["Сделка", r => r.verified ? pill("Да", "green") : pill("Нет", "gray")],
-        ["Статус", r => r.hidden ? pill("Скрыт", "gray") : pill("Виден", "green")],
+        ["Статус", r => r.deleted ? pill("Удалён", "red") : r.pending ? pill("Ждёт проверки", "yellow") : r.hidden ? pill("Скрыт", "gray") : pill("Виден", "green")],
       ], { open: false, empty: "Отзывов нет" })}`;
   } };
   const rvBulk = (patch, msg) => { UI.selected("reviews").forEach(id => { VO.reviews.adminSet(id, patch); A.log(msg, id); }); sel.reviews.clear(); VO.toast(msg, 1300); UI.render(); };
   ACT.rvhide = () => rvBulk({ hidden: true }, "Отзыв скрыт");
-  ACT.rvshow = () => rvBulk({ hidden: null }, "Отзыв показан");
-  ACT.rvdel = async () => { if (!UI.selected("reviews").length) return; if (await UI.ask("Удалить отзывы?", "Удалённые отзывы нельзя восстановить.", "Удалить", true)) rvBulk({ deleted: true }, "Отзыв удалён"); };
+  ACT.rvshow = () => rvBulk({ hidden: null, pending: null }, "Отзыв показан");
+  ACT.rvok = () => rvBulk({ hidden: null, pending: null }, "Отзыв одобрен");
+  ACT.rvrest = () => rvBulk({ deleted: null }, "Отзыв восстановлен");
+  ACT.rvdel = async () => { if (!UI.selected("reviews").length) return; if (await UI.ask("Удалить отзывы?", "Их можно будет вернуть: фильтр «Удалённые».", "Удалить", true)) rvBulk({ deleted: true }, "Отзыв удалён"); };
 
   /* ---------- Рассылка ---------- */
   SEC.mail = { group: "manage", name: "Рассылка", perm: "manage", render() {
@@ -719,23 +799,66 @@
   } };
 
   /* ---------- Правила сайта ---------- */
+  // Каждая настройка сразу влияет на сайт. tog — переключатель, num — число, sel — выбор
+  const RULES = [
+    ["Объявления", "ads", [
+      ["tog", "premod", "Проверять каждое объявление", "Новые и изменённые объявления появятся в ленте только после одобрения в «Модерации»"],
+      ["num", "premodNewDays", "Проверять объявления новых аккаунтов, дней", "Аккаунты моложе N дней публикуют через проверку. 0 — выключено", 0, 365],
+      ["num", "premodFirstN", "Проверять первые N объявлений каждого человека", "Потом — без проверки. 0 — выключено", 0, 100],
+      ["num", "dayLimit", "Объявлений в сутки от одного человека", "Защита от массовых публикаций", 1, 200],
+      ["num", "maxPhotos", "Фото в одном объявлении", "От 1 до 20", 1, 20],
+      ["tog", "requirePhoto", "Фото обязательно", "Без фото объявление не опубликовать"],
+      ["num", "minDesc", "Минимальная длина описания, символов", "0 — описание необязательно", 0, 1000],
+      ["num", "adTTL", "Срок публикации, дней", "Потом объявление уходит из ленты, автор может продлить в кабинете. 0 — бессрочно", 0, 365],
+      ["num", "autoHideReports", "Скрывать объявление автоматически после N жалоб", "До проверки модератором. 0 — не скрывать", 0, 50],
+      ["sel", "defSort", "Сортировка ленты по умолчанию", "Что видят посетители, пока сами не выбрали", [["new", "Сначала новые"], ["pop", "Популярные"], ["cheap", "Дешевле"], ["dear", "Дороже"]]],
+    ]],
+    ["Пользователи и вход", "users", [
+      ["tog", "regOpen", "Открыта регистрация", "Если выключить — войти смогут только уже зарегистрированные и команда"],
+      ["tog", "blockTempMail", "Не пускать с одноразовой почтой", "Mailinator, Temp-mail и похожие — любимый инструмент спамеров"],
+      ["num", "otpTries", "Попыток ввода кода", "После — временная блокировка входа", 3, 10],
+      ["num", "otpLockMin", "Блокировка входа после ошибок, минут", "", 1, 120],
+      ["num", "autoBanWarns", "Автоблокировка на 7 дней после N предупреждений", "0 — выключено. Снять блокировку можно в карточке пользователя", 0, 20],
+    ]],
+    ["Переписка", "chats", [
+      ["tog", "bots", "Демо-собеседники", "Тестовые продавцы и покупатели отвечают автоматически. Выключите перед запуском"],
+      ["tog", "chatRiskWarn", "Предупреждать о подозрительных сообщениях", "Под сообщениями с «предоплатой», кодами и ссылками — подсказка об осторожности"],
+      ["tog", "chatNoLinks", "Запретить ссылки в сообщениях", "Самый частый способ увести на поддельную страницу оплаты"],
+      ["tog", "chatPhotos", "Разрешить фото в сообщениях", ""],
+      ["num", "newUserMsgPerHour", "Сообщений в час для аккаунтов младше суток", "Защита от рассылок с новых аккаунтов. 0 — без ограничения", 0, 500],
+    ]],
+    ["Отзывы", "reviews", [
+      ["tog", "reviewsOnlyDeal", "Отзывы только после сделки на сайте", "Без завершённой сделки оставить отзыв нельзя"],
+      ["tog", "reviewsPremod", "Проверять отзывы перед публикацией", "Новые отзывы появятся после одобрения в разделе «Отзывы»"],
+    ]],
+  ];
   SEC.rules = { group: "manage", name: "Правила сайта", perm: "rules", render() {
     const c = A.cfg();
-    const tog = (k, n, d) => `<label class="tog"><span><b>${n}</b><small>${d}</small></span><input type="checkbox" data-cfg="${k}"${c[k] ? " checked" : ""}><span class="sw"></span></label>`;
-    return `<section class="acard toggles">${tog("premod", "Проверять каждое объявление", "Новые и изменённые объявления попадут в «Модерацию» и появятся в ленте только после одобрения")}${tog("regOpen", "Открыта регистрация", "Если выключить — войти смогут только уже зарегистрированные")}${tog("bots", "Демо-собеседники", "Тестовые продавцы и покупатели отвечают в чате автоматически. Выключите перед запуском")}</section>
-      <section class="acard aform aform--flat"><h3>Лимиты</h3><div class="arow2"><div class="field"><input type="number" min="1" max="200" data-cfgn="dayLimit" value="${c.dayLimit}" placeholder=" "><label>Объявлений в сутки от одного человека</label></div><div class="field"><input type="number" min="1" max="20" data-cfgn="maxPhotos" value="${c.maxPhotos}" placeholder=" "><label>Фото в объявлении</label></div></div><p class="muted">Сохраняется сразу.</p></section>`;
+    const row = ([t, k, n, d, a, b]) => t === "tog" ? `<label class="arule"><span><b>${n}</b>${d ? `<small>${d}</small>` : ""}</span><span class="atog"><input type="checkbox" data-cfg="${k}"${c[k] ? " checked" : ""}><i></i></span></label>`
+      : t === "num" ? `<label class="arule"><span><b>${n}</b>${d ? `<small>${d}</small>` : ""}</span><input class="arule__n" type="number" min="${a}" max="${b}" data-cfgn="${k}" value="${c[k]}"></label>`
+      : `<label class="arule"><span><b>${n}</b>${d ? `<small>${d}</small>` : ""}</span><select class="arule__s" data-cfgs="${k}">${a.map(([v, x]) => `<option value="${v}"${c[k] === v ? " selected" : ""}>${x}</option>`).join("")}</select></label>`;
+    return `<p class="muted ahead">Все настройки применяются сразу. Каждое изменение записывается в журнал — его можно отменить.</p>
+      <div class="arules">${RULES.map(([g, ic, rows]) => `<section class="acard"><h3>${I(IC[ic], 18)} ${g}</h3>${rows.map(row).join("")}</section>`).join("")}</div>
+      <div class="abtns"><button type="button" class="adm-btn adm-btn--ghost" data-a="rulesreset">Вернуть все правила по умолчанию</button></div>`;
   }, change(t) {
-    if (t.dataset.cfg) { A.setCfg({ [t.dataset.cfg]: t.checked }); A.log("Правило сайта изменено", t.closest("label").querySelector("b").textContent, t.checked ? "вкл." : "выкл."); VO.toast("Сохранено", 1100); }
-    if (t.dataset.cfgn) { const v = Math.max(+t.min, Math.min(+t.max, Math.round(+t.value) || +t.min)); t.value = v; A.setCfg({ [t.dataset.cfgn]: v }); A.log("Лимит изменён", t.dataset.cfgn, v); VO.toast("Сохранено", 1100); }
+    const key = t.dataset.cfg || t.dataset.cfgn || t.dataset.cfgs; if (!key) return;
+    let v = t.dataset.cfg ? t.checked : t.dataset.cfgs ? t.value : Math.max(+t.min, Math.min(+t.max, Math.round(+t.value) || 0));
+    if (t.dataset.cfgn) t.value = v;
+    const prev = A.cfg()[key], name = t.closest(".arule").querySelector("b").textContent;
+    A.setCfg({ [key]: v });
+    const lid = A.log("Правило сайта изменено", name, `${fmtV(prev)} → ${fmtV(v)}`, { undo: [{ t: "cfg", id: key, s: prev }] });
+    VO.toast(`<span class="toast__t">Сохранено</span><button type="button" class="toast__undo" data-undo="${lid}">Отменить</button>`, 4000);
   } };
+  const fmtV = v => v === true ? "вкл." : v === false ? "выкл." : String(v);
+  ACT.rulesreset = async () => { if (!await UI.ask("Вернуть правила по умолчанию?", "Лимиты, проверки и ограничения станут как при запуске. Команда и стоп-слова не изменятся.", "Вернуть")) return; const c = A.cfg(), keep = { team: c.team, words: c.words, banner: c.banner, maint: c.maint }; store.set("vo_adm_cfg", keep); A.log("Правила сайта сброшены по умолчанию"); location.reload(); };
 
   /* ---------- Журнал ---------- */
   SEC.log = { group: "manage", name: "Журнал действий", perm: "manage", render() {
     const L = A.logs().filter(l => UI.match("log", `${l.act} ${l.target} ${l.info} ${l.who}`)).filter(l => !UI.f("log", "who") || l.who === UI.f("log", "who"));
     const whos = [...new Set(A.logs().map(l => l.who))];
-    return `<div class="ahead"><p class="muted">Все действия команды: кто, что и когда. Хранится 2000 последних записей.</p><button class="adm-btn adm-btn--ghost" type="button" data-a="logcsv">Скачать CSV</button></div>
+    return `<div class="ahead"><p class="muted">Все действия команды: кто, что и когда. Последние действия можно отменить — кнопка справа. Хранится 2000 записей.</p><button class="adm-btn adm-btn--ghost" type="button" data-a="logcsv">Скачать CSV</button></div>
       ${UI.tools("log", "Действие, объект или комментарий", [["who", [["", "Все участники"], ...whos.map(w => [w, w])]]])}
-      ${UI.table("log", L, [["Когда", l => fmtD(l.t), "nw"], ["Кто", l => esc(l.who), "hide-m"], ["Действие", l => `<b>${esc(l.act)}</b>`], ["Объект", l => esc(l.target)], ["Подробности", l => esc(l.info), "hide-m"]], { open: false, empty: "Записей нет" })}`;
+      ${UI.table("log", L, [["Когда", l => fmtD(l.t), "nw"], ["Кто", l => esc(l.who), "hide-m"], ["Действие", l => `<b>${esc(l.act)}</b>`], ["Объект", l => esc(l.target)], ["Подробности", l => esc(l.info), "hide-m"], ["", l => l.undo ? `<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" data-undo="${esc(l.id)}">Отменить</button>` : l.undone ? pill("Отменено", "gray") : "", "nw"]], { open: false, empty: "Записей нет" })}`;
   } };
   const download = (name, text, type = "text/plain") => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); };
   UI.download = download;
