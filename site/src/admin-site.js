@@ -14,7 +14,7 @@
   const scan = sel => {
     const root = $(sel); if (!root) return [];
     const seen = new Map(), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => { const p = n.parentElement; return !p || p.closest(A.DENY) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
-    for (let n; (n = w.nextNode());) { const k = A.normText(n.__o != null ? n.__o : n.nodeValue); if (k && /\p{L}{2}/u.test(k) && !seen.has(k)) seen.set(k, 1); }
+    for (let n; (n = w.nextNode());) { const k = A.normText(n.__o != null ? n.__o : n.nodeValue); if (k && !A.dynamic(k) && !seen.has(k)) seen.set(k, 1); }
     return [...seen.keys()];
   };
   SEC.texts = { group: "site", name: "Тексты", perm: "site", render() {

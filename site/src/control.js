@@ -67,7 +67,13 @@
   /* ---------- текст сайта ---------- */
   // Правка любого текста: «было → стало». Пользовательские данные (объявления, имена, переписка) не трогаем.
   A.DENY = ".card, .msg, .chat__body, .chats__list, .crow, .adp__desc, .adp__title, .adp__price, .adp__specs, .seller, .rev, .revs, .note-i, .pop__item, .row-ad, .mini-row, .ticket, .saved, .me, .cab__me, .adm, .ed-ui, .toast, .gal, .crumbs span, .signin__wall, .inbox__code, script, style, textarea, input, select, option, [data-noedit], .suggest__recent, .region .txt, #profPrev, .deal-bar, .lbx, .chat__h, .chat__quick, .cab-kpi b, .wiz__prev, .review__card, .review__l dd, .city ul, .sg-list, .vo-cookie__body small";
+  // Счётчики, даты, цены, контакты и имена считает сам сайт — их править нельзя
+  A.DENY += ", .badge, .dot-n, time, .msg__t, .count, #feedSub, .feed-sub, .gal__count, .adp__stats, .row-ad__st, .cab-kpi, .kpi, .sec-row small, .quality__h, .otp, .tabs small, [role=tab] small, .chips small, .seg small, .wiz-steps i, .cab__hi h1, .cab__hi .muted, .cab__nav em, .pub, .foot__mail, #footOwner, #year, #fabList a, .way small, .pop--me__head, .inbox, .pricehint b, .rate, .stars, .ed-dock";
+  // «Живой» текст: без букв (9+, 3, 1 / 4) или короткий с цифрами (21 объявление, 5 мин назад)
+  A.dynamic = t => { t = String(t).replace(/\s+/g, " ").trim(); return !/\p{L}{2}/u.test(t) || (/\d/.test(t) && t.length < 40); };
   let TEXT = store.get("vo_site_text", {});
+  // если раньше успели «поправить» счётчик — убираем такую правку
+  { let bad = false; Object.keys(TEXT).forEach(k => { if (A.dynamic(k)) { delete TEXT[k]; bad = true; } }); if (bad) store.set("vo_site_text", TEXT); }
   A.texts = () => TEXT;
   const norm = s => s.replace(/\s+/g, " ").trim();
   A.normText = norm;
@@ -77,7 +83,7 @@
     for (let n; (n = w.nextNode());) {
       if (n.__o != null && n.nodeValue !== n.__v) n.__o = null;   // текст сменил сам сайт — это новый оригинал
       const o = n.__o != null ? n.__o : n.nodeValue, k = norm(o);
-      if (!k) continue;
+      if (!k || A.dynamic(k)) continue;
       const v = TEXT[k];
       if (v != null) {
         if (n.__o == null) n.__o = o;
@@ -88,7 +94,7 @@
     }
   }
   A.applyText = applyText;
-  A.setText = (orig, val) => { orig = norm(orig); if (val == null || norm(val) === orig) delete TEXT[orig]; else TEXT[orig] = val; store.set("vo_site_text", TEXT); applyText(document.body); };
+  A.setText = (orig, val) => { orig = norm(orig); if (A.dynamic(orig)) return; if (val == null || norm(val) === orig) delete TEXT[orig]; else TEXT[orig] = val; store.set("vo_site_text", TEXT); applyText(document.body); };
   A.setTexts = map => { TEXT = map; store.set("vo_site_text", TEXT); applyText(document.body); };
   let pend = new Set(), raf = 0;
   const mo = new MutationObserver(ms => {

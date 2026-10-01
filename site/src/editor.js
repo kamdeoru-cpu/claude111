@@ -10,9 +10,10 @@
 
   const textNodes = (el, deep) => {
     const out = [];
-    if (!deep) el.childNodes.forEach(n => { if (n.nodeType === 3 && A.normText(n.nodeValue)) out.push(n); });
+    const okText = n => { const t = A.normText(n.__o != null ? n.__o : n.nodeValue); return t && !A.dynamic(t); };
+    if (!deep) el.childNodes.forEach(n => { if (n.nodeType === 3 && okText(n)) out.push(n); });
     if (out.length) return out;
-    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => { const p = n.parentElement; return !A.normText(n.nodeValue) || !p || p.closest(A.DENY) || p.closest(".ed-ui") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => { const p = n.parentElement; return !okText(n) || !p || p.closest(A.DENY) || p.closest(".ed-ui") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
     for (let n; (n = w.nextNode()) && out.length < 8;) out.push(n);
     return out;
   };
@@ -20,6 +21,9 @@
     if (!el || el.closest(".ed-ui")) return null;
     const own = el.closest(A.DENY); if (own) return { deny: own };
     // поднимаемся до элемента, у которого есть свой текст
+    // своё число или счётчик (9+, 21 объявление, 5 мин назад) — не редактируется
+    const mine = [...el.childNodes].filter(n => n.nodeType === 3 && A.normText(n.nodeValue));
+    if (mine.length && mine.every(n => A.dynamic(n.nodeValue))) return { deny: el, auto: true };
     let x = el;
     for (let i = 0; x && i < 4; i++, x = x.parentElement) { if (x === document.body) break; if (textNodes(x).length) return { el: x }; }
     const d = textNodes(el, true); return d.length ? { el } : null;
@@ -37,7 +41,7 @@
     const el = t.el || t.deny, r = el.getBoundingClientRect();
     Object.assign(hl.style, { top: r.top - 4 + "px", left: r.left - 4 + "px", width: r.width + 8 + "px", height: r.height + 8 + "px" });
     hl.classList.toggle("deny", !!t.deny); hl.hidden = false;
-    hl.querySelector("span").textContent = t.deny ? "Данные пользователей — правятся в разделе «Управление»" : "Нажмите, чтобы изменить";
+    hl.querySelector("span").textContent = t.auto ? "Число считает сайт — его нельзя изменить" : t.deny ? "Это меняется само (данные, счётчики, контакты) — не редактируется здесь" : "Нажмите, чтобы изменить";
   }
   function openPop(el) {
     closePop();
@@ -98,7 +102,8 @@
     e.preventDefault(); e.stopPropagation();
     if (pop) { pop._cancel(); return; }
     const t = target(e.target); if (!t) return;
-    if (t.deny) return VO.toast("Это данные пользователей. Их меняют в админке: «Объявления» или «Пользователи»", 3500);
+    if (t.auto) return VO.toast("Это число считает сам сайт (уведомления, избранное, количество, время) — вручную его менять нельзя", 3500);
+    if (t.deny) return VO.toast("Это меняется само: данные пользователей, счётчики или контакты. Объявления и людей правят в «Управлении», контакты — в разделе «Контакты»", 4500);
     hl.hidden = true; openPop(t.el);
   }, true);
   // в режиме правки формы не отправляются и ссылки не открываются

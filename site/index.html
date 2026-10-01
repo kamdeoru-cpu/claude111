@@ -4349,7 +4349,13 @@ window.VO_BRAND_ICONS = {
   /* ---------- текст сайта ---------- */
   // Правка любого текста: «было → стало». Пользовательские данные (объявления, имена, переписка) не трогаем.
   A.DENY = ".card, .msg, .chat__body, .chats__list, .crow, .adp__desc, .adp__title, .adp__price, .adp__specs, .seller, .rev, .revs, .note-i, .pop__item, .row-ad, .mini-row, .ticket, .saved, .me, .cab__me, .adm, .ed-ui, .toast, .gal, .crumbs span, .signin__wall, .inbox__code, script, style, textarea, input, select, option, [data-noedit], .suggest__recent, .region .txt, #profPrev, .deal-bar, .lbx, .chat__h, .chat__quick, .cab-kpi b, .wiz__prev, .review__card, .review__l dd, .city ul, .sg-list, .vo-cookie__body small";
+  // Счётчики, даты, цены, контакты и имена считает сам сайт — их править нельзя
+  A.DENY += ", .badge, .dot-n, time, .msg__t, .count, #feedSub, .feed-sub, .gal__count, .adp__stats, .row-ad__st, .cab-kpi, .kpi, .sec-row small, .quality__h, .otp, .tabs small, [role=tab] small, .chips small, .seg small, .wiz-steps i, .cab__hi h1, .cab__hi .muted, .cab__nav em, .pub, .foot__mail, #footOwner, #year, #fabList a, .way small, .pop--me__head, .inbox, .pricehint b, .rate, .stars, .ed-dock";
+  // «Живой» текст: без букв (9+, 3, 1 / 4) или короткий с цифрами (21 объявление, 5 мин назад)
+  A.dynamic = t => { t = String(t).replace(/\s+/g, " ").trim(); return !/\p{L}{2}/u.test(t) || (/\d/.test(t) && t.length < 40); };
   let TEXT = store.get("vo_site_text", {});
+  // если раньше успели «поправить» счётчик — убираем такую правку
+  { let bad = false; Object.keys(TEXT).forEach(k => { if (A.dynamic(k)) { delete TEXT[k]; bad = true; } }); if (bad) store.set("vo_site_text", TEXT); }
   A.texts = () => TEXT;
   const norm = s => s.replace(/\s+/g, " ").trim();
   A.normText = norm;
@@ -4359,7 +4365,7 @@ window.VO_BRAND_ICONS = {
     for (let n; (n = w.nextNode());) {
       if (n.__o != null && n.nodeValue !== n.__v) n.__o = null;   // текст сменил сам сайт — это новый оригинал
       const o = n.__o != null ? n.__o : n.nodeValue, k = norm(o);
-      if (!k) continue;
+      if (!k || A.dynamic(k)) continue;
       const v = TEXT[k];
       if (v != null) {
         if (n.__o == null) n.__o = o;
@@ -4370,7 +4376,7 @@ window.VO_BRAND_ICONS = {
     }
   }
   A.applyText = applyText;
-  A.setText = (orig, val) => { orig = norm(orig); if (val == null || norm(val) === orig) delete TEXT[orig]; else TEXT[orig] = val; store.set("vo_site_text", TEXT); applyText(document.body); };
+  A.setText = (orig, val) => { orig = norm(orig); if (A.dynamic(orig)) return; if (val == null || norm(val) === orig) delete TEXT[orig]; else TEXT[orig] = val; store.set("vo_site_text", TEXT); applyText(document.body); };
   A.setTexts = map => { TEXT = map; store.set("vo_site_text", TEXT); applyText(document.body); };
   let pend = new Set(), raf = 0;
   const mo = new MutationObserver(ms => {
@@ -6867,9 +6873,10 @@ window.VO_BRAND_ICONS = {
 
   const textNodes = (el, deep) => {
     const out = [];
-    if (!deep) el.childNodes.forEach(n => { if (n.nodeType === 3 && A.normText(n.nodeValue)) out.push(n); });
+    const okText = n => { const t = A.normText(n.__o != null ? n.__o : n.nodeValue); return t && !A.dynamic(t); };
+    if (!deep) el.childNodes.forEach(n => { if (n.nodeType === 3 && okText(n)) out.push(n); });
     if (out.length) return out;
-    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => { const p = n.parentElement; return !A.normText(n.nodeValue) || !p || p.closest(A.DENY) || p.closest(".ed-ui") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => { const p = n.parentElement; return !okText(n) || !p || p.closest(A.DENY) || p.closest(".ed-ui") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
     for (let n; (n = w.nextNode()) && out.length < 8;) out.push(n);
     return out;
   };
@@ -6877,6 +6884,9 @@ window.VO_BRAND_ICONS = {
     if (!el || el.closest(".ed-ui")) return null;
     const own = el.closest(A.DENY); if (own) return { deny: own };
     // поднимаемся до элемента, у которого есть свой текст
+    // своё число или счётчик (9+, 21 объявление, 5 мин назад) — не редактируется
+    const mine = [...el.childNodes].filter(n => n.nodeType === 3 && A.normText(n.nodeValue));
+    if (mine.length && mine.every(n => A.dynamic(n.nodeValue))) return { deny: el, auto: true };
     let x = el;
     for (let i = 0; x && i < 4; i++, x = x.parentElement) { if (x === document.body) break; if (textNodes(x).length) return { el: x }; }
     const d = textNodes(el, true); return d.length ? { el } : null;
@@ -6894,7 +6904,7 @@ window.VO_BRAND_ICONS = {
     const el = t.el || t.deny, r = el.getBoundingClientRect();
     Object.assign(hl.style, { top: r.top - 4 + "px", left: r.left - 4 + "px", width: r.width + 8 + "px", height: r.height + 8 + "px" });
     hl.classList.toggle("deny", !!t.deny); hl.hidden = false;
-    hl.querySelector("span").textContent = t.deny ? "Данные пользователей — правятся в разделе «Управление»" : "Нажмите, чтобы изменить";
+    hl.querySelector("span").textContent = t.auto ? "Число считает сайт — его нельзя изменить" : t.deny ? "Это меняется само (данные, счётчики, контакты) — не редактируется здесь" : "Нажмите, чтобы изменить";
   }
   function openPop(el) {
     closePop();
@@ -6955,7 +6965,8 @@ window.VO_BRAND_ICONS = {
     e.preventDefault(); e.stopPropagation();
     if (pop) { pop._cancel(); return; }
     const t = target(e.target); if (!t) return;
-    if (t.deny) return VO.toast("Это данные пользователей. Их меняют в админке: «Объявления» или «Пользователи»", 3500);
+    if (t.auto) return VO.toast("Это число считает сам сайт (уведомления, избранное, количество, время) — вручную его менять нельзя", 3500);
+    if (t.deny) return VO.toast("Это меняется само: данные пользователей, счётчики или контакты. Объявления и людей правят в «Управлении», контакты — в разделе «Контакты»", 4500);
     hl.hidden = true; openPop(t.el);
   }, true);
   // в режиме правки формы не отправляются и ссылки не открываются
@@ -7884,7 +7895,7 @@ window.VO_BRAND_ICONS = {
   const scan = sel => {
     const root = $(sel); if (!root) return [];
     const seen = new Map(), w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => { const p = n.parentElement; return !p || p.closest(A.DENY) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
-    for (let n; (n = w.nextNode());) { const k = A.normText(n.__o != null ? n.__o : n.nodeValue); if (k && /\p{L}{2}/u.test(k) && !seen.has(k)) seen.set(k, 1); }
+    for (let n; (n = w.nextNode());) { const k = A.normText(n.__o != null ? n.__o : n.nodeValue); if (k && !A.dynamic(k) && !seen.has(k)) seen.set(k, 1); }
     return [...seen.keys()];
   };
   SEC.texts = { group: "site", name: "Тексты", perm: "site", render() {
