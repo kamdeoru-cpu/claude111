@@ -67,6 +67,9 @@
     if (/отправ|почт|сдэк/.test(t)) return "Да, отправка подойдёт. Оплачу при получении.";
     return pick(["Спасибо! Подумаю и вернусь.", "Понял(а), спасибо за ответ.", "Хорошо, а торг возможен?"]);
   }
+  // человек сейчас смотрит именно этот диалог (страница открыта и вкладка на экране)
+  const viewing = id => !!(open && open.id === id && /^#\/me\/msg\//.test(location.hash) && document.visibilityState === "visible");
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && open && viewing(open.id)) paintIfOpen(open.id); });
   function botTurn(c, text) {
     if (!isBot(c) || c.blocked) return;
     const id = c.id;
@@ -75,8 +78,8 @@
     setTimeout(() => {
       const x = VO.chats.get(id); if (!x) return;
       const reply = replyFor(x, text || "");
-      push(x, { from: "peer", text: reply, read: open && open.id === id && document.visibilityState === "visible" });
-      if (!(open && open.id === id) && !x.muted) VO.addNote("Новое сообщение", `${VO.person(x.peer).name}: ${reply}`, { cat: "msg", link: "#/me/msg/" + id });
+      push(x, { from: "peer", text: reply, read: viewing(id) });
+      if (!viewing(id) && !x.muted) VO.addNote("Новое сообщение", `${VO.person(x.peer).name}: ${reply}`, { cat: "msg", link: "#/me/msg/" + id });
       // демо-покупатель сам предлагает сделку, когда договорились о встрече/отправке
       if (x.role === "seller" && /договоримся|отправка подойдёт/.test(reply) && !x.deal) setTimeout(() => propose(x, "peer", /отправ/.test(reply) ? "ship" : "meet"), 1500);
       paintIfOpen(id);

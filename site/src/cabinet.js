@@ -172,7 +172,13 @@
     const u = VO.user(), n = u.notif || {};
     const T = [["msg", "Новые сообщения", "Когда вам пишут по объявлению"], ["deal", "Сделки", "Предложения сделок и смена этапов"], ["review", "Отзывы", "Когда о вас оставили отзыв"], ["fav", "Избранное", "Если продавец снизил цену или снял объявление"], ["search", "Сохранённые поиски", "Новые объявления по вашим поискам"], ["news", "Новости сервиса", "Не чаще раза в месяц, только важное"]];
     shell("notif", `<header class="cab__hi"><div><h1>Настройки уведомлений</h1><span class="muted">На сайте уведомления видны всегда. Здесь — что дублировать на ${esc(u.email)}</span></div><button class="btn btn--ghost" type="button" data-ntab="list">← К уведомлениям</button></header>
-      <section class="cab-card toggles">${T.map(([k, t, d]) => `<label class="tog"><span><b>${t}</b><small>${d}</small></span><input type="checkbox" data-n="${k}"${n[k] !== false && (n[k] || ["msg", "deal", "review"].includes(k)) ? " checked" : ""}><span class="sw"></span></label>`).join("")}</section>`);
+      <section class="cab-card toggles">${T.map(([k, t, d]) => `<label class="tog"><span><b>${t}</b><small>${d}</small></span><input type="checkbox" data-n="${k}"${n[k] !== false && (n[k] || ["msg", "deal", "review"].includes(k)) ? " checked" : ""}><span class="sw"></span></label>`).join("")}</section>
+      <section class="cab-card toggles"><div class="cab-card__h"><h2>На этом устройстве</h2></div>
+        <label class="tog"><span><b>Звук</b><small>Мягкий сигнал о новом сообщении, предложении сделки или отзыве</small></span><input type="checkbox" data-dev="sound"${VO.notify.sound ? " checked" : ""}><span class="sw"></span></label>
+        <label class="tog"><span><b>Счётчик во вкладке</b><small>Число непрочитанных сообщений на значке вкладки — мигает, пока вы на другой вкладке</small></span><input type="checkbox" data-dev="tab"${VO.notify.tab ? " checked" : ""}><span class="sw"></span></label>
+        <button class="btn btn--ghost btn--sm" type="button" data-dev-test>Прослушать звук</button></section>`);
+    page.querySelectorAll("[data-dev]").forEach(c => c.addEventListener("change", () => { VO.notify[c.dataset.dev] = c.checked; if (c.dataset.dev === "sound" && c.checked) VO.notify.ding("msg", true); VO.toast("Сохранено", 1400); }));
+    page.querySelector("[data-dev-test]").addEventListener("click", () => VO.notify.ding("msg", true));
     page.querySelectorAll("[data-n]").forEach(c => c.addEventListener("change", () => { u.notif = { ...u.notif, [c.dataset.n]: c.checked }; VO.saveUser(u); VO.toast("Сохранено", 1400); }));
   }
   page.addEventListener("click", e => {
