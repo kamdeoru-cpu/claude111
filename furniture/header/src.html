@@ -621,9 +621,7 @@ html.splash-on{overflow:hidden}
 }
 
 /* ───────── О компании: графитовая полоса, всё по сетке ───────── */
-.ab{--fg:#FFFFFF;--fg2:rgba(255,255,255,.82);--rule:rgba(255,255,255,.32);--ph-bg:#A93939;color:var(--fg);padding-block:clamp(64px,8vw,120px);background:
-  linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/32px 32px,
-  linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/32px 32px,var(--red)}
+.ab{--fg:#FFFFFF;--fg2:rgba(255,255,255,.82);--rule:rgba(255,255,255,.32);--ph-bg:#A93939;color:var(--fg);padding-block:clamp(64px,8vw,120px);background:var(--red)}
 .ab__grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);row-gap:clamp(36px,4.5vw,64px)}
 .ab__head{grid-column:1/6;display:grid;align-content:start;gap:20px}
 .ab__k{display:flex;align-items:center;gap:12px;margin:0;font:500 11.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
@@ -634,17 +632,25 @@ html.splash-on{overflow:hidden}
 .ab__lead b{font-weight:600;color:var(--fg);background:linear-gradient(var(--ink),var(--ink)) 0 100%/100% 2px no-repeat;padding-bottom:1px}
 .ab__photos{grid-column:1/-1;display:grid;grid-template-columns:2fr 1fr 1fr;gap:clamp(16px,2vw,28px);height:clamp(240px,24vw,380px)}
 .ab__ph{position:relative;margin:0;min-width:0;overflow:hidden}
-.ab .ph{background:
-  linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px) -1px -1px/24px 24px,
-  linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px) -1px -1px/24px 24px,var(--ph-bg)}
-.ab .ph__paint{background:rgba(51,51,51,.28)}
+.ab .ph{background:var(--ph-bg)}
+.ab .ph__paint{display:none}
 .ab .ph__draw{width:clamp(84px,9vw,140px);height:auto;color:rgba(255,255,255,.88)}
 .ab .ph__draw .wfill{fill:var(--ph-bg)}
 .ab .ph__dim{background:rgba(255,255,255,.5);bottom:16%}
 .ab .ph__dim b{background:var(--ph-bg);color:var(--fg2)}
 .ab .cm{border-color:rgba(255,255,255,.5)}
-.ab__ph:hover .ph__paint{transform:translateX(0) skewX(-14deg) scaleX(1.3)}
-.ab__ph:hover .ph__draw{color:#FFFFFF}
+.ab .ph__draw{transition:transform .8s var(--ease-out),color .3s}
+.ab .cm{transition:transform .5s var(--ease-out),border-color .3s,opacity .3s}
+.ab__ph:hover .ph__draw{color:#FFFFFF;transform:scale(1.1) translateY(-4px)}
+.ab__ph:hover .cm:nth-of-type(1){transform:translate(6px,6px)}
+.ab__ph:hover .cm:nth-of-type(2){transform:translate(-6px,6px)}
+.ab__ph:hover .cm:nth-of-type(3){transform:translate(6px,-6px)}
+.ab__ph:hover .cm:nth-of-type(4){transform:translate(-6px,-6px)}
+.ab__go{position:absolute;right:14px;top:14px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:var(--red);opacity:0;transform:scale(.6) rotate(-45deg);transition:opacity .3s,transform .5s var(--ease-spring)}
+.ab__go svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.ab__ph:hover .ab__go{opacity:1;transform:none}
+.ab__cap{transition:transform .5s var(--ease-out)}
+.ab__ph:hover .ab__cap{transform:translateX(4px)}
 .ab__ph:hover .cm{border-color:var(--fg);opacity:1}
 .ab__cap{position:absolute;left:14px;top:14px;display:flex;gap:8px;align-items:center;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg)}
 .ab__cap b{color:var(--fg);font-weight:500;border-bottom:1.5px solid var(--ink)}
@@ -657,29 +663,36 @@ html.splash-on{overflow:hidden}
 .ab__fact b{font:400 clamp(20px,1.6vw,26px)/1 var(--f-display);color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ab__fact b sup{font-size:.45em;vertical-align:.9em}
 .ab__fact>span{font:400 12.5px/1.35 var(--f-body);color:var(--fg2)}
-.ab__fact:first-child b{color:var(--ink)}
+.ab__fact:first-child b{color:var(--fg)}
 .ab__acts{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
 .ab__acts .cta{box-shadow:none}
 .ab .cta__flood{background:var(--ink)}
 .ab .cta__ico{color:var(--paper)}
 .ab__facts{background:rgba(51,51,51,.12)}
 .ab__note{font:500 11px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
-/* этапы */
-.st{grid-column:1/-1;position:relative;margin:0;padding:clamp(28px,3vw,40px) 0 0;list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);border-top:1px solid var(--rule)}
-.st::before{content:"";position:absolute;left:0;top:-1px;width:100%;height:2px;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.6s var(--ease-out)}
-.st.is-in::before{transform:scaleX(1)}
-.st__i{position:relative;display:grid;gap:8px;align-content:start}
-.st__n{justify-self:start;padding:5px 8px;background:var(--ink);font:500 11px/1 var(--f-mono);letter-spacing:.1em;color:var(--fg)}
-.st__i b{font:600 15.5px/1.3 var(--f-body);color:var(--fg)}
-.st__i span:last-child{font:400 13.5px/1.5 var(--f-body);color:var(--fg2)}
-.st__i>*{opacity:.15;transform:translateY(8px);transition:opacity .6s calc(.3s + var(--i)*.15s),transform .7s calc(.3s + var(--i)*.15s) var(--ease-out)}
+/* этапы: линия с узлами, контурные номера заполняются по очереди */
+.st{grid-column:1/-1;position:relative;margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:clamp(16px,2vw,28px)}
+.st::before{content:"";position:absolute;left:0;right:0;top:9px;height:1.5px;background:var(--rule)}
+.st::after{content:"";position:absolute;left:0;right:0;top:9px;height:1.5px;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.8s .1s var(--ease-out)}
+.st.is-in::after{transform:scaleX(1)}
+.st__i{position:relative;display:grid;gap:10px;align-content:start;padding-top:40px}
+.st__i::before{content:"";position:absolute;left:0;top:2px;width:16px;height:16px;border-radius:50%;background:var(--red);box-shadow:inset 0 0 0 1.5px var(--fg);transition:background-color .4s calc(.3s + var(--i)*.3s),transform .4s var(--ease-spring)}
+.st.is-in .st__i::before{background:var(--fg)}
+.st__i:hover::before{transform:scale(1.35)}
+.st__n{font:400 clamp(34px,3.2vw,52px)/1 var(--f-display);color:transparent;-webkit-text-stroke:1.2px rgba(255,255,255,.75);transition:color .5s calc(.4s + var(--i)*.3s),-webkit-text-stroke-color .3s}
+.st.is-in .st__n{color:rgba(255,255,255,.14)}
+.st__i:hover .st__n{color:var(--fg);-webkit-text-stroke-color:var(--fg)}
+.st__i b{font:600 16px/1.3 var(--f-body);color:var(--fg)}
+.st__i span:last-child{font:400 13.5px/1.55 var(--f-body);color:var(--fg2);max-width:26ch}
+.st__i>*{opacity:.2;transform:translateY(10px);transition:opacity .6s calc(.35s + var(--i)*.3s),transform .7s calc(.35s + var(--i)*.3s) var(--ease-out)}
 .st.is-in .st__i>*{opacity:1;transform:none}
 @media (max-width:1100px){
   .ab__head{grid-column:1/-1}
   .ab__lead{grid-column:1/-1}
   .ab__body{grid-column:1/-1}
   .ab__side{grid-column:1/-1}
-  .st{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:28px}
+  .st{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:36px}
+  .st::before,.st::after{display:none}
 }
 @media (max-width:700px){
   .ab__photos{grid-template-columns:1fr 1fr;height:auto}
@@ -690,13 +703,13 @@ html.splash-on{overflow:hidden}
   .st{grid-template-columns:1fr 1fr}
 }
 
-/* ───────── Кровати: живой чертёж-конфигуратор ───────── */
-.bd{padding-block:clamp(72px,9vw,140px)}
-.bd__head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px 40px;margin-bottom:clamp(36px,4.5vw,64px)}
-.bd__hl{display:grid;gap:18px;justify-items:start}
-.bd__sub{margin:0;font:500 clamp(17px,1.4vw,21px)/1.4 var(--f-body);color:var(--ink);letter-spacing:-.01em}
+/* ───────── Кровати ───────── */
+.bds{padding-block:clamp(72px,9vw,140px)}
+.bds__head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px 40px;margin-bottom:clamp(36px,4.5vw,60px)}
+.bds__hl{display:grid;gap:16px;justify-items:start}
+.bds__sub{margin:0;font:500 clamp(17px,1.4vw,21px)/1.4 var(--f-body);color:var(--ink);letter-spacing:-.01em}
 .draft{position:relative;display:inline-flex;align-items:center;gap:12px;height:48px;padding-inline:22px;font:600 13px/1 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--ink);transition:color .3s}
-.draft__l{position:absolute;background:var(--ink);transition:inset .45s var(--ease-out),background-color .3s}
+.draft__l{position:absolute;background:var(--ink);transition:inset .45s var(--ease-out)}
 .draft__l--t{top:0;left:0;right:0;height:1.5px}.draft__l--b{bottom:0;left:0;right:0;height:1.5px}
 .draft__l--l{left:0;top:0;bottom:0;width:1.5px}.draft__l--r{right:0;top:0;bottom:0;width:1.5px}
 .draft__arr{width:22px;height:12px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;transition:transform .45s var(--ease-out)}
@@ -705,92 +718,91 @@ html.splash-on{overflow:hidden}
 .draft:hover .draft__l--l,.draft:hover .draft__l--r,.draft:focus-visible .draft__l--l,.draft:focus-visible .draft__l--r{top:-10px;bottom:-10px}
 .draft:hover .draft__arr,.draft:focus-visible .draft__arr{transform:translateX(6px)}
 
-.bd__main{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);row-gap:36px;align-items:start}
-.bd__stage{grid-column:1/8;position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:
-  linear-gradient(var(--grid) 1px,transparent 1px) -1px -1px/24px 24px,
-  linear-gradient(90deg,var(--grid) 1px,transparent 1px) -1px -1px/24px 24px,var(--ph)}
-.bd__stage .cm{opacity:.5}
-.bd__meta{position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;gap:12px;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);pointer-events:none}
-.bd__meta b{color:var(--red);font-weight:500}
-.bd__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.bd__draw{transition:opacity .2s}
-.bd__draw.is-swap{opacity:0}
-.bd__svg .ln{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
-.bd__svg .fab{stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;transition:fill .6s var(--ease-out)}
-.bd__svg .sheet{fill:#FBFAF8;stroke:var(--ink);stroke-width:1.4}
-.bd__svg .cover{fill:#D9CFC3;stroke:var(--ink);stroke-width:1.4}
-.bd__svg .throw{fill:#5B5856;stroke:var(--ink);stroke-width:1.2}
-.bd__svg .pil{fill:#FFFFFF;stroke:var(--ink);stroke-width:1.4}
-.bd__svg .box{fill:#4A4644;stroke:var(--ink);stroke-width:1.4}
-.bd__svg .strut{stroke:var(--red);stroke-width:2.2;stroke-linecap:round}
-.bd__svg .gnd{stroke:var(--ink);stroke-width:1;opacity:.35}
-.bd__svg .dim{stroke:var(--red);stroke-width:1.1}
-.bd__svg .dimt{fill:var(--red);font:500 12px var(--f-mono);letter-spacing:.06em}
-.bd__svg .note{fill:#F3EEEA;font:500 10px var(--f-mono);letter-spacing:.12em}
-.bd__svg [pathLength]{stroke-dasharray:1;stroke-dashoffset:0}
-.bd__stage:not(.is-in) .bd__draw [pathLength]{stroke-dashoffset:1;fill-opacity:0}
-.bd__stage.is-in .bd__draw [pathLength]{transition:stroke-dashoffset 1.4s var(--ease-out),fill-opacity .8s 1s,fill .6s var(--ease-out)}
-.bd__stage:not(.is-in) .bd__dims{opacity:0}
-.bd__dims{transition:opacity .6s 1.2s}
+.bds__main{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);align-items:center}
+.bds__media{grid-column:1/7;position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;clip-path:inset(0 100% 0 0);transition:clip-path 1.2s cubic-bezier(.7,0,.2,1)}
+.bds__media.is-in{clip-path:inset(0 0 0 0)}
+.bds__media .ph{inset:0}
+.bds__media .ph__dim{bottom:9%;left:16%;right:16%;transition:left .65s var(--ease-out),right .65s var(--ease-out)}
+.bds__tag{position:absolute;left:18px;top:18px;display:flex;gap:10px;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.bds__tag b{color:var(--red);font-weight:500}
+.bds__num{position:absolute;right:18px;top:16px;font:400 13px/1 var(--f-mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.bds__num b{font:400 22px/1 var(--f-display);color:var(--ink)}
+.bds__wipe{position:absolute;inset:0;z-index:3;background:var(--red);transform:translateX(-101%);pointer-events:none}
+.bds__lift{position:absolute;right:18px;bottom:18px;padding:7px 10px;background:var(--ink);color:var(--paper);font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .4s var(--ease-out)}
+.bds__media.has-lift .bds__lift{opacity:1;transform:none}
+.bed{position:relative;width:72%;height:auto;margin-top:-4%;overflow:visible}
+.bed .fab{stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;transition:fill .6s var(--ease-out)}
+.bed .sheet{fill:#FBFAF8;stroke:var(--ink);stroke-width:1.3}
+.bed .cover{fill:#E2D9CE;stroke:var(--ink);stroke-width:1.3}
+.bed .throw{fill:#5B5856;stroke:var(--ink);stroke-width:1.1}
+.bed .pil{fill:#FFFFFF;stroke:var(--ink);stroke-width:1.3}
+.bed .ln{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round}
+.bed .box{fill:#4A4644;stroke:var(--ink);stroke-width:1.3}
+.bed .strut{stroke:var(--red);stroke-width:2.4;stroke-linecap:round}
 
-.bd__info{grid-column:9/13;display:grid;gap:22px;align-content:start}
-.bd__k{display:flex;align-items:center;gap:10px;margin:0;font:600 11.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
-.bd__k::before{content:"";width:28px;height:2px;background:var(--red)}
-.bd__name{margin:0;font:600 clamp(28px,2.6vw,40px)/1.05 var(--f-body);letter-spacing:-.03em;transition:opacity .25s,transform .35s var(--ease-out)}
-.bd__price{margin:-8px 0 0;font:600 clamp(18px,1.4vw,22px)/1 var(--f-body);font-variant-numeric:tabular-nums;transition:opacity .25s,transform .35s var(--ease-out)}
-.bd__price small{font-weight:500;font-size:.75em;color:var(--ink-soft)}
-.bd__desc{margin:-6px 0 0;font-size:15px;color:var(--ink-soft)}
-.bd__info.is-swap .bd__name,.bd__info.is-swap .bd__price{opacity:0;transform:translateY(8px)}
-.bd__opt{display:grid;gap:10px}
-.bd__lbl{display:flex;justify-content:space-between;align-items:baseline;font:600 14px/1 var(--f-body)}
-.bd__lbl span{font:500 11px/1 var(--f-mono);letter-spacing:.06em;color:var(--ink-soft)}
-.pills{display:flex;flex-wrap:wrap;gap:8px}
-.pill{position:relative;height:40px;padding:0 16px;border-radius:20px;box-shadow:inset 0 0 0 1.2px var(--line);font:500 14px/1 var(--f-body);font-variant-numeric:tabular-nums;color:var(--ink);overflow:hidden;isolation:isolate;transition:box-shadow .25s,color .25s}
-.pill::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--red);transform:scaleY(0);transform-origin:50% 100%;transition:transform .35s var(--ease-out)}
-.pill:hover{box-shadow:inset 0 0 0 1.2px var(--ink)}
-.pill[aria-pressed="true"]{color:var(--paper);box-shadow:inset 0 0 0 1.2px var(--red)}
-.pill[aria-pressed="true"]::before{transform:none}
-.fabric{position:relative}
-.fabric__btn{display:flex;align-items:center;gap:14px;width:100%;padding:10px 16px 10px 10px;border-radius:12px;box-shadow:inset 0 0 0 1.2px var(--line);text-align:left;transition:box-shadow .25s}
-.fabric__btn:hover,.fabric__btn[aria-expanded="true"]{box-shadow:inset 0 0 0 1.2px var(--ink)}
-.fabric__sw{width:44px;height:44px;flex:none;border-radius:8px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 2px,transparent 2px 5px);transition:background-color .4s}
-.fabric__n{flex:1;min-width:0;font:500 15px/1.3 var(--f-body)}
-.fabric__n small{display:block;font:500 11px/1.3 var(--f-mono);letter-spacing:.06em;color:var(--ink-soft)}
-.fabric__btn svg{width:10px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .35s var(--ease-spring)}
-.fabric__btn[aria-expanded="true"] svg{transform:rotate(90deg)}
-.fabric__list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding-top:0;max-height:0;overflow:hidden;transition:max-height .45s var(--ease-out),padding .45s var(--ease-out)}
-.fabric.is-open .fabric__list{max-height:140px;padding-top:10px}
-.fabric__opt{display:grid;gap:6px;justify-items:center;padding:6px 4px;border-radius:10px;font:500 11.5px/1.2 var(--f-body);color:var(--ink-soft);text-align:center;transition:background-color .2s,color .2s}
-.fabric__opt i{width:100%;max-width:56px;aspect-ratio:1;border-radius:8px;background:var(--c);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 2px,transparent 2px 5px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);transition:transform .3s var(--ease-spring)}
-.fabric__opt:hover i{transform:scale(1.08) rotate(-3deg)}
-.fabric__opt[aria-pressed="true"]{color:var(--ink);background:var(--red-tint)}
-.fabric__opt[aria-pressed="true"] i{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 0 0 2px var(--paper),0 0 0 3.5px var(--red)}
-.bd__acts{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:4px}
+.bds__info{grid-column:8/13;display:grid;gap:20px;align-content:start}
+.bds__info>*{opacity:0;transform:translateY(16px);transition:opacity .6s calc(.3s + var(--i,0)*.08s),transform .8s calc(.3s + var(--i,0)*.08s) var(--ease-out)}
+.bds__info.is-in>*{opacity:1;transform:none}
+.bds__k{display:flex;align-items:center;gap:10px;margin:0;font:600 11.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+.bds__k::before{content:"";width:28px;height:2px;background:var(--red)}
+.bds__title{display:grid;gap:10px}
+.bds__name{margin:0;font:600 clamp(32px,3vw,48px)/1 var(--f-body);letter-spacing:-.035em}
+.bds__row{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.bds__price{font:600 clamp(20px,1.6vw,26px)/1 var(--f-body);font-variant-numeric:tabular-nums}
+.bds__price small{font-weight:500;font-size:.7em;color:var(--ink-soft)}
+.bds__desc{font-size:15px;color:var(--ink-soft)}
+.roll{display:inline-block;animation:roll .5s var(--ease-out)}
+@keyframes roll{from{opacity:0;transform:translateY(60%)}to{opacity:1;transform:none}}
+.bds__opt{display:grid;gap:10px;justify-items:start}
+.bds__lbl{font:600 14px/1 var(--f-body)}
+.bds__lbl span{margin-left:8px;font:500 11px/1 var(--f-mono);letter-spacing:.06em;color:var(--ink-soft)}
+.seg{position:relative;display:inline-flex;flex-wrap:nowrap;max-width:100%;padding:4px;border-radius:26px;box-shadow:inset 0 0 0 1.2px var(--line);background:var(--paper)}
+.seg__ind{position:absolute;top:4px;bottom:4px;left:var(--x,4px);width:var(--w,0);border-radius:22px;background:var(--red);box-shadow:0 8px 16px -10px rgba(188,66,66,.8);transition:left .5s var(--ease-spring),width .45s var(--ease-out)}
+.seg button{position:relative;z-index:1;height:40px;padding:0 clamp(12px,1.2vw,18px);border-radius:20px;font:500 14px/1 var(--f-body);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;transition:color .3s}
+.seg button:hover{color:var(--red)}
+.seg button[aria-pressed="true"]{color:var(--paper)}
+.fsel{position:relative;width:100%}
+.fsel__btn{display:flex;align-items:center;gap:14px;width:100%;padding:10px 16px 10px 10px;border-radius:14px;box-shadow:inset 0 0 0 1.2px var(--line);text-align:left;transition:box-shadow .25s}
+.fsel__btn:hover,.fsel__btn[aria-expanded="true"]{box-shadow:inset 0 0 0 1.2px var(--ink)}
+.fsel__sw{width:46px;height:46px;flex:none;border-radius:10px;background-color:var(--c);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.16) 0 2px,transparent 2px 5px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);transition:background-color .45s}
+.fsel__n{flex:1;min-width:0;font:500 15px/1.3 var(--f-body)}
+.fsel__n small{display:block;font:500 11px/1.3 var(--f-mono);letter-spacing:.06em;color:var(--ink-soft)}
+.fsel__btn svg{width:10px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .35s var(--ease-spring)}
+.fsel__btn[aria-expanded="true"] svg{transform:rotate(90deg)}
+.fsel__list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;max-height:0;overflow:hidden;transition:max-height .45s var(--ease-out),padding .45s var(--ease-out)}
+.fsel.is-open .fsel__list{max-height:150px;padding-top:10px}
+.fsel__o{display:grid;gap:6px;justify-items:center;padding:6px 4px;border-radius:10px;font:500 11.5px/1.2 var(--f-body);color:var(--ink-soft);text-align:center;transform:translateY(-6px);opacity:0;transition:background-color .2s,color .2s,transform .4s var(--ease-out),opacity .3s}
+.fsel.is-open .fsel__o{transform:none;opacity:1;transition-delay:0s,0s,calc(var(--j)*.04s),calc(var(--j)*.04s)}
+.fsel__o i{width:100%;max-width:56px;aspect-ratio:1;border-radius:10px;background-color:var(--c);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.16) 0 2px,transparent 2px 5px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);transition:transform .3s var(--ease-spring)}
+.fsel__o:hover i{transform:scale(1.08) rotate(-3deg)}
+.fsel__o[aria-pressed="true"]{color:var(--ink)}
+.fsel__o[aria-pressed="true"] i{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 0 0 2px var(--paper),0 0 0 3.5px var(--red)}
+.bds__acts{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-top:6px}
+.bds__acts .ib{width:52px;height:52px;box-shadow:inset 0 0 0 1.2px var(--line)}
 
-.bd__rail{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(12px,1.6vw,24px);margin-top:clamp(24px,3vw,48px)}
-.bc{display:grid;gap:12px;text-align:left;transform:translateY(26px);transition:transform .9s calc(var(--k)*.08s) var(--ease-out)}
-.bd__rail.is-in .bc{transform:none}
-.bc__ph{position:relative;aspect-ratio:1/1;max-width:100%;background:var(--ph);overflow:hidden;transition:background-color .3s}
-.bc__ph::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 0 var(--red);transition:box-shadow .3s}
-.bc__ph svg{position:absolute;inset:6% 4%;width:92%;height:88%}
-.bc__ph .ln,.bc__ph .fab{stroke-width:2.6}
-.bc:hover .bc__ph{background:var(--red-tint)}
-.bc[aria-pressed="true"] .bc__ph::after{box-shadow:inset 0 0 0 2px var(--red)}
-.bc__now{position:absolute;left:10px;top:10px;padding:5px 8px;background:var(--red);color:var(--paper);font:500 10px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(-8px);transition:transform .35s var(--ease-out),opacity .25s}
-.bc[aria-pressed="true"] .bc__now{transform:none;opacity:1}
-.bc__n{font:600 15px/1.2 var(--f-body);letter-spacing:.02em;text-transform:uppercase;color:var(--ink);transition:color .25s}
-.bc:hover .bc__n,.bc[aria-pressed="true"] .bc__n{color:var(--red)}
-.bc__p{margin-top:-6px;font:500 15px/1 var(--f-body);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.bds__railhead{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:clamp(56px,7vw,100px);margin-bottom:22px}
+.bds__rt{font:600 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.bds__rail{--g:clamp(14px,1.8vw,26px);display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 4*var(--g))/5);gap:var(--g);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 2px 6px}
+.bds__rail::-webkit-scrollbar{display:none}
+.bcd{display:grid;gap:12px;text-align:left;scroll-snap-align:start;min-width:0;transform:translateY(28px);opacity:.001;transition:transform .9s calc(var(--k)*.07s) var(--ease-out),opacity .6s calc(var(--k)*.07s)}
+.bds__rail.is-in .bcd{transform:none;opacity:1}
+.bcd__ph{position:relative;aspect-ratio:1/1;max-width:100%;display:grid;place-items:center;overflow:hidden;background:var(--ph);transition:background-color .35s}
+.bcd__ph::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 0 var(--red);transition:box-shadow .35s var(--ease-out)}
+.bcd__ph .bed{width:80%;margin:0;transition:transform .7s var(--ease-out)}
+.bcd:hover .bcd__ph{background:var(--red-tint)}
+.bcd:hover .bed{transform:scale(1.06) translateY(-3px)}
+.bcd[aria-pressed="true"] .bcd__ph::after{box-shadow:inset 0 0 0 2px var(--red)}
+.bcd__n{font:600 15px/1.2 var(--f-body);letter-spacing:.02em;text-transform:uppercase;color:var(--ink);background:linear-gradient(var(--red),var(--red)) 0 100%/0% 1.5px no-repeat;padding-bottom:3px;justify-self:start;transition:color .25s,background-size .45s var(--ease-out)}
+.bcd:hover .bcd__n,.bcd[aria-pressed="true"] .bcd__n{color:var(--red);background-size:100% 1.5px}
+.bcd__p{margin-top:-4px;font:500 15px/1 var(--f-body);color:var(--ink-soft);font-variant-numeric:tabular-nums}
 @media (max-width:1100px){
-  .bd__stage{grid-column:1/-1}
-  .bd__info{grid-column:1/-1}
+  .bds__media{grid-column:1/-1}
+  .bds__info{grid-column:1/-1;margin-top:32px}
+  .bds__rail{grid-auto-columns:calc((100% - 2*var(--g))/3)}
 }
-@media (max-width:760px){
-  .bd__rail{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:44%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:6px}
-  .bd__rail::-webkit-scrollbar{display:none}
-  .bc{scroll-snap-align:start}
-  .bd__meta span:last-child{display:none}
-  .fabric__list{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:640px){
+  .bds__rail{grid-auto-columns:62%}
+  .seg button{padding:0 11px;font-size:13.5px}
 }
 
 /* ───────── Адаптив ───────── */
@@ -1283,9 +1295,9 @@ html.splash-on{overflow:hidden}
       </div>
       <p class="ab__lead">BADesign вырос из мастерской, основанной в <b>2014 году</b> в Московской области, в современное мебельное производство площадью <b>2500 м²</b>. Мы создаём дизайнерскую мебель полного цикла — от идеи и эскиза до финальной сборки.</p>
       <div class="ab__photos" aria-label="Фото студии (заглушки)">
-        <figure class="ab__ph" role="img" aria-label="Место для фото производства"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path class="wfill" d="M3 28V15l7 4v-4l7 4v-4l7 4V6h4v22Z"/><path d="M7 23h3M13 23h3M19 23h3"/></svg><span class="ph__dim"><b>фото 1600 × 900</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">Производство · <b>2 500 м²</b></figcaption></figure>
-        <figure class="ab__ph" role="img" aria-label="Место для фото мастерской"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2v3"/><circle cx="16" cy="7" r="2"/><path d="M15 9 9 27M17 9l6 18M11.5 19.5h9"/><path d="M4 29.5h24" opacity=".5"/></svg><span class="ph__dim"><b>фото 900 × 1000</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">Мастерская · <b>2014</b></figcaption></figure>
-        <figure class="ab__ph" role="img" aria-label="Место для фото сборки"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-arm"><path class="wfill" d="M10 7h12a2 2 0 0 1 2 2v8H8V9a2 2 0 0 1 2-2Z"/><path class="wfill" d="M5 16a2 2 0 0 1 4 0v3h14v-3a2 2 0 0 1 4 0v6H5Z"/><path d="M8 22l-1 5M24 22l1 5"/></g><path d="M27 4l-4 4M22 9l-1 1" stroke-width="2"/></svg><span class="ph__dim"><b>фото 900 × 1000</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">Сборка</figcaption></figure>
+        <figure class="ab__ph" role="img" aria-label="Место для фото производства"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path class="wfill" d="M3 28V15l7 4v-4l7 4v-4l7 4V6h4v22Z"/><path d="M7 23h3M13 23h3M19 23h3"/></svg><span class="ph__dim"><b>фото 1600 × 900</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><span class="ab__go" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M3 11 11 3M5 3h6v6"/></svg></span><figcaption class="ab__cap">Производство · <b>2 500 м²</b></figcaption></figure>
+        <figure class="ab__ph" role="img" aria-label="Место для фото мастерской"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2v3"/><circle cx="16" cy="7" r="2"/><path d="M15 9 9 27M17 9l6 18M11.5 19.5h9"/><path d="M4 29.5h24" opacity=".5"/></svg><span class="ph__dim"><b>фото 900 × 1000</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><span class="ab__go" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M3 11 11 3M5 3h6v6"/></svg></span><figcaption class="ab__cap">Мастерская · <b>2014</b></figcaption></figure>
+        <figure class="ab__ph" role="img" aria-label="Место для фото сборки"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-arm"><path class="wfill" d="M10 7h12a2 2 0 0 1 2 2v8H8V9a2 2 0 0 1 2-2Z"/><path class="wfill" d="M5 16a2 2 0 0 1 4 0v3h14v-3a2 2 0 0 1 4 0v6H5Z"/><path d="M8 22l-1 5M24 22l1 5"/></g><path d="M27 4l-4 4M22 9l-1 1" stroke-width="2"/></svg><span class="ph__dim"><b>фото 900 × 1000</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><span class="ab__go" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M3 11 11 3M5 3h6v6"/></svg></span><figcaption class="ab__cap">Сборка</figcaption></figure>
       </div>
       <div class="ab__body">
         <p class="ab__p">В нашем производстве объединены опыт мастеров, современные технологии и внимательное отношение к деталям. Мы работаем с проверенными материалами, подбираем ткани, фурнитуру и конструктив под задачи каждого проекта, чтобы мебель была не только красивой, но и удобной в ежедневном использовании.</p>
@@ -1311,72 +1323,60 @@ html.splash-on{overflow:hidden}
       </ol>
     </div>
   </section>
-  <section class="bd wrap" id="beds" aria-labelledby="bd-title">
-    <div class="bd__head">
-      <div class="bd__hl">
-        <h2 class="nv__t js-reveal" id="bd-title">Кровати<i class="nv__drip" style="--x:10%;--h:.32em;--d:.1s"><i></i></i><i class="nv__drip" style="--x:52%;--h:.2em;--d:.3s"></i><i class="nv__drip" style="--x:86%;--h:.4em;--d:.2s"><i></i></i></h2>
-        <p class="bd__sub">Пространство для идеального сна и гармонии</p>
+  <section class="bds wrap" id="beds" aria-labelledby="bds-title">
+    <div class="bds__head">
+      <div class="bds__hl">
+        <h2 class="nv__t js-reveal" id="bds-title">Кровати<i class="nv__drip" style="--x:10%;--h:.32em;--d:.1s"><i></i></i><i class="nv__drip" style="--x:52%;--h:.2em;--d:.3s"></i><i class="nv__drip" style="--x:86%;--h:.4em;--d:.2s"><i></i></i></h2>
+        <p class="bds__sub">Пространство для идеального сна и гармонии</p>
       </div>
       <a class="draft" href="#beds"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Все кровати<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
     </div>
-    <div class="bd__main">
-      <div class="bd__stage js-reveal" role="img" aria-label="Чертёж выбранной кровати, вид спереди">
-        <div class="bd__meta"><span>Модель · <b class="js-bd-model">Блан</b></span><span>Вид спереди · М 1:20</span></div>
-        <svg class="bd__svg" viewBox="0 0 480 360" aria-hidden="true">
-          <g class="bd__draw">
-            <path class="gnd" d="M20 300H460"/>
-            <path class="fab js-head" pathLength="1" d=""/>
-            <path class="fab js-base" pathLength="1" d=""/>
-            <path class="box js-box" d=""/>
-            <path class="strut js-strut" d=""/>
-            <g class="js-top">
-              <path class="sheet js-sheet" pathLength="1" d=""/>
-              <path class="cover js-cover" pathLength="1" d=""/>
-              <path class="throw js-throw" pathLength="1" d=""/>
-              <path class="pil js-pil" pathLength="1" d=""/>
-            </g>
-            <path class="ln js-legs" pathLength="1" d=""/>
-            <text class="note js-note" text-anchor="middle" opacity="0">НИША ДЛЯ ХРАНЕНИЯ</text>
-          </g>
-          <g class="bd__dims">
-            <path class="dim js-dim" d=""/>
-            <text class="dimt js-dimt" text-anchor="middle" y="334">1400 мм</text>
-          </g>
-        </svg>
-        <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+    <div class="bds__main">
+      <div class="bds__media js-reveal" role="img" aria-label="Место для фото выбранной кровати">
+        <div class="ph">
+          <svg class="bed js-bed" viewBox="20 30 440 290" aria-hidden="true"></svg>
+          <span class="ph__dim js-dim"><b class="js-dim-t">1400 × 2000 мм</b></span>
+          <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+        </div>
+        <span class="bds__tag"><b class="js-m-name">Блан</b>фото 1600 × 1200</span>
+        <span class="bds__num"><b class="js-m-num">01</b> / <span class="js-m-total">09</span></span>
+        <span class="bds__lift">с подъёмным механизмом</span>
+        <span class="bds__wipe"></span>
       </div>
-      <div class="bd__info">
-        <p class="bd__k">Выбранный товар</p>
-        <h3 class="bd__name js-bd-name">Блан</h3>
-        <p class="bd__price js-bd-price">117 369 ₽</p>
-        <p class="bd__desc js-bd-desc">Кровать Blan</p>
-        <div class="bd__opt">
-          <div class="bd__lbl">Габариты<span class="js-bd-size">1400 × 2000 мм</span></div>
-          <div class="pills js-sizes">
-            <button class="pill" type="button" data-w="140" aria-pressed="true">140×200</button>
-            <button class="pill" type="button" data-w="160" aria-pressed="false">160×200</button>
-            <button class="pill" type="button" data-w="180" aria-pressed="false">180×200</button>
-            <button class="pill" type="button" data-w="200" aria-pressed="false">200×200</button>
-          </div>
+      <div class="bds__info js-reveal">
+        <p class="bds__k" style="--i:0">Выбранный товар</p>
+        <div class="bds__title" style="--i:1">
+          <h3 class="bds__name js-name">Блан</h3>
+          <div class="bds__row"><span class="bds__price js-price">117 369 ₽</span><span class="bds__desc js-desc">Кровать Blan</span></div>
         </div>
-        <div class="bd__opt fabric">
-          <div class="bd__lbl">Цвет обивки</div>
-          <button class="fabric__btn" type="button" aria-expanded="false"><span class="fabric__sw" style="--c:#EFE7D3"></span><span class="fabric__n"><small>Romantica</small><span class="js-fab-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
-          <div class="fabric__list js-fabrics"></div>
+        <div class="bds__opt" style="--i:2">
+          <div class="bds__lbl">Габариты<span>ширина × длина, см</span></div>
+          <div class="seg js-size" role="group" aria-label="Габариты"><span class="seg__ind"></span><button type="button" data-v="140" aria-pressed="true">140×200</button><button type="button" data-v="160" aria-pressed="false">160×200</button><button type="button" data-v="180" aria-pressed="false">180×200</button><button type="button" data-v="200" aria-pressed="false">200×200</button></div>
         </div>
-        <div class="bd__opt">
-          <div class="bd__lbl">Механизм</div>
-          <div class="pills js-mech">
-            <button class="pill" type="button" data-lift="0" aria-pressed="true">Без механизма</button>
-            <button class="pill" type="button" data-lift="1" aria-pressed="false">Подъёмный механизм</button>
-          </div>
+        <div class="bds__opt fsel" style="--i:3">
+          <div class="bds__lbl">Цвет обивки</div>
+          <button class="fsel__btn" type="button" aria-expanded="false"><span class="fsel__sw" style="--c:#EFE7D3"></span><span class="fsel__n"><small class="js-f-code">Romantica</small><span class="js-f-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
+          <div class="fsel__list js-fabrics"></div>
         </div>
-        <div class="bd__acts">
+        <div class="bds__opt" style="--i:4">
+          <div class="bds__lbl">Механизм</div>
+          <div class="seg js-mech" role="group" aria-label="Механизм"><span class="seg__ind"></span><button type="button" data-v="0" aria-pressed="true">Без механизма</button><button type="button" data-v="1" aria-pressed="false">Подъёмный механизм</button></div>
+        </div>
+        <div class="bds__acts" style="--i:5">
           <a class="cta" href="#beds" data-splash data-t="Подробнее" data-s1="о кровати Блан" data-s2="размеры и ткани"></a>
+          <button class="ib ib--fav" type="button" aria-label="В избранное" aria-pressed="false" data-ico="heart"></button>
         </div>
       </div>
-      <div class="bd__rail js-reveal js-beds" aria-label="Другие кровати"></div>
     </div>
+    <div class="bds__railhead">
+      <span class="bds__rt">Другие модели</span>
+      <div class="nv__arrs">
+        <button class="nv__arr nv__arr--p js-bp" type="button" aria-label="Листать назад"><svg viewBox="0 0 22 12"><path d="M21 6H2M7 1.5 2 6l5 4.5"/></svg></button>
+        <button class="nv__arr nv__arr--n js-bn" type="button" aria-label="Листать вперёд"><svg viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
+      </div>
+    </div>
+    <div class="bds__rail js-reveal js-brail" aria-label="Кровати, листайте вбок"></div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos">01–05 / 09</span></div>
   </section>
 </main>
 
@@ -1959,132 +1959,163 @@ html.splash-on{overflow:hidden}
   var root = document.getElementById('beds');
   if (!root) return;
   var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var $ = function(q){ return root.querySelector(q); };
   var BEDS = [
     {name: 'Блан', desc: 'Кровать Blan', price: '117 369 ₽', head: 'blan'},
     {name: 'Изи 2.0', desc: 'Кровать Изи 2.0', price: '<small>от</small> 161 094 ₽', head: 'wing'},
     {name: 'Изи', desc: 'Кровать Изи', price: '<small>от</small> 148 725 ₽', head: 'wing', legs: true},
     {name: 'Мон', desc: 'Кровать Мон', price: '<small>от</small> 114 096 ₽', head: 'tall'},
-    {name: 'Лиз', desc: 'Кровать Лиз', price: '<small>от</small> 116 401 ₽', head: 'low'}
+    {name: 'Лиз', desc: 'Кровать Лиз', price: '<small>от</small> 116 401 ₽', head: 'low'},
+    {name: 'Скоро в каталоге', desc: 'Арочное изголовье', price: 'цена уточняется', head: 'arch'},
+    {name: 'Скоро в каталоге', desc: 'Изголовье с каналами', price: 'цена уточняется', head: 'tuft'},
+    {name: 'Скоро в каталоге', desc: 'Каретная стяжка', price: 'цена уточняется', head: 'capi', legs: true},
+    {name: 'Скоро в каталоге', desc: 'Изголовье из реек', price: 'цена уточняется', head: 'slat'}
   ];
   var FABRICS = [
-    {code: 'Romantica 01', name: 'Лепесток жасмина', c: '#EFE7D3'},
-    {code: 'Ткань', name: 'Туман', c: '#CFCBC4'},
-    {code: 'Ткань', name: 'Олива', c: '#8A8F6E'},
-    {code: 'Ткань', name: 'Терракота', c: '#B8664E'},
-    {code: 'Ткань', name: 'Графит', c: '#5E5B58'}
+    {code: 'Romantica', name: 'Romantica 01 Лепесток жасмина', short: 'Лепесток жасмина', c: '#EFE7D3'},
+    {code: 'Ткань', name: 'Туман', short: 'Туман', c: '#CFCBC4'},
+    {code: 'Ткань', name: 'Олива', short: 'Олива', c: '#8A8F6E'},
+    {code: 'Ткань', name: 'Терракота', short: 'Терракота', c: '#B8664E'},
+    {code: 'Ткань', name: 'Графит', short: 'Графит', c: '#5E5B58'}
   ];
   var CX = 240, GROUND = 300;
   function rr(x, y, w, h, r){ r = Math.min(r, w / 2, h / 2); return 'M' + (x + r) + ' ' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ' ' + y + ' ' + (x + w) + ' ' + (y + r) + 'V' + (y + h - r) + 'Q' + (x + w) + ' ' + (y + h) + ' ' + (x + w - r) + ' ' + (y + h) + 'H' + (x + r) + 'Q' + x + ' ' + (y + h) + ' ' + x + ' ' + (y + h - r) + 'V' + (y + r) + 'Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + 'Z'; }
-  // геометрия: w — ширина в пикселях чертежа, lift 0…1
   function geo(bed, w, lift){
-    var x0 = CX - w / 2, legs = !!bed.legs, baseTop = legs ? 214 : 222, baseBot = legs ? 272 : GROUND - 2, g = {};
-    var hb = {blan: [62, 26], wing: [86, 12], tall: [70, 8], low: [130, 8]}[bed.head];
-    if (bed.head === 'blan') {
-      var half = w / 2 - 3;
-      g.head = rr(x0 + 2, hb[0], half, baseTop - hb[0] + 10, hb[1]) + rr(CX + 1, hb[0], half, baseTop - hb[0] + 10, hb[1]);
-    } else if (bed.head === 'wing') {
-      g.head = rr(x0 + 8, hb[0], w - 16, baseTop - hb[0] + 10, hb[1]) + 'M' + (x0 - 6) + ' ' + (hb[0] + 18) + 'L' + (x0 + 10) + ' ' + hb[0] + 'V' + (baseTop + 4) + 'H' + (x0 - 6) + 'Z' + 'M' + (x0 + w + 6) + ' ' + (hb[0] + 18) + 'L' + (x0 + w - 10) + ' ' + hb[0] + 'V' + (baseTop + 4) + 'H' + (x0 + w + 6) + 'Z';
-    } else if (bed.head === 'tall') {
-      g.head = rr(x0 - 4, hb[0], w + 8, baseTop - hb[0] + 10, hb[1]);
-    } else {
-      g.head = rr(x0 + 10, hb[0], w - 20, baseTop - hb[0] + 10, hb[1]);
+    var x0 = CX - w / 2, legs = !!bed.legs, bt = legs ? 214 : 222, bb = legs ? 272 : GROUND - 2, g = {}, hh, i, n;
+    switch (bed.head) {
+      case 'blan': var half = w / 2 - 3; g.head = rr(x0 + 2, 62, half, bt - 52, 26) + rr(CX + 1, 62, half, bt - 52, 26); break;
+      case 'wing': g.head = rr(x0 + 8, 86, w - 16, bt - 76, 12) + 'M' + (x0 - 6) + ' 104L' + (x0 + 10) + ' 86V' + (bt + 4) + 'H' + (x0 - 6) + 'Z' + 'M' + (x0 + w + 6) + ' 104L' + (x0 + w - 10) + ' 86V' + (bt + 4) + 'H' + (x0 + w + 6) + 'Z'; break;
+      case 'tall': g.head = rr(x0 - 4, 70, w + 8, bt - 60, 8); break;
+      case 'low': g.head = rr(x0 + 10, 130, w - 20, bt - 120, 8); break;
+      case 'arch': g.head = 'M' + (x0 + 6) + ' ' + (bt + 10) + 'V120Q' + (x0 + 6) + ' 56 ' + CX + ' 56Q' + (x0 + w - 6) + ' 56 ' + (x0 + w - 6) + ' 120V' + (bt + 10) + 'Z'; break;
+      case 'tuft': g.head = rr(x0 + 4, 74, w - 8, bt - 64, 16); n = Math.round(w / 38); for (i = 1; i < n; i++) g.head += 'M' + (x0 + 4 + (w - 8) * i / n).toFixed(1) + ' 80V' + bt; break;
+      case 'capi': g.head = rr(x0 + 4, 66, w - 8, bt - 56, 10); for (var r = 0; r < 3; r++) { n = Math.floor((w - 40) / 34); for (i = 0; i <= n; i++) { var bx = x0 + 22 + i * (w - 44) / n + (r % 2 ? 17 : 0); if (bx > x0 + w - 20) continue; g.head += 'M' + (bx - 2).toFixed(1) + ' ' + (92 + r * 32) + 'a2 2 0 1 0 4 0a2 2 0 1 0-4 0'; } } break;
+      default: n = Math.max(4, Math.round(w / 30)); g.head = ''; var sw = (w - 8) / n; for (i = 0; i < n; i++) g.head += rr(x0 + 4 + i * sw + 2, 72, sw - 4, bt - 62, 4);
     }
-    g.base = rr(x0, baseTop, w, baseBot - baseTop, 12);
-    g.legs = legs ? 'M' + (x0 + 14) + ' ' + baseBot + 'v' + (GROUND - baseBot) + 'M' + (x0 + w - 14) + ' ' + baseBot + 'v' + (GROUND - baseBot) + 'M' + (x0 + 14 + 8) + ' ' + baseBot + 'v' + (GROUND - baseBot - 6) + 'M' + (x0 + w - 22) + ' ' + baseBot + 'v' + (GROUND - baseBot - 6) : 'M' + (x0 + 16) + ' ' + GROUND + 'h6M' + (x0 + w - 22) + ' ' + GROUND + 'h6';
-    var dy = -64 * lift, mt = baseTop - 30 + dy;
+    g.base = rr(x0, bt, w, bb - bt, 12);
+    g.legs = legs ? 'M' + (x0 + 14) + ' ' + bb + 'v' + (GROUND - bb) + 'M' + (x0 + w - 14) + ' ' + bb + 'v' + (GROUND - bb) : 'M' + (x0 + 16) + ' ' + GROUND + 'h6M' + (x0 + w - 22) + ' ' + GROUND + 'h6';
+    var mt = bt - 30 - 64 * lift;
     g.sheet = rr(x0 + 6, mt, w - 12, 34, 8);
     g.cover = 'M' + (x0 + 4) + ' ' + (mt + 10) + 'Q' + CX + ' ' + (mt - 2) + ' ' + (x0 + w - 4) + ' ' + (mt + 10) + 'V' + (mt + 40) + 'H' + (x0 + 4) + 'Z';
     g.throw = 'M' + (x0 - 2) + ' ' + (mt + 16) + 'Q' + CX + ' ' + (mt + 4) + ' ' + (x0 + w + 2) + ' ' + (mt + 16) + 'L' + (x0 + w + 6) + ' ' + (mt + 34) + 'Q' + CX + ' ' + (mt + 22) + ' ' + (x0 - 6) + ' ' + (mt + 34) + 'Z';
     var pw = Math.min(110, w / 2 - 22), py = mt - 18;
     g.pil = rr(CX - pw - 8, py, pw, 26, 13) + rr(CX + 8, py, pw, 26, 13);
-    g.box = lift > .01 ? rr(x0 + 12, baseTop + 2, w - 24, 26 * lift + 4, 4) : '';
-    g.strut = lift > .01 ? 'M' + (x0 + 24) + ' ' + (baseTop + 18) + 'L' + (x0 + 40) + ' ' + (mt + 34) + 'M' + (x0 + w - 24) + ' ' + (baseTop + 18) + 'L' + (x0 + w - 40) + ' ' + (mt + 34) : '';
-    g.dim = 'M' + x0 + ' 318H' + (x0 + w) + 'M' + (x0 - 4) + ' 322l8-8M' + (x0 + w - 4) + ' 322l8-8M' + x0 + ' ' + (GROUND + 4) + 'V324M' + (x0 + w) + ' ' + (GROUND + 4) + 'V324';
-    g.noteY = baseTop + 2 + (26 * lift + 4) / 2 + 3.5;
+    g.box = lift > .02 ? rr(x0 + 12, bt + 2, w - 24, 26 * lift + 4, 4) : '';
+    g.strut = lift > .02 ? 'M' + (x0 + 24) + ' ' + (bt + 18) + 'L' + (x0 + 40) + ' ' + (mt + 34) + 'M' + (x0 + w - 24) + ' ' + (bt + 18) + 'L' + (x0 + w - 40) + ' ' + (mt + 34) : '';
     return g;
   }
-  function px(cm){ return 1.55 * cm; }
+  var ORDER = ['head', 'base', 'box', 'strut', 'sheet', 'cover', 'throw', 'pil', 'legs'];
+  var CLS = {head: 'fab', base: 'fab', box: 'box', strut: 'strut', sheet: 'sheet', cover: 'cover', throw: 'throw', pil: 'pil', legs: 'ln'};
+  function svgFor(g){ return ORDER.map(function(k){ return '<path class="' + CLS[k] + ' p-' + k + '" d="' + (g[k] || '') + '"/>'; }).join(''); }
+  function pxw(cm){ return 1.55 * cm; }
 
-  var $ = function(sel){ return root.querySelector(sel); };
-  var stage = $('.bd__stage'), draw = $('.bd__draw'), info = $('.bd__info');
-  var parts = {head: $('.js-head'), base: $('.js-base'), legs: $('.js-legs'), sheet: $('.js-sheet'), cover: $('.js-cover'), throw: $('.js-throw'), pil: $('.js-pil'), box: $('.js-box'), strut: $('.js-strut'), dim: $('.js-dim')};
-  var note = $('.js-note'), dimT = $('.js-dimt');
   var state = {bed: 0, w: 140, lift: 0, fab: 0}, cur = {w: 140, lift: 0}, anim = 0;
-
+  var bedSvg = $('.js-bed'), media = $('.bds__media');
+  bedSvg.innerHTML = svgFor(geo(BEDS[0], pxw(140), 0));
+  var P = {}; ORDER.forEach(function(k){ P[k] = bedSvg.querySelector('.p-' + k); });
   function paint(){
-    var g = geo(BEDS[state.bed], px(cur.w), cur.lift);
-    for (var k in parts) parts[k].setAttribute('d', g[k] || '');
-    note.setAttribute('x', CX); note.setAttribute('y', g.noteY);
-    note.setAttribute('opacity', Math.max(0, (cur.lift - .6) / .4).toFixed(2));
-    dimT.setAttribute('x', CX);
-    dimT.textContent = Math.round(cur.w * 10) + ' мм';
+    var g = geo(BEDS[state.bed], pxw(cur.w), cur.lift);
+    ORDER.forEach(function(k){ P[k].setAttribute('d', g[k] || ''); });
+    var f = FABRICS[state.fab].c; P.head.style.fill = f; P.base.style.fill = f;
   }
   function tween(){
     cancelAnimationFrame(anim);
     if (still.matches) { cur.w = state.w; cur.lift = state.lift; paint(); return; }
-    var from = {w: cur.w, lift: cur.lift}, t0 = performance.now(), dur = 650;
+    var a = {w: cur.w, lift: cur.lift}, t0 = performance.now(), dur = 700;
     (function step(now){
-      var k = Math.min(1, (now - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-      cur.w = from.w + (state.w - from.w) * e; cur.lift = from.lift + (state.lift - from.lift) * e;
+      var k = Math.min(1, (now - t0) / dur);
+      var e = 1 - Math.pow(1 - k, 3), eb = 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2);
+      cur.w = a.w + (state.w - a.w) * e;
+      cur.lift = a.lift + (state.lift - a.lift) * (state.lift > a.lift ? eb : e);
       paint();
       if (k < 1) anim = requestAnimationFrame(step);
     })(t0);
   }
-  function setFabric(i){
-    state.fab = i;
-    var f = FABRICS[i];
-    [parts.head, parts.base].forEach(function(p){ p.style.fill = f.c; });
-    $('.fabric__sw').style.setProperty('--c', f.c);
-    $('.fabric__n small').textContent = f.code === 'Ткань' ? 'Ткань' : 'Romantica';
-    $('.js-fab-name').textContent = (f.code === 'Ткань' ? '' : f.code + ' ') + f.name;
-    root.querySelectorAll('.fabric__opt').forEach(function(o, j){ o.setAttribute('aria-pressed', String(j === i)); });
-    railSvgs.forEach(function(r){ r.querySelectorAll('.fab').forEach(function(p){ p.style.fill = f.c; }); });
+  // переключатели с бегущим ползунком
+  function seg(el, onPick){
+    var ind = el.querySelector('.seg__ind'), btns = el.querySelectorAll('button');
+    function place(){ var b = el.querySelector('[aria-pressed="true"]'); ind.style.setProperty('--x', b.offsetLeft + 'px'); ind.style.setProperty('--w', b.offsetWidth + 'px'); }
+    btns.forEach(function(b){ b.addEventListener('click', function(){ btns.forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); }); place(); onPick(+b.dataset.v); }); });
+    window.addEventListener('resize', place);
+    if (document.fonts) document.fonts.ready.then(place);
+    place();
   }
-  function pressGroup(group, btn){ group.querySelectorAll('.pill').forEach(function(b){ b.setAttribute('aria-pressed', String(b === btn)); }); }
-
-  // размеры
-  $('.js-sizes').addEventListener('click', function(e){
-    var b = e.target.closest('.pill'); if (!b) return;
-    pressGroup(this, b); state.w = +b.dataset.w;
-    $('.js-bd-size').textContent = state.w * 10 + ' × 2000 мм';
-    tween();
+  seg($('.js-size'), function(v){
+    state.w = v; tween();
+    $('.js-dim-t').textContent = v * 10 + ' × 2000 мм';
+    var d = $('.js-dim'); var inset = 16 + (200 - v) / 60 * 7; d.style.left = inset + '%'; d.style.right = inset + '%';
   });
-  // механизм
-  $('.js-mech').addEventListener('click', function(e){
-    var b = e.target.closest('.pill'); if (!b) return;
-    pressGroup(this, b); state.lift = +b.dataset.lift; tween();
-  });
+  seg($('.js-mech'), function(v){ state.lift = v; tween(); media.classList.toggle('has-lift', !!v); });
   // ткани
-  var fl = $('.js-fabrics'), fbtn = $('.fabric__btn'), fabric = $('.fabric');
-  fl.innerHTML = FABRICS.map(function(f, i){ return '<button class="fabric__opt" type="button" aria-pressed="' + (i === 0) + '"><i style="--c:' + f.c + '"></i>' + f.name + '</button>'; }).join('');
-  fbtn.addEventListener('click', function(){ var o = !fabric.classList.contains('is-open'); fabric.classList.toggle('is-open', o); fbtn.setAttribute('aria-expanded', String(o)); });
-  fl.querySelectorAll('.fabric__opt').forEach(function(o, i){ o.addEventListener('click', function(){ setFabric(i); }); });
-
-  // лента моделей
-  var rail = $('.js-beds');
-  rail.innerHTML = BEDS.map(function(b, i){
-    var g = geo(b, px(150), 0);
-    return '<button class="bc" type="button" style="--k:' + i + '" aria-pressed="' + (i === 0) + '"><span class="bc__ph"><span class="bc__now">Выбрано</span><svg viewBox="40 40 400 280" aria-hidden="true"><path class="fab" d="' + g.head + '"/><path class="sheet" d="' + g.sheet + '"/><path class="cover" d="' + g.cover + '"/><path class="throw" d="' + g.throw + '"/><path class="pil" d="' + g.pil + '"/><path class="fab" d="' + g.base + '"/><path class="ln" d="' + g.legs + '"/></svg></span><span class="bc__n">' + b.name + '</span><span class="bc__p">' + b.price + '</span></button>';
-  }).join('');
-  var railSvgs = [].slice.call(rail.querySelectorAll('svg'));
-  rail.querySelectorAll('.bd__svg, svg').forEach(function(s){ s.classList.add('bd__svg'); });
-  rail.querySelectorAll('.bc').forEach(function(card, i){
-    card.addEventListener('click', function(){
-      if (state.bed === i) return;
-      rail.querySelectorAll('.bc').forEach(function(c){ c.setAttribute('aria-pressed', String(c === card)); });
-      draw.classList.add('is-swap'); info.classList.add('is-swap');
-      setTimeout(function(){
-        state.bed = i;
-        var b = BEDS[i];
-        $('.js-bd-name').textContent = b.name; $('.js-bd-price').innerHTML = b.price; $('.js-bd-desc').textContent = b.desc;
-        $('.js-bd-model').textContent = b.name;
-        var c = $('.bd__acts .cta small span'); if (c) c.textContent = 'о кровати ' + b.name;
-        paint();
-        draw.classList.remove('is-swap'); info.classList.remove('is-swap');
-      }, 220);
-      if (window.innerWidth < 1100) stage.scrollIntoView({behavior: still.matches ? 'auto' : 'smooth', block: 'center'});
+  var fsel = $('.fsel'), fbtn = $('.fsel__btn'), fl = $('.js-fabrics');
+  fl.innerHTML = FABRICS.map(function(f, i){ return '<button class="fsel__o" type="button" style="--j:' + i + '" aria-pressed="' + (i === 0) + '"><i style="--c:' + f.c + '"></i>' + f.short + '</button>'; }).join('');
+  fbtn.addEventListener('click', function(){ var o = !fsel.classList.contains('is-open'); fsel.classList.toggle('is-open', o); fbtn.setAttribute('aria-expanded', String(o)); });
+  fl.querySelectorAll('.fsel__o').forEach(function(o, i){
+    o.addEventListener('click', function(){
+      state.fab = i;
+      fl.querySelectorAll('.fsel__o').forEach(function(x, j){ x.setAttribute('aria-pressed', String(j === i)); });
+      $('.fsel__sw').style.setProperty('--c', FABRICS[i].c);
+      $('.js-f-code').textContent = FABRICS[i].code; $('.js-f-name').textContent = FABRICS[i].name;
+      paint();
+      railSvgs.forEach(function(sv){ sv.querySelectorAll('.fab').forEach(function(p){ p.style.fill = FABRICS[i].c; }); });
     });
   });
-  paint(); setFabric(0);
+
+  // лента моделей
+  var rail = $('.js-brail'), total = BEDS.length;
+  $('.js-m-total').textContent = ('0' + total).slice(-2);
+  rail.innerHTML = BEDS.map(function(b, i){
+    return '<button class="bcd" type="button" style="--k:' + i + '" aria-pressed="' + (i === 0) + '"><span class="bcd__ph"><svg class="bed" viewBox="20 30 440 290" aria-hidden="true">' + svgFor(geo(b, pxw(160), 0)) + '</svg></span><span class="bcd__n">' + (b.name === 'Скоро в каталоге' ? b.desc : b.name) + '</span><span class="bcd__p">' + b.price + '</span></button>';
+  }).join('');
+  var cards = [].slice.call(rail.querySelectorAll('.bcd')), railSvgs = cards.map(function(c){ return c.querySelector('svg'); });
+  railSvgs.forEach(function(sv){ sv.querySelectorAll('.fab').forEach(function(p){ p.style.fill = FABRICS[0].c; }); });
+
+  function setText(el, html){ el.innerHTML = '<span class="roll">' + html + '</span>'; }
+  function select(i){
+    if (i === state.bed || i < 0 || i >= total) return;
+    cards.forEach(function(c, j){ c.setAttribute('aria-pressed', String(j === i)); });
+    var swap = function(){
+      state.bed = i;
+      var b = BEDS[i];
+      setText($('.js-name'), b.name === 'Скоро в каталоге' ? b.desc : b.name);
+      setText($('.js-price'), b.price);
+      setText($('.js-desc'), b.name === 'Скоро в каталоге' ? 'Новая модель, скоро в каталоге' : b.desc);
+      $('.js-m-name').textContent = b.name === 'Скоро в каталоге' ? 'Новая модель' : b.name;
+      $('.js-m-num').textContent = ('0' + (i + 1)).slice(-2);
+      var cs = root.querySelector('.bds__acts .cta small span'); if (cs) cs.textContent = b.name === 'Скоро в каталоге' ? 'о новой модели' : 'о кровати ' + b.name;
+      paint();
+    };
+    var wipe = $('.bds__wipe');
+    if (still.matches || !wipe.animate) { swap(); }
+    else {
+      wipe.animate([{transform: 'translateX(-101%)'}, {transform: 'translateX(0)'}], {duration: 340, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards'}).onfinish = function(){
+        swap();
+        wipe.animate([{transform: 'translateX(0)'}, {transform: 'translateX(101%)'}], {duration: 420, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards'});
+      };
+    }
+    cards[i].scrollIntoView({behavior: still.matches ? 'auto' : 'smooth', block: 'nearest', inline: 'nearest'});
+    syncRail();
+  }
+  cards.forEach(function(c, i){ c.addEventListener('click', function(){ select(i); }); });
+
+  // стрелки листают ленту, линейка показывает положение
+  var bp = $('.js-bp'), bn = $('.js-bn'), fill = $('.js-bfill'), pos = $('.js-bpos');
+  function step(){ return cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : rail.clientWidth; }
+  function pad(n){ return ('0' + n).slice(-2); }
+  function syncRail(){
+    var max = rail.scrollWidth - rail.clientWidth, x = rail.scrollLeft;
+    bp.disabled = x < 4; bn.disabled = x > max - 4;
+    var vis = Math.max(1, Math.round(rail.clientWidth / step())), first = Math.min(total - vis, Math.round(x / step())) + 1;
+    pos.textContent = (vis > 1 ? pad(first) + '–' + pad(Math.min(total, first + vis - 1)) : pad(first)) + ' / ' + pad(total);
+    var w = rail.clientWidth / rail.scrollWidth;
+    fill.style.setProperty('--w', (w * 100).toFixed(2) + '%');
+    fill.style.setProperty('--a', (max > 0 ? x / max * (1 - w) * 100 : 0).toFixed(2) + '%');
+  }
+  bp.addEventListener('click', function(){ rail.scrollBy({left: -step(), behavior: still.matches ? 'auto' : 'smooth'}); });
+  bn.addEventListener('click', function(){ rail.scrollBy({left: step(), behavior: still.matches ? 'auto' : 'smooth'}); });
+  var tk = false;
+  rail.addEventListener('scroll', function(){ if (!tk) { tk = true; requestAnimationFrame(function(){ tk = false; syncRail(); }); } }, {passive: true});
+  window.addEventListener('resize', syncRail);
+  syncRail(); paint();
 })();
 </script>
