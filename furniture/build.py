@@ -1,4 +1,4 @@
-"""Собирает furniture/header/index.html из src.html и логотипа.
+"""Собирает index.html шапок (header, header-v2) из src.html и логотипа.
 
 Логотип вставляется шаблоном: циркуль, капли и буквы получают классы,
 чтобы их можно было анимировать по отдельности.
@@ -7,7 +7,7 @@ import pathlib
 import re
 
 HERE = pathlib.Path(__file__).parent
-svg = (HERE.parent / "logo" / "bad-design-logo.svg").read_text(encoding="utf-8")
+svg = (HERE / "logo" / "bad-design-logo.svg").read_text(encoding="utf-8")
 paths = re.findall(r"<path [^>]*/>", svg)
 mask = re.search(r"<mask.*?</mask>", svg, re.S).group(0).replace("mask0_17_1994", "lgm__ID__")
 compass, b_letter, drips = paths[0:9], paths[9], paths[10:16]
@@ -32,6 +32,10 @@ logo = (
     + "</svg>"
 )
 
-src = (HERE / "src.html").read_text(encoding="utf-8")
-(HERE / "index.html").write_text(src.replace("{{LOGO}}", logo), encoding="utf-8")
-print("index.html:", len(src) + len(logo), "bytes")
+for name in ("header", "header-v2"):
+    src_path = HERE / name / "src.html"
+    if not src_path.exists():
+        continue
+    src = src_path.read_text(encoding="utf-8")
+    (HERE / name / "index.html").write_text(src.replace("{{LOGO}}", logo), encoding="utf-8")
+    print(f"{name}/index.html:", len(src) + len(logo), "bytes")

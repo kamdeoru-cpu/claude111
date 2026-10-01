@@ -46,7 +46,7 @@ svg{display:block}
 
 /* ───────── Шапка ───────── */
 .hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--paper)}
-.hdr__in{position:relative;z-index:3;display:flex;align-items:center;gap:28px;max-width:1360px;margin:0 auto;padding-inline:clamp(16px,3vw,40px);height:var(--hdr-h);background:var(--paper);transition:height .35s var(--ease-out)}
+.hdr__in{position:relative;z-index:3;display:flex;align-items:center;gap:clamp(16px,2vw,28px);max-width:1680px;margin:0 auto;padding-inline:clamp(16px,3vw,40px);height:var(--hdr-h);background:var(--paper);transition:height .35s var(--ease-out)}
 .hdr.is-compact{--hdr-h:66px}
 .hdr.is-compact .logo{width:104px}
 .hdr.is-compact .hdr__in{box-shadow:0 10px 30px -22px rgba(51,51,51,.45)}
@@ -60,9 +60,29 @@ svg{display:block}
 .ruler i::after{content:"";position:absolute;right:-4px;top:0;width:8px;height:8px;background:var(--red);border-radius:0 50% 50% 50%;transform:rotate(45deg);transform-origin:50% 50%}
 
 /* Навигация */
-.nav{display:flex;align-items:center;gap:clamp(14px,2.2vw,30px);height:100%}
+.nav{display:flex;align-items:center;gap:clamp(14px,1.8vw,30px);height:100%}
+/* Кнопка «Каталог»: капсула с красными линиями, при открытии линии складываются в циркуль */
+.catbtn{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 22px 0 12px;border-radius:24px;box-shadow:inset 0 0 0 1.5px var(--ink);font:700 15.5px/1 var(--f-body);color:var(--ink);white-space:nowrap;transition:box-shadow .3s,background-color .3s,color .3s;flex:none}
+.catbtn svg{width:30px;height:30px;fill:none;stroke:var(--red);stroke-width:1.8;stroke-linecap:round;overflow:visible}
+.catbtn:hover,.catbtn:focus-visible,.catbtn[aria-expanded="true"]{background:var(--red-tint);box-shadow:inset 0 0 0 1.5px var(--red);color:var(--red)}
+.catbtn:hover .bl2,.catbtn:focus-visible .bl2{animation:tick .7s var(--ease-spring)}
+.catbtn:hover .bl3,.catbtn:focus-visible .bl3{animation:tick .7s .08s var(--ease-spring)}
+.catbtn[aria-expanded="true"] .bl{animation:none}
+@keyframes tick{0%{transform:none}40%{transform:scaleX(.35)}100%{transform:none}}
+/* Выпадающий список «Сотрудничество» */
+.has-drop{position:relative}
+.drop{position:absolute;z-index:5;top:calc(100% - 10px);left:-20px;width:320px;padding:10px;background:var(--paper);border:1.5px solid var(--ink);border-radius:4px;box-shadow:0 26px 40px -26px rgba(51,51,51,.4);transform:translateY(8px);opacity:0;visibility:hidden;transition:transform .35s var(--ease-out),opacity .25s,visibility 0s .35s}
+.drop.is-open{transform:none;opacity:1;visibility:visible;transition-delay:0s}
+.drop::before{content:"";position:absolute;top:-7px;left:44px;width:12px;height:12px;background:var(--paper);border-left:1.5px solid var(--ink);border-top:1.5px solid var(--ink);transform:rotate(45deg)}
+.drop a{position:relative;display:grid;gap:2px;padding:10px 12px 10px 30px;border-radius:3px;transition:background-color .2s}
+.drop a::before{content:"";position:absolute;left:12px;top:19px;width:10px;height:1.5px;background:var(--red);transform:scaleX(.4);transform-origin:0 50%;transition:transform .3s var(--ease-out)}
+.drop a b{font:600 14.5px/1.3 var(--f-body)}
+.drop a small{font:400 12.5px/1.35 var(--f-body);color:var(--ink-soft)}
+.drop a:hover,.drop a:focus-visible{background:var(--red-tint)}
+.drop a:hover b,.drop a:focus-visible b{color:var(--red)}
+.drop a:hover::before,.drop a:focus-visible::before{transform:scaleX(1)}
 .nav__item{height:100%;display:flex;align-items:center}
-.nav__link{position:relative;display:inline-flex;align-items:center;gap:6px;height:100%;font:600 13px/1 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+.nav__link{position:relative;display:inline-flex;align-items:center;gap:6px;height:100%;font:500 15.5px/1 var(--f-body);letter-spacing:-.005em;color:var(--ink);white-space:nowrap}
 .nav__t{position:relative;display:block;padding-block:4px}
 .nav__t::after{content:attr(data-text);position:absolute;inset:0;padding-block:4px;color:var(--red);clip-path:inset(0 100% 0 0);transition:clip-path .45s var(--ease-out)}
 .nav__link:hover .nav__t::after,.nav__link:focus-visible .nav__t::after,.nav__link.is-active .nav__t::after,.nav__link[aria-expanded="true"] .nav__t::after{clip-path:inset(0 0 0 0)}
@@ -135,12 +155,10 @@ svg{display:block}
 /* телефон: капсула раскрывается */
 .phone{position:relative;display:flex;align-items:center;height:44px;border-radius:22px;padding-right:0;color:var(--ink);transition:background-color .3s,color .3s}
 .phone .ib{pointer-events:none}
-.phone__num{display:grid;grid-template-columns:0fr;transition:grid-template-columns .45s var(--ease-out)}
-.phone__num>span{overflow:hidden;white-space:nowrap;font:500 14px/1 var(--f-mono);letter-spacing:-.01em}
+.phone__num{display:grid}
+.phone__num>span{overflow:hidden;white-space:nowrap;padding-right:16px;font:500 14.5px/1 var(--f-mono);letter-spacing:-.01em}
 .phone__num small{display:block;margin-top:4px;font:400 11px/1 var(--f-body);color:var(--ink-soft);letter-spacing:0}
 .phone:hover,.phone:focus-visible{background:var(--red-tint);color:var(--red)}
-.phone:hover .phone__num,.phone:focus-visible .phone__num{grid-template-columns:1fr}
-.phone:hover .phone__num>span,.phone:focus-visible .phone__num>span{padding-right:16px}
 .p-hand{transform-box:view-box;transform-origin:12px 12px}
 .p-wave{stroke-dasharray:1;stroke-dashoffset:1;opacity:0}
 .phone:hover .p-wave,.phone:focus-visible .p-wave{opacity:1}
@@ -201,11 +219,12 @@ svg{display:block}
 .bl{transform-box:view-box;transition:transform .5s var(--ease-spring),opacity .3s}
 .bl1{transform-origin:18px 7px}.bl2{transform-origin:6px 12px}.bl3{transform-origin:6px 17px}
 .bhead{transform-box:view-box;transform-origin:12px 5px;transform:scale(0);transition:transform .35s var(--ease-spring);fill:var(--paper)}
-.is-open .bl1{transform:translate(-6px,-.5px) rotate(-71deg)}
-.is-open .bl2{transform:translate(3.5px,1.5px) scaleX(.55)}
-.is-open .bl3{transform:translate(6px,-10.5px) rotate(71deg)}
-.is-open .bhead{transform:scale(1);transition-delay:.2s}
-.is-open .burger__lbl span{transform:translateY(-12px)}
+.catbtn .bhead{fill:var(--red-tint)}
+[aria-expanded="true"] .bl1{transform:translate(-6px,-.5px) rotate(-71deg)}
+[aria-expanded="true"] .bl2{transform:translate(3.5px,1.5px) scaleX(.55)}
+[aria-expanded="true"] .bl3{transform:translate(6px,-10.5px) rotate(71deg)}
+[aria-expanded="true"] .bhead{transform:scale(1);transition-delay:.2s}
+[aria-expanded="true"] .burger__lbl span{transform:translateY(-12px)}
 .is-open .burger{color:var(--red)}
 
 /* Мобильное меню */
@@ -227,7 +246,7 @@ svg{display:block}
 /* Мега-меню каталога */
 .mega{position:absolute;z-index:2;left:0;right:0;top:100%;background:var(--paper);border-top:1px solid var(--line);transform:translateY(-10px);opacity:0;visibility:hidden;transition:transform .4s var(--ease-out),opacity .25s,visibility 0s .4s;box-shadow:0 34px 44px -34px rgba(51,51,51,.35)}
 .mega.is-open{transform:none;opacity:1;visibility:visible;transition-delay:0s}
-.mega__in{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;max-width:1360px;margin:0 auto;padding:26px clamp(16px,3vw,40px) 34px}
+.mega__in{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;max-width:1680px;margin:0 auto;padding:26px clamp(16px,3vw,40px) 34px}
 .cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .mega .mdrips i{transition-delay:0s}
 .mega.is-open .mdrips i{transform:scaleY(1);transition-delay:calc(.25s + var(--d))}
@@ -354,11 +373,16 @@ h1 em{font-style:normal;color:var(--red)}
 .foot{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font:400 12px/1.4 var(--f-mono);color:var(--ink-soft)}
 
 /* ───────── Адаптив ───────── */
-@media (max-width:1240px){.hdr .acts .phone{display:none}}
-@media (max-width:1080px){
-  .hdr>.hdr__in>.nav{display:none}
+@media (max-width:1599px){.hdr .acts>.cta{display:none}}
+@media (max-width:1279px){
+  .hdr>.hdr__in>.nav>.nav__item{display:none}
   .hdr .burger{display:inline-flex}
-  .mega__in{grid-template-columns:1fr}
+}
+@media (max-width:1080px){.mega__in{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .hdr>.hdr__in>.nav{display:none}
+  .hdr .phone__num{display:none}
+  .hdr .phone .ib{pointer-events:auto}
 }
 @media (max-width:880px){
   .intro{grid-template-columns:1fr}
@@ -389,13 +413,19 @@ h1 em{font-style:normal;color:var(--red)}
   <div class="hdr__in">
     <a class="logo js-logo lg-intro" href="#top" aria-label="BAD Design — на главную"></a>
     <nav class="nav" aria-label="Основное меню">
-      <div class="nav__item has-mega">
-        <button class="nav__link is-active" type="button" aria-expanded="false" aria-controls="mega"><span class="nav__t" data-text="Каталог">Каталог</span><svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5 5 6.5 8 3.5"/></svg></button>
+      <button class="catbtn" type="button" aria-expanded="false" aria-controls="mega"></button>
+      <div class="nav__item has-drop">
+        <button class="nav__link" type="button" aria-expanded="false" aria-controls="drop-coop"><span class="nav__t" data-text="Сотрудничество">Сотрудничество</span><svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5 5 6.5 8 3.5"/></svg></button>
+        <div class="drop" id="drop-coop">
+          <a href="#s-nav"><b>Дизайнерам и архитекторам</b><small>Комплектация проектов, специальные условия</small></a>
+          <a href="#s-nav"><b>Дилерам</b><small>Оптовые поставки и представительство</small></a>
+          <a href="#s-nav"><b>Застройщикам</b><small>Меблировка квартир и общественных зон</small></a>
+        </div>
       </div>
-      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="Коллекции">Коллекции</span></a></div>
-      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="Проекты">Проекты</span></a></div>
-      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="Студия">Студия</span></a></div>
-      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="Контакты">Контакты</span></a></div>
+      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="HoReCa">HoReCa</span></a></div>
+      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="Шоурум">Шоурум</span></a></div>
+      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="На заказ">На заказ</span></a></div>
+      <div class="nav__item"><a class="nav__link" href="#s-nav"><span class="nav__t" data-text="Outlet">Outlet</span></a></div>
     </nav>
     <div class="acts">
       <button class="ib ib--search" type="button" aria-label="Поиск" aria-expanded="false" aria-controls="hsearch" data-ico="search"></button>
@@ -476,6 +506,7 @@ h1 em{font-style:normal;color:var(--red)}
           <li>Под пунктом прочерчивается <b>размерная линия</b> с засечками, как на чертеже.</li>
           <li>Слово перекрашивается в красный слева направо, вслед за линией.</li>
           <li>С правой засечки срывается капля. У текущего раздела капля висит постоянно.</li>
+          <li><b>Каталог</b> — капсула с красными линиями: при наведении линии «отмеряются», при открытии складываются в циркуль.</li>
         </ul>
         <table class="stamp"><tr><td>Элемент</td><td>Меню</td></tr><tr><td>Время</td><td>0,45 с</td></tr></table>
       </div>
@@ -489,7 +520,7 @@ h1 em{font-style:normal;color:var(--red)}
           <li><b>Поиск.</b> Ножка циркуля обегает линзу и чертит её заново, затем вырастает ручка.</li>
           <li><b>Избранное.</b> Сердце заливается краской с волнистым краем, снизу капает. Нажатие сохраняет заливку и разбрызгивает краску.</li>
           <li><b>Корзина.</b> В пакет падает стул, пакет пружинит. Счётчики сделаны в форме капли, при изменении капля «шлёпается».</li>
-          <li><b>Телефон.</b> Трубка звонит, волны чертятся по дуге, капсула раскрывается и показывает номер (сейчас номер-заглушка).</li>
+          <li><b>Телефон.</b> Номер виден в шапке всегда. При наведении трубка звонит, волны чертятся по дуге. На телефоне остаётся только значок.</li>
         </ul>
         <table class="stamp"><tr><td>Элемент</td><td>Иконки 24 px</td></tr><tr><td>Линия</td><td>1,6 px</td></tr></table>
       </div>
@@ -569,7 +600,8 @@ h1 em{font-style:normal;color:var(--red)}
     ['Шкафы','по вашим размерам','<svg viewBox="0 0 32 32"><path d="M6 3h20v24H6ZM8 27v2M24 27v2"/><path class="i-hanger" d="M20.5 8.5v1.5M17 13.5l3.5-3.2 3.5 3.2Z" stroke-width="1.2"/><path class="wfill" d="M6 3h10v24H6Z"/><path d="M14 14v3"/><g class="i-door"><path class="wfill" d="M16 3h10v24H16Z"/><path d="M18 14v3"/></g></svg>'],
     ['Свет','люстры, бра, торшеры','<svg viewBox="0 0 32 32"><g class="i-lamp"><path class="i-cone" d="M10.5 16 4 30h24l-6.5-14Z"/><path d="M16 2v8"/><path class="wfill" d="M9.5 16a6.5 6.5 0 0 1 13 0Z"/><path class="i-bulb" d="M14.3 16a1.7 1.7 0 0 0 3.4 0" fill="none"/></g></svg>']
   ];
-  var LINKS = ['Каталог','Коллекции','Проекты','Студия','Контакты'];
+  var LINKS = ['Сотрудничество','HoReCa','Шоурум','На заказ','Outlet'];
+  var MLINKS = ['Каталог'].concat(LINKS);
 
   // логотип
   var tpl = document.getElementById('logo-tpl').innerHTML;
@@ -589,7 +621,7 @@ h1 em{font-style:normal;color:var(--red)}
 
   // демо-навигация
   document.querySelectorAll('.js-demo-nav').forEach(function(el){
-    el.innerHTML = LINKS.map(function(t,i){
+    el.innerHTML = '<button class="catbtn" type="button" aria-expanded="false"></button>' + LINKS.map(function(t,i){
       return '<a class="nav__link'+(i===0?' is-active':'')+'" href="#s-nav"><span class="nav__t" data-text="'+t+'">'+t+'</span></a>';
     }).join('');
   });
@@ -612,7 +644,7 @@ h1 em{font-style:normal;color:var(--red)}
 
   // бургер и мобильное меню
   var MPANEL = '<div class="mpanel__in"><ul class="mlinks">'+
-    LINKS.map(function(t,i){ return '<li><a href="#s-mob" style="--i:'+i+'">'+t+'<small>0'+(i+1)+'</small></a></li>'; }).join('')+
+    MLINKS.map(function(t,i){ return '<li><a href="#s-mob" style="--i:'+i+'">'+t+'<small>'+(i?'':'→')+'</small></a></li>'; }).join('')+
     '</ul><div class="mpanel__foot"><a class="cta" href="#s-btn" data-splash>'+CTA+'</a><span class="mpanel__tel">+7 (000) 000-00-00<small>ежедневно 10:00–20:00</small></span></div></div>'+
     '<div class="mdrips"><i style="left:14%;--h:14px;--d:0s"></i><i style="left:48%;--h:22px;--d:.1s"></i><i style="left:82%;--h:10px;--d:.05s"></i></div>';
   document.querySelectorAll('.mpanel').forEach(function(el){ el.innerHTML = MPANEL; });
@@ -630,20 +662,33 @@ h1 em{font-style:normal;color:var(--red)}
     });
   });
 
+  // кнопка «Каталог»
+  document.querySelectorAll('.catbtn').forEach(function(b){
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="bl bl1" d="M6 7h12"/><path class="bl bl2" d="M6 12h9"/><path class="bl bl3" d="M6 17h12"/><circle class="bhead" cx="12" cy="5" r="1.7"/></svg>Каталог';
+    if (!b.closest('#hdr')) b.addEventListener('click', function(){ b.setAttribute('aria-expanded', String(b.getAttribute('aria-expanded') !== 'true')); });
+  });
+
   // мега-меню
   var hdr = document.getElementById('hdr');
   var mega = document.getElementById('mega');
-  var megaBtn = hdr.querySelector('.has-mega .nav__link');
+  var megaBtn = hdr.querySelector('.catbtn');
   var megaTimer;
   function openMega(){ clearTimeout(megaTimer); closeSearch(); mega.classList.add('is-open'); megaBtn.setAttribute('aria-expanded','true'); }
   function closeMega(){ mega.classList.remove('is-open'); megaBtn.setAttribute('aria-expanded','false'); }
   function laterClose(){ clearTimeout(megaTimer); megaTimer = setTimeout(closeMega, 220); }
   var fine = window.matchMedia('(hover:hover) and (pointer:fine)');
-  [megaBtn.parentNode, mega].forEach(function(el){
+  [megaBtn, mega].forEach(function(el){
     el.addEventListener('mouseenter', function(){ if (fine.matches) openMega(); });
     el.addEventListener('mouseleave', function(){ if (fine.matches) laterClose(); });
   });
   megaBtn.addEventListener('click', function(){ mega.classList.contains('is-open') ? closeMega() : openMega(); });
+
+  // «Сотрудничество»
+  var drop = document.getElementById('drop-coop'), dropBtn = drop.parentNode.querySelector('.nav__link'), dropTimer;
+  function setDrop(open){ clearTimeout(dropTimer); drop.classList.toggle('is-open', open); dropBtn.setAttribute('aria-expanded', String(open)); }
+  drop.parentNode.addEventListener('mouseenter', function(){ if (fine.matches) { closeMega(); setDrop(true); } });
+  drop.parentNode.addEventListener('mouseleave', function(){ if (fine.matches) dropTimer = setTimeout(function(){ setDrop(false); }, 200); });
+  dropBtn.addEventListener('click', function(){ setDrop(!drop.classList.contains('is-open')); });
 
   // поиск
   var search = document.getElementById('hsearch');
@@ -655,9 +700,10 @@ h1 em{font-style:normal;color:var(--red)}
     else closeSearch();
   });
   search.querySelectorAll('.chip').forEach(function(c){ c.addEventListener('click', function(){ var q = document.getElementById('q'); q.value = c.textContent; q.focus(); }); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { closeMega(); closeSearch(); } });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { closeMega(); closeSearch(); setDrop(false); } });
   document.addEventListener('click', function(e){
     if (!hdr.contains(e.target)) { closeMega(); closeSearch(); }
+    if (!drop.parentNode.contains(e.target)) setDrop(false);
   });
 
   // счётчики-капли
