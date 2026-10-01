@@ -117,7 +117,7 @@
 @keyframes pin-hop { 0% { transform: none; } 35% { transform: translateY(-5px) scaleY(1.05); } 62% { transform: translateY(0) scale(1.12, .86); } 80% { transform: translateY(-1.5px); } 100% { transform: none; } }
 @keyframes pin-shadow { 35% { transform: scale(.45); opacity: .35; } 62% { transform: scale(1.2); } }
 
-.city { position: absolute; top: calc(100% + 10px); right: 40px; width: 260px; z-index: 6; background: #fff; border-radius: 20px; padding: 12px;
+.city { position: absolute; top: calc(100% + 10px); right: 40px; width: 300px; z-index: 6; background: #fff; border-radius: 20px; padding: 12px;
   box-shadow: 0 24px 60px -20px rgba(22, 24, 29, .3), 0 0 0 1px var(--line);
   opacity: 0; transform: translateY(-6px) scale(.97); transform-origin: 80% 0; pointer-events: none; transition: opacity .2s, transform .35s var(--spring); }
 .search.is-city .city { opacity: 1; transform: none; pointer-events: auto; }
@@ -128,7 +128,9 @@
 .city li button { width: 100%; text-align: left; border: 0; background: transparent; padding: 8px 10px; border-radius: 10px; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; }
 .city li button:hover { background: var(--mist); }
 .city li button[aria-selected="true"]::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); align-self: center; }
-.city .empty { padding: 8px 10px; color: var(--muted); font-size: 13px; }
+.city .empty { padding: 6px 10px 8px; color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+.city__own { color: var(--accent); } .city__own b { margin-left: 4px; }
+.city li button { display: block !important; }
 
 /* кнопка «Найти» */
 .go { flex: none; width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; display: grid; place-items: center; position: relative; transition: transform .25s var(--spring), background-color .2s; }

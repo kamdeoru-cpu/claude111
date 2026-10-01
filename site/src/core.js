@@ -27,7 +27,8 @@
 
   /* ---------- тосты ---------- */
   VO.toast = (html, ms = 3200) => {
-    const t = document.createElement("div");
+    if ([...$("#toasts").children].some(x => x.dataset.h === html && !x.classList.contains("out"))) return;   // без дублей
+    const t = document.createElement("div"); t.dataset.h = html;
     t.className = "toast"; t.innerHTML = `<i></i><span>${html}</span>`;
     $("#toasts").appendChild(t);
     setTimeout(() => { t.classList.add("out"); t.addEventListener("animationend", () => t.remove()); }, ms);
@@ -44,19 +45,33 @@
     searches: store.get("vo_searches", []),
   };
   if (!S.notes) { S.notes = [{ id: 1, t: Date.now(), title: "Добро пожаловать", text: "Размещение объявлений бесплатное. Загляните в «Как это работает».", read: false }]; store.set("vo_notes", S.notes); }
-  VO.user = () => S.session ? S.accounts[S.session] || null : null;
+  const migrate = u => { if (u && !u.phoneVis) u.phoneVis = u.showPhone ? "auth" : "none"; if (u && !u.type) u.type = "person"; return u; };
+  VO.user = () => S.session ? migrate(S.accounts[S.session]) || null : null;
+  VO.me = () => VO.user() ? VO.uid(VO.user().email) : null;   // id текущего пользователя для чатов, сделок и отзывов
   VO.saveUser = u => { S.accounts[u.email] = u; store.set("vo_accounts", S.accounts); VO.emit("user"); };
   VO.saveMine = () => store.set("vo_my_ads", S.mine);
   VO.uid = email => "u" + [...email].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(36);
 
-  VO.allAds = (all = false) => [...S.mine.filter(a => all || a.status !== "archived").map(a => ({ ...a, mine: VO.user() && a.owner === VO.user().email })), ...window.VO_ADS];
+  VO.allAds = (all = false) => [...S.mine.filter(a => all || (a.status || "active") === "active").map(a => ({ ...a, mine: VO.user() && a.owner === VO.user().email })), ...window.VO_ADS];
   VO.findAd = id => VO.allAds(true).find(a => a.id === id);
-  VO.seller = a => {
-    if (a.owner) { const u = S.accounts[a.owner] || { name: a.sellerName || "Продавец" }; return { id: VO.uid(a.owner), name: u.name, since: new Date(u.created || Date.now()).getFullYear(), phone: !!u.showPhone, phoneNum: u.phone, color: u.color }; }
-    const s = window.VO_SELLERS[a.seller] || { name: "Продавец", since: 2025 };
-    return { id: a.seller, ...s };
+  /* Справочник людей: тестовые продавцы, демо-покупатели и аккаунты этого браузера */
+  VO.person = id => {
+    if (!id) return null;
+    if (window.VO_SELLERS[id]) { const s = window.VO_SELLERS[id]; return { id, name: s.name, since: s.since, type: s.company ? "company" : "person", company: s.company ? s.name : "", phoneVis: s.phone ? "all" : "none", phoneNum: null, bot: true, city: s.city }; }
+    if (window.VO_DEMO_BUYERS && window.VO_DEMO_BUYERS[id]) return { id, ...window.VO_DEMO_BUYERS[id], bot: true, type: "person", since: 2026 };
+    const acc = Object.values(S.accounts).find(a => VO.uid(a.email) === id);
+    if (acc) { migrate(acc); return { id, name: acc.name || "Пользователь", since: new Date(acc.created).getFullYear(), type: acc.type, company: acc.company, phoneVis: acc.phoneVis, phoneNum: acc.phone, color: acc.color, city: acc.city, about: acc.about, email: acc.email }; }
+    return { id, name: "Пользователь", since: 2026, type: "person" };
   };
-  VO.addNote = (title, text) => { S.notes.unshift({ id: Date.now(), t: Date.now(), title, text, read: false }); S.notes = S.notes.slice(0, 30); store.set("vo_notes", S.notes); VO.emit("notes"); };
+  VO.seller = a => VO.person(a.owner ? VO.uid(a.owner) : a.seller);
+  VO.displayName = p => p.type === "company" && p.company ? p.company : p.name;
+  VO.kind = p => p.type === "company" ? "Компания" : "Частное лицо";
+  // cat: msg | deal | ads | review | account | service; link — куда ведёт уведомление
+  VO.NOTE_CATS = { msg: "Сообщения", deal: "Сделки", ads: "Объявления", review: "Отзывы", account: "Аккаунт", service: "Сервис" };
+  VO.addNote = (title, text, o = {}) => { S.notes.unshift({ id: Date.now() + Math.random(), t: Date.now(), title, text, read: false, cat: o.cat || "service", link: o.link || null, owner: o.owner || S.session || null }); S.notes = S.notes.slice(0, 200); store.set("vo_notes", S.notes); VO.emit("notes"); };
+  VO.myNotes = () => S.notes.filter(n => !n.owner || n.owner === S.session);
+  VO.readNote = id => { const n = S.notes.find(x => String(x.id) === String(id)); if (n && !n.read) { n.read = true; store.set("vo_notes", S.notes); VO.emit("notes"); } return n; };
+  VO.readAllNotes = cat => { VO.myNotes().forEach(n => { if (!cat || n.cat === cat) n.read = true; }); store.set("vo_notes", S.notes); VO.emit("notes"); };
 
   /* ---------- просмотры ---------- */
   const day = (t = Date.now()) => new Date(t).toISOString().slice(0, 10);
@@ -79,7 +94,7 @@
 
   /* ---------- форматирование ---------- */
   VO.rub = n => n.toLocaleString("ru-RU") + " ₽";
-  VO.price = a => a.price === 0 ? '<span class="free">Даром</span>' : `${VO.rub(a.price)}${a.per ? `<small>${a.per === "выезд" ? "за выезд" : "в " + a.per}</small>` : ""}`;
+  VO.price = a => a.price == null ? '<span class="muted">Цена не указана</span>' : a.price === 0 ? '<span class="free">Даром</span>' : `${VO.rub(a.price)}${a.per ? `<small>${a.per === "выезд" ? "за выезд" : "в " + a.per}</small>` : ""}`;
   VO.minutesAgo = a => a.created ? Math.floor((Date.now() - a.created) / 60000) : a.ago + Math.floor((Date.now() - LOADED) / 60000);
   VO.agoText = a => {
     const m = VO.minutesAgo(a);
@@ -90,7 +105,7 @@
   };
   VO.plural = (n, a, b, c) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c; };
   VO.media = a => a.photo ? `<img src="${a.photo}" alt="">` : (window.VO_ILL[a.ill] || "");
-  VO.tag = a => a.status === "archived" ? '<span class="card__tag">Снято</span>' : a.price === 0 ? '<span class="card__tag card__tag--free">Даром</span>'
+  VO.tag = a => a.status === "archived" ? '<span class="card__tag">Снято</span>' : a.status === "sold" ? '<span class="card__tag">Продано</span>' : a.price === 0 ? '<span class="card__tag card__tag--free">Даром</span>'
     : a.cond === "Новое" ? '<span class="card__tag card__tag--new">Новое</span>' : `<span class="card__tag">${esc(a.cond)}</span>`;
   VO.heart = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.3-7-9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7 2.4C19 15.7 12 20 12 20Z"/></svg>';
   VO.ico = {
@@ -157,16 +172,21 @@
     url = url || location.href;
     if (navigator.share) { try { await navigator.share({ title, text, url }); return; } catch (e) { if (e.name === "AbortError") return; } }
     const enc = encodeURIComponent;
+    const BI = window.VO_BRAND_ICONS;
     VO.sheet(`<div class="share"><h3>Поделиться</h3><p class="share__t">${esc(title)}</p>
       <div class="share__row">
-        <a href="https://t.me/share/url?url=${enc(url)}&text=${enc(title)}" target="_blank" rel="noopener"><i style="background:#2AABEE">TG</i>Telegram</a>
-        <a href="https://vk.com/share.php?url=${enc(url)}&title=${enc(title)}" target="_blank" rel="noopener"><i style="background:#0077FF">VK</i>ВКонтакте</a>
-        <a href="https://wa.me/?text=${enc(title + " " + url)}" target="_blank" rel="noopener"><i style="background:#25D366">WA</i>WhatsApp</a>
-        <a href="mailto:?subject=${enc(title)}&body=${enc(url)}"><i style="background:#16181D">@</i>Почта</a>
+        <a href="https://t.me/share/url?url=${enc(url)}&text=${enc(title)}" target="_blank" rel="noopener"><i>${BI.tg}</i>Telegram</a>
+        <a href="https://vk.com/share.php?url=${enc(url)}&title=${enc(title)}" target="_blank" rel="noopener"><i>${BI.vk}</i>ВКонтакте</a>
+        <a href="https://wa.me/?text=${enc(title + " " + url)}" target="_blank" rel="noopener"><i>${BI.wa}</i>WhatsApp</a>
+        <a href="https://connect.ok.ru/offer?url=${enc(url)}&title=${enc(title)}" target="_blank" rel="noopener"><i>${BI.ok}</i>Одноклассники</a>
+        <a href="mailto:?subject=${enc(title)}&body=${enc(url)}"><i>${BI.mail}</i>Почта</a>
+        <button type="button" data-copy-url="${esc(url)}"><i>${BI.link}</i>Ссылка</button>
       </div>
       <label class="share__link"><input readonly value="${esc(url)}"><button type="button" class="btn btn--ink" data-copy>Копировать</button></label></div>`, { cls: "sheet--sm" });
   };
   document.addEventListener("click", e => {
+    const cu = e.target.closest("[data-copy-url]");
+    if (cu) { (navigator.clipboard ? navigator.clipboard.writeText(cu.dataset.copyUrl) : Promise.reject()).then(() => VO.toast("Ссылка скопирована"), () => VO.toast("Скопируйте ссылку из поля ниже")); return; }
     const b = e.target.closest("[data-copy]"); if (!b) return;
     const inp = b.parentElement.querySelector("input");
     (navigator.clipboard ? navigator.clipboard.writeText(inp.value) : Promise.reject()).then(() => { b.textContent = "Скопировано"; }, () => { inp.select(); document.execCommand && document.execCommand("copy"); b.textContent = "Скопировано"; });
@@ -215,12 +235,49 @@
   VO.MAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   VO.check = (field, ok) => { field.classList.toggle("bad", !ok); return ok; };
   VO.phoneMask = v => {
-    let d = v.replace(/\D/g, ""); if (d[0] === "8") d = "7" + d.slice(1); if (d[0] !== "7") d = "7" + d; d = d.slice(0, 11);
+    let d = v.replace(/\D/g, "");
+    if (d.length > 11 && d[0] === "7" && (d[1] === "8" || d[1] === "7")) d = "7" + d.slice(2);   // ввели 8 или 7 после уже стоящего «+7»
+    if (d[0] === "8") d = "7" + d.slice(1); if (d[0] !== "7") d = "7" + d; d = d.slice(0, 11);
     const p = d.slice(1); let o = "+7";
     if (p.length) o += " (" + p.slice(0, 3); if (p.length >= 3) o += ")"; if (p.length > 3) o += " " + p.slice(3, 6); if (p.length > 6) o += "-" + p.slice(6, 8); if (p.length > 8) o += "-" + p.slice(8, 10);
     return o;
   };
-  VO.phoneOk = v => v.replace(/\D/g, "").length === 11;
+  VO.phoneOk = v => !VO.phoneProblem(v);
+  /* Отсекаем заведомо несуществующие номера: повторы, «лесенки», служебные и несуществующие коды */
+  VO.phoneProblem = v => {
+    let d = (v || "").replace(/\D/g, ""); if (d[0] === "8") d = "7" + d.slice(1);
+    if (d.length !== 11 || d[0] !== "7") return "Номер должен состоять из 11 цифр: +7 и 10 цифр";
+    const b = d.slice(1), code = b.slice(0, 3), rest = b.slice(3);
+    if ("01256".includes(b[0])) return "Такого кода нет — проверьте первые цифры после +7";
+    if (b[0] === "7") return "Укажите российский номер — код начинается с 3, 4, 8 или 9";
+    if (/^80\d/.test(code)) return "Это номер горячей линии — укажите личный номер";
+    if (/^(\d)\1+$/.test(b) || /^(\d)\1{6}$/.test(rest)) return "Похоже, это не настоящий номер — слишком много одинаковых цифр";
+    const counts = {}; [...b].forEach(c => counts[c] = (counts[c] || 0) + 1);
+    if (Math.max(...Object.values(counts)) >= 8) return "Похоже, это не настоящий номер — слишком много одинаковых цифр";
+    const SEQ = "01234567890", REV = "09876543210";
+    if (SEQ.includes(rest) || REV.includes(rest) || SEQ.includes(b) || REV.includes(b)) return "Похоже, это не настоящий номер — цифры идут по порядку";
+    if (/^(\d\d)\1\1\d$/.test(rest) || /^(\d\d\d)\1\d$/.test(rest) || /^(\d)\1\1(\d)\2\2\d$/.test(rest)) return "Похоже, это не настоящий номер — проверьте цифры";
+    const FAKE = ["9001234567", "9991234567", "9123456789", "9876543210", "9998887766", "9001112233", "9000000001", "9112223344", "9101010101", "9998877665", "9000000099", "9997776655", "9212345678", "9161234567x"];
+    if (FAKE.includes(b)) return "Это тестовый номер — укажите свой";
+    return null;
+  };
+  /* Поле выбора населённого пункта с подсказками: любой город из списка или свой вариант */
+  VO.cityField = (input, onPick) => {
+    const box = document.createElement("ul"); box.className = "cityac"; box.hidden = true;
+    input.parentElement.appendChild(box); input.setAttribute("autocomplete", "off");
+    const norm = c => c.toLowerCase().replace(/ё/g, "е");
+    const show = () => {
+      const all = window.VO_CITIES_ALL || [], q = norm(input.value.trim());
+      let list = q ? all.filter(c => norm(c).startsWith(q)).concat(all.filter(c => !norm(c).startsWith(q) && norm(c).includes(q))).slice(0, 8) : (window.VO_CITIES_TOP || []).slice(0, 8);
+      let html = list.map(c => `<li><button type="button" data-c="${esc(c)}">${esc(c)}</button></li>`).join("");
+      if (q.length > 1 && !all.some(c => norm(c) === q)) html += `<li><button type="button" class="own" data-c="${esc(input.value.trim())}">Другой: <b>${esc(input.value.trim())}</b></button></li>`;
+      box.innerHTML = html; box.hidden = !html;
+    };
+    input.addEventListener("focus", show); input.addEventListener("input", show);
+    input.addEventListener("blur", () => setTimeout(() => { box.hidden = true; }, 150));
+    box.addEventListener("mousedown", e => { const b = e.target.closest("[data-c]"); if (!b) return; e.preventDefault(); input.value = b.dataset.c; box.hidden = true; input.dispatchEvent(new Event("input", { bubbles: true })); box.hidden = true; if (onPick) onPick(b.dataset.c); });
+    input.addEventListener("keydown", e => { if (e.key === "Escape" || e.key === "Tab") box.hidden = true; if (e.key === "Enter" && !box.hidden) { const b = box.querySelector("[data-c]"); if (b) { e.preventDefault(); input.value = b.dataset.c; box.hidden = true; } } });
+  };
   VO.maskedPhone = v => v ? v.replace(/(\d{3})-(\d{2})$/, "***-**") : "";
 
   /* ---------- шапка: панели иконок и профиль ---------- */
@@ -233,7 +290,7 @@
   }
   function togglePop(key, force) {
     Object.entries(pops).forEach(([k, { p, btn }]) => { const on = k === key ? (force ?? !p.classList.contains("is-open")) : false; p.classList.toggle("is-open", on); btn.setAttribute("aria-expanded", on); });
-    if (key === "bell" && pops.bell.p.classList.contains("is-open")) { S.notes.forEach(n => n.read = true); store.set("vo_notes", S.notes); syncBadges(); }
+
   }
   VO.closePops = () => togglePop(null);
   document.addEventListener("click", e => { if (!e.target.closest(".pop")) togglePop(null); else if (e.target.closest("a")) togglePop(null); });
@@ -249,18 +306,32 @@
   }
   favPop.addEventListener("click", e => { const i = e.target.closest("[data-open]"); if (i && !e.target.closest("[data-fav]")) { togglePop(null); location.hash = "#/ad/" + i.dataset.open; } });
   function renderMsgPop() {
-    msgPop.innerHTML = `<h4>Сообщения</h4><div class="pop__empty"><svg width="64" height="56" viewBox="0 0 64 56"><path d="M8 6h30a16 16 0 0 1 0 32H22L8 50Z" fill="#F4F5F7"/><circle cx="22" cy="22" r="3" fill="#16181D"/><circle cx="32" cy="22" r="3" fill="#16181D"/><circle cx="42" cy="22" r="3" fill="#FF4F3A"/></svg>`
-      + (VO.user() ? `<b>Диалогов пока нет</b>Напишите продавцу со страницы объявления — переписка появится здесь.` : `<b>Войдите, чтобы переписываться</b>Сообщения с продавцами и покупателями будут здесь.<br><a class="pop__btn" href="#/login">Войти</a>`) + `</div>`;
+    const chats = VO.user() && VO.chats ? VO.chats.list().slice(0, 5) : [];
+    msgPop.innerHTML = `<h4>Сообщения ${VO.user() ? '<a href="#/me/msg">Все</a>' : ""}</h4>` + (!VO.user()
+      ? `<div class="pop__empty"><svg width="64" height="56" viewBox="0 0 64 56"><path d="M8 6h30a16 16 0 0 1 0 32H22L8 50Z" fill="#F4F5F7"/><circle cx="22" cy="22" r="3" fill="#16181D"/><circle cx="32" cy="22" r="3" fill="#16181D"/><circle cx="42" cy="22" r="3" fill="#FF4F3A"/></svg><b>Войдите, чтобы переписываться</b>Диалоги с продавцами и покупателями будут здесь.<br><a class="pop__btn" href="#/login">Войти</a></div>`
+      : chats.length ? `<ul class="pop__list">${chats.map(c => VO.chats.popRow(c)).join("")}</ul>`
+      : `<div class="pop__empty"><b>Диалогов пока нет</b>Напишите продавцу со страницы объявления — переписка появится здесь.</div>`);
   }
   function renderBellPop() {
-    bellPop.innerHTML = `<h4>Уведомления</h4>` + S.notes.slice(0, 6).map(n => `<div class="note-i"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/></svg></i><div><b>${esc(n.title)}</b><span>${esc(n.text)}</span></div></div>`).join("");
+    const list = VO.myNotes().slice(0, 6), unread = VO.myNotes().filter(n => !n.read).length;
+    bellPop.innerHTML = `<h4>Уведомления ${unread ? `<button class="link" type="button" data-read-all>Прочитать все</button>` : ""}</h4>`
+      + (list.length ? list.map(n => `<a class="note-i${n.read ? "" : " unread"}" href="${n.link || "#/me/notif"}" data-note="${n.id}"><i>${VO.noteIcon(n.cat)}</i><div><b>${esc(n.title)}</b><span>${esc(n.text)}</span><small>${VO.NOTE_CATS[n.cat] || "Сервис"} · ${VO.timeAgo(n.t)}</small></div></a>`).join("") : `<div class="pop__empty">Пока тихо</div>`)
+      + (VO.user() ? `<a class="pop__all" href="#/me/notif">Все уведомления</a>` : "");
   }
+  bellPop.addEventListener("click", e => {
+    if (e.target.closest("[data-read-all]")) { e.stopPropagation(); VO.readAllNotes(); return; }
+    const n = e.target.closest("[data-note]"); if (n) VO.readNote(n.dataset.note);
+  });
+  VO.noteIcon = cat => ({ msg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4.5 4.5h10a5.5 5.5 0 0 1 0 11H8.5l-4 4Z"/></svg>', deal: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8 12 3l9 5v8l-9 5-9-5Z"/><path d="M3 8l9 5 9-5"/></svg>', review: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>', ads: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5"/></svg>', account: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>' })[cat] || '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/></svg>';
+  VO.timeAgo = t => { const m = Math.floor((Date.now() - t) / 60000); if (m < 1) return "только что"; if (m < 60) return m + " мин назад"; if (m < 1440) return Math.floor(m / 60) + " ч назад"; return new Date(t).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); };
   function syncBadges() {
     const set = (btn, n) => { const b = $(".badge", btn); b.hidden = !n; b.textContent = n > 9 ? "9+" : n; };
-    set($("#favBtn"), S.favs.size); set($("#bellBtn"), S.notes.filter(n => !n.read).length);
+    set($("#favBtn"), S.favs.size); set($("#bellBtn"), VO.user() ? VO.myNotes().filter(n => !n.read).length : 0);
+    set($("#msgBtn"), VO.user() && VO.chats ? VO.chats.unread() : 0);
     renderFavPop(); renderBellPop(); renderMsgPop(); renderMe();
   }
-  VO.on("favs", syncBadges); VO.on("notes", syncBadges); VO.on("user", syncBadges); VO.on("mine", syncBadges);
+  VO.syncBadges = syncBadges;
+  VO.on("favs", syncBadges); VO.on("notes", syncBadges); VO.on("user", syncBadges); VO.on("mine", syncBadges); VO.on("chats", syncBadges);
 
   const loginBtn = $("#loginBtn");
   let meWrap = null, mePop = null;
@@ -275,12 +346,13 @@
       mePop = makePop("me", $(".me", meWrap), "pop--me");
       mePop.addEventListener("click", e => { if (e.target.closest("[data-logout]")) VO.logout(); });
     }
-    $(".me__ava", meWrap).textContent = (u.name || u.email)[0].toUpperCase();
+    $(".me__ava", meWrap).textContent = (VO.displayName(u) || u.name || u.email)[0].toUpperCase();
     $(".me__ava", meWrap).style.background = u.color || "";
     $(".me__name", meWrap).textContent = u.name || "Профиль";
     const act = S.mine.filter(a => a.owner === u.email && a.status !== "archived").length;
-    mePop.innerHTML = `<a class="pop--me__head" href="#/me"><span class="me__ava" style="background:${u.color || ""}">${esc((u.name || u.email)[0].toUpperCase())}</span><span><b>${esc(u.name || "Без имени")}</b><small>${esc(u.email)}</small></span></a><div class="sep"></div>
-      <a href="#/me">Личный кабинет</a><a href="#/me/ads">Мои объявления <small>${act}</small></a><a href="#/me/fav">Избранное <small>${S.favs.size}</small></a><a href="#/me/profile">Профиль и настройки</a>
+    const unreadMsg = VO.chats ? VO.chats.unread() : 0;
+    mePop.innerHTML = `<a class="pop--me__head" href="#/me"><span class="me__ava" style="background:${u.color || ""}">${esc((u.name || u.email)[0].toUpperCase())}</span><span class="pop--me__n"><b>${esc(VO.displayName(u) || "Без имени")}</b><small>${VO.kind(u)}${VO.rating ? VO.rating.short(VO.me()) : ""}</small></span></a><div class="sep"></div>
+      <a href="#/me">Личный кабинет</a><a href="#/me/ads">Мои объявления <small>${act}</small></a><a href="#/me/msg">Сообщения ${unreadMsg ? `<small class="hot">${unreadMsg}</small>` : ""}</a><a href="#/me/deals">Сделки</a><a href="#/me/fav">Избранное <small>${S.favs.size}</small></a><a href="#/me/profile">Профиль и настройки</a>
       <div class="sep"></div><button type="button" class="out" data-logout>Выйти</button>`;
   }
   VO.logout = () => { S.session = null; store.set("vo_session", null); VO.emit("user"); VO.toast("Вы вышли из аккаунта"); if (/^#\/(me|post)/.test(location.hash)) location.hash = "#/"; };

@@ -5,7 +5,7 @@
   const C = window.VO_CONTACTS;
   const SITE = "«Все объявления» (всеобьявления.рф)";
   const OP = `${C.owner}, физическое лицо`;
-  const DATE = "[дата публикации — заглушка]";
+  const DATE = "1 октября 2026 года";
   const contacts = `электронная почта: ${C.email}, телефон: ${C.phone}`;
   const DOCS = {
     terms: ["Пользовательское соглашение", [
@@ -44,22 +44,20 @@
       ["Запрещено в тексте", ["Ссылки на сторонние сайты и мессенджеры, номера телефонов (для звонков включите показ номера в профиле).", "Оскорбления, дискриминация, призывы к насилию, нецензурная лексика.", "Навязчивое повторение одного объявления, заведомо ложная цена."]],
       ["Проверка и санкции", ["Объявления проверяются автоматически и по жалобам пользователей.", "При нарушении объявление скрывается; при повторных нарушениях аккаунт может быть заблокирован."]],
     ]],
-    ads: ["Реклама на сайте", [
-      ["Размещение рекламы", ["На сайте есть рекламные места: в меню категорий и между объявлениями. Мы размещаем только проверенную рекламу, соответствующую закону «О рекламе», с пометкой «Реклама» и данными рекламодателя.", "[Стоимость и форматы — заглушка: условия обсуждаются индивидуально]"]],
-      ["Как связаться", [`Напишите на ${C.email} с темой «Реклама» или в мессенджеры, указанные на странице «Написать нам».`]],
-    ]],
   };
   VO.DOCS = DOCS;
   const page = VO.page("doc");
   VO.routes.doc = p => {
+    if (p[1] === "ads") { location.hash = "#/advertise"; return; }
     const k = DOCS[p[1]] ? p[1] : "terms", [title, secs] = DOCS[k];
     page.innerHTML = `<div class="wrap docs">
       <aside class="docs__nav"><b>Документы</b>${Object.entries(DOCS).map(([id, [t]]) => `<a href="#/doc/${id}" class="${id === k ? "on" : ""}">${t}</a>`).join("")}</aside>
       <article class="doc"><span class="ph__eyebrow">Документ</span><h1>${title}</h1><p class="muted doc__ed">Редакция от ${esc(DATE).replace(/\[(.+?)\]/g, '<mark class="stub">[$1]</mark>')}</p>
         <nav class="doc__toc">${secs.map(([h], i) => `<a href="#/doc/${k}" data-to="s${i}">${i + 1}. ${h}</a>`).join("")}</nav>
         ${secs.map(([h, ps], i) => `<section id="s${i}"><h2>${i + 1}. ${h}</h2>${ps.map((t, j) => `<p><span class="doc__n">${i + 1}.${j + 1}</span><span>${esc(t).replace(/\[(.+?)\]/g, '<mark class="stub">[$1]</mark>')}</span></p>`).join("")}</section>`).join("")}
-        <div class="doc__foot"><button class="btn btn--ghost" type="button" onclick="print()">Распечатать</button><a class="btn btn--ghost" href="#/contact">Задать вопрос</a></div></article></div>`;
+        <div class="doc__foot"><button class="btn btn--ghost" type="button" data-print>Распечатать</button><a class="btn btn--ghost" href="#/contact">Задать вопрос</a></div></article></div>`;
     $$("[data-to]", page).forEach(a => a.addEventListener("click", e => { e.preventDefault(); document.getElementById(a.dataset.to).scrollIntoView({ behavior: "smooth", block: "start" }); }));
+    const pr = $("[data-print]", page); if (pr) pr.addEventListener("click", () => print());
     VO.show("doc", title);
   };
 })();

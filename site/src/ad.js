@@ -27,7 +27,8 @@
     const views = VO.views(a), today = VO.viewsByDay(a, 1)[0];
     const sellerAds = VO.allAds().filter(x => VO.seller(x).id === s.id);
     const attrs = Object.entries(a.attrs || {}).map(([k, v]) => [window.VO_ATTR_NAMES[k] || k, v === true ? "Да" : typeof v === "number" ? v.toLocaleString("ru-RU") : v]);
-    attrs.unshift(["Категория", VO.catName(a.cat)], ["Состояние", a.cond]);
+    attrs.unshift(["Категория", VO.catName(a.cat) + (a.sub ? " · " + a.sub : "")], ["Состояние", a.cond]);
+    if (a.delivery && a.delivery.length) attrs.push(["Передача", a.delivery.map(x => ({ meet: "встреча", ship: "отправка", courier: "привезёт продавец" })[x]).join(", ")]);
     const similar = VO.allAds().filter(x => x.id !== a.id && x.cat === a.cat).concat(VO.allAds().filter(x => x.id !== a.id && x.cat !== a.cat)).slice(0, 6);
     const ph = a.photos && a.photos.length ? a.photos : a.photo ? [a.photo] : null;
     const views3 = ph ? ph.map((_, i) => i) : [0, 1, 2];
@@ -53,11 +54,11 @@
           <div class="adp__card">
             <div class="adp__price">${VO.price(a)}${a.bargain ? '<span class="card__bargain">Торг</span>' : ""}</div>
             <h1 class="adp__title">${esc(a.title)}</h1>
-            <div class="adp__meta">${VO.ico.pin}${esc(a.city)} · ${VO.agoText(a)}</div>
+            <div class="adp__meta">${VO.ico.pin}${esc(a.city)}${a.district ? ", " + esc(a.district) : ""} · ${VO.agoText(a)}</div>
             ${mine ? owner(a) : `
             <div class="adp__acts">
               <button class="btn btn--accent btn--wide" type="button" data-write>${VO.ico.msg}Написать продавцу</button>
-              <button class="btn btn--ghost btn--wide" type="button" data-phone>${VO.ico.phone}<span>${s.phone ? "Показать телефон" : "Продавец скрыл номер"}</span></button>
+              <button class="btn btn--ghost btn--wide" type="button" data-phone>${VO.ico.phone}<span>${s.phoneVis === "none" ? "Только сообщения" : "Показать телефон"}</span></button>
               <div class="adp__row">
                 <button class="btn btn--ghost${S.favs.has(a.id) ? " is-on" : ""}" type="button" data-fav="${a.id}" aria-pressed="${S.favs.has(a.id)}">${VO.heart}<span class="lbl">${S.favs.has(a.id) ? "В избранном" : "В избранное"}</span></button>
                 <button class="btn btn--ghost" type="button" data-share>${VO.ico.share}Поделиться</button>
@@ -67,7 +68,7 @@
           </div>
           <a class="seller" href="#/u/${s.id}">
             <span class="seller__ava" style="${s.color ? `background:${s.color}` : ""}">${esc(s.name[0])}</span>
-            <span class="seller__t"><b>${esc(s.name)}</b><small>${s.company ? "Компания" : "Частное лицо"} · на сайте с ${s.since} года</small><small class="seller__ads">${sellerAds.length} ${VO.plural(sellerAds.length, "объявление", "объявления", "объявлений")} ${VO.ico.chev}</small></span>
+            <span class="seller__t"><b>${esc(VO.displayName(s))}${s.demo ? ' <em class="tag-demo">демо</em>' : ""}</b><small>${VO.kind(s)} · на сайте с ${s.since} года</small>${VO.rating.badge(s.id)}<small class="seller__ads">${sellerAds.length} ${VO.plural(sellerAds.length, "объявление", "объявления", "объявлений")} ${VO.ico.chev}</small></span>
           </a>
           <div class="adp__tip"><b>Как не попасться мошенникам</b><span>Не переводите предоплату незнакомым, не сообщайте коды из СМС и не переходите по ссылкам «на оплату».</span><a href="#/safety">Подробнее о безопасности →</a></div>
           ${mine ? "" : `<button class="link adp__report" type="button" data-report>${VO.ico.flag}Пожаловаться на объявление</button>`}
@@ -83,12 +84,13 @@
   function owner(a) {
     const days = VO.viewsByDay(a, 7), total = VO.views(a);
     return `<div class="own">
-      <div class="own__head"><b>Ваше объявление</b><span class="own__st ${a.status === "archived" ? "off" : ""}">${a.status === "archived" ? "Снято с публикации" : "Опубликовано"}</span></div>
-      <div class="own__stats"><div><b>${total}</b><small>просмотров${VO.DEMO ? " · демо" : ""}</small></div><div><b>${S.favs.has(a.id) ? 1 : 0}</b><small>в избранном</small></div><div>${spark(days)}<small>за 7 дней</small></div></div>
+      <div class="own__head"><b>Ваше объявление</b><span class="own__st ${a.status === "active" ? "" : "off"}">${a.status === "archived" ? "Снято с публикации" : a.status === "sold" ? "Продано" : "Опубликовано"}</span></div>
+      <div class="own__stats"><div><b>${total}</b><small>просмотров${VO.DEMO ? " · демо" : ""}</small></div><div><b>${VO.chats.forAd(a.id).length}</b><small>диалогов</small></div><div>${spark(days)}<small>за 7 дней</small></div></div>
+      ${VO.chats.forAd(a.id).length ? `<a class="btn btn--ghost btn--wide btn--sm" href="#/me/msg/${VO.chats.forAd(a.id)[0].id}">Открыть переписку</a>` : ""}
       <div class="own__acts">
         <a class="btn btn--ink" href="#/post?edit=${a.id}">${VO.ico.edit}Редактировать</a>
         <button class="btn btn--ghost" type="button" data-bump>Поднять в ленте</button>
-        <button class="btn btn--ghost" type="button" data-arch>${a.status === "archived" ? "Вернуть в ленту" : "Снять с публикации"}</button>
+        <button class="btn btn--ghost" type="button" data-arch>${a.status === "active" ? "Снять с публикации" : "Вернуть в ленту"}</button>
         <button class="btn btn--ghost" type="button" data-share>${VO.ico.share}Поделиться</button>
       </div></div>`;
   }
@@ -107,15 +109,13 @@
     if (t.closest("[data-share]")) return VO.share({ title: a.title + " — " + (a.price ? VO.rub(a.price) : "даром"), url: location.href.split("#")[0] + "#/ad/" + a.id });
     if (t.closest("[data-write]")) {
       if (!VO.user()) return VO.needLogin("#/ad/" + a.id, "Войдите, чтобы написать продавцу");
-      return VO.sheet(`<div class="soon"><div class="soon__chat"><div class="bub bub--out">Здравствуйте! ${esc(a.title)} ещё актуально?</div><div class="bub bub--typing"><i></i><i></i><i></i></div></div>
-        <h3>Переписка появится в ближайшем обновлении</h3><p>Мы доделываем чаты: сообщения будут приходить прямо сюда и на почту. Пока можно связаться по телефону, если продавец его открыл.</p>
-        <button class="btn btn--ink" type="button" data-sheet-close>Понятно</button></div>`, { cls: "sheet--sm" });
+      const c = VO.chats.openFor(a.id); if (c) location.hash = "#/me/msg/" + c.id; return;
     }
     const ph = t.closest("[data-phone]");
     if (ph) {
       const s = VO.seller(a);
-      if (!s.phone) return VO.toast("Продавец решил не показывать номер — напишите ему сообщение");
-      if (!VO.user()) return VO.needLogin("#/ad/" + a.id, "Войдите, чтобы увидеть номер — так мы защищаем продавцов от спама");
+      if (s.phoneVis === "none") return VO.toast("Продавец общается только через сообщения — так безопаснее для обоих");
+      if (s.phoneVis === "auth" && !VO.user()) return VO.needLogin("#/ad/" + a.id, "Продавец показывает номер только вошедшим — так меньше спама");
       $("span", ph).textContent = s.phoneNum || "Тестовое объявление — номера нет";
       ph.classList.add("is-shown"); return;
     }
@@ -127,7 +127,7 @@
     }
     if (t.closest("[data-arch]")) {
       const m = S.mine.find(x => x.id === a.id);
-      m.status = m.status === "archived" ? "active" : "archived"; VO.saveMine(); VO.emit("mine");
+      m.status = m.status === "active" ? "archived" : "active"; VO.saveMine(); VO.emit("mine");
       VO.toast(m.status === "archived" ? "Объявление снято — его не видно в ленте" : "Объявление снова в ленте"); return render(a.id);
     }
   });

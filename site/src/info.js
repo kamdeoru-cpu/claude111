@@ -196,6 +196,8 @@
   $("#helpQ", help).addEventListener("input", faq);
 
   /* ================= НАПИСАТЬ НАМ ================= */
+  VO.device = () => { let d = VO.store.get("vo_device", null); if (!d) { d = "dv" + Math.random().toString(36).slice(2, 10); VO.store.set("vo_device", d); } return d; };
+  VO.tickets = () => { const u = VO.user(); return VO.store.get("vo_tickets", []).filter(t => t.device === VO.device() || (u && t.email === u.email)); };
   const WAYS = [["tg", "Telegram", "Быстрее всего", C.tg], ["wa", "WhatsApp", "Пишите в любое время", C.wa], ["max", "MAX", "Российский мессенджер", C.max], ["mail", "Почта", C.email, "mailto:" + C.email], ["phone", "Телефон", C.phone, "tel:" + C.tel]];
   const contact = VO.page("contact", `<div class="wrap">
     <div class="contact">
@@ -214,7 +216,7 @@
         <div class="field field--area"><textarea id="cMsg" name="msg" placeholder=" " rows="5" maxlength="2000"></textarea><label for="cMsg">Сообщение</label><em>Напишите хотя бы пару слов</em><small class="count" id="cCount">0 / 2000</small></div>
         <label class="check"><input type="checkbox" id="cAgree"><span></span><span>Согласен(на) на <a href="#/doc/consent">обработку персональных данных</a> для ответа на обращение</span></label>
         <button class="btn btn--ink btn--lg btn--send" type="submit"><span>Отправить</span>${VO.ico.msg}</button>
-        <div class="sent" id="sent" hidden><div class="sent__bub"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12.5 4 4 8-9"/></svg></div><b>Почти готово</b><span>Открыли вашу почтовую программу с готовым письмом — осталось нажать «Отправить». Не открылась? Напишите на <a href="mailto:${C.email}">${C.email}</a>.</span><button class="btn btn--ghost" type="button" id="sentAgain">Написать ещё</button></div>
+        <div class="sent" id="sent" hidden><div class="sent__bub"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12.5 4 4 8-9"/></svg></div><b>Почти готово</b><span>Открыли вашу почтовую программу с готовым письмом — осталось нажать «Отправить». Не открылась? Напишите на <a href="mailto:${C.email}">${C.email}</a>. Обращение сохранено в личном кабинете в разделе «Обращения».</span><button class="btn btn--ghost" type="button" id="sentAgain">Написать ещё</button></div>
       </form>
     </div></div>`);
   const cf = $("#contactForm", contact);
@@ -230,6 +232,9 @@
     if (!$("#cAgree", cf).checked) return VO.toast("Отметьте согласие на обработку данных — иначе мы не сможем ответить");
     const last = VO.store.get("vo_contact_t", 0); if (Date.now() - last < 30e3) return VO.toast("Сообщение уже отправлено. Подождите полминуты перед следующим");
     VO.store.set("vo_contact_t", Date.now());
+    // обращение сохраняем: оно появится в кабинете — по почте или по этому устройству, даже если войти позже
+    VO.store.set("vo_tickets", [{ id: "t" + Date.now().toString(36), email: mail.toLowerCase(), name, topic, msg, t: Date.now(), device: VO.device(), status: "sent" }, ...VO.store.get("vo_tickets", [])]);
+    if (VO.user()) VO.addNote("Обращение отправлено", `Тема: ${topic}. Ответ придёт на ${mail}`, { cat: "service", link: "#/me/tickets" });
     // Сервера пока нет — отправляем через почтовую программу пользователя на почту владельца
     const body = `${msg}\n\n— ${name}, ${mail}`;
     location.href = `mailto:${C.email}?subject=${encodeURIComponent("[Все объявления] " + topic)}&body=${encodeURIComponent(body)}`;

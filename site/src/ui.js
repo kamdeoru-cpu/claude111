@@ -21,6 +21,7 @@
   document.addEventListener("click", e => { if (e.target.closest("[data-cookie-settings]") && window.CookieConsent) window.CookieConsent.open(); });
 
   if (window.VO_closeMega) VO.closeMega = window.VO_closeMega;
+  VO.on("route", h => { if (h !== "me") document.documentElement.classList.remove("in-chat"); });
   VO.routes["*"] = () => { VO.page("404", `<div class="wrap"><div class="empty empty--404"><b>404</b><span>Такой страницы нет — возможно, ссылка устарела.</span><div class="empty__acts"><a class="btn btn--ink" href="#/">На главную</a><a class="btn btn--ghost" href="#/help">Помощь</a></div></div></div>`); VO.show("404", "Страница не найдена"); };
   VO.start();
 })();

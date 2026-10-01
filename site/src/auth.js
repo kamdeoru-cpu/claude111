@@ -12,7 +12,7 @@
   const ads = window.VO_ADS;
   page.innerHTML = `<div class="signin">
     <div class="signin__wall" aria-hidden="true">
-      <div class="wall">${[0, 1, 2, 3].map(k => col(ads.filter((_, i) => i % 4 === k).concat(ads.filter((_, i) => i % 4 === (k + 1) % 4)), k)).join("")}</div>
+      <div class="wall">${[0, 1, 2].map(k => col(ads.filter((_, i) => i % 3 === k), k)).join("")}</div>
       <div class="signin__say"><span class="ph__eyebrow">Все объявления</span><b>Покупайте, продавайте<br>и&nbsp;отдавайте даром</b><span>Один аккаунт — и всё под рукой: объявления, избранное, сообщения.</span></div>
     </div>
     <div class="signin__panel">
@@ -115,31 +115,40 @@
   /* ---------- анкета при первом входе (обязательная) ---------- */
   function onboarding() {
     const u = VO.user(); if (!u || u.onboarded) return;
-    const cities = (window.VO_CITIES || []).filter(c => c !== "Вся Россия");
     const el = VO.sheet(`<form class="onb" id="onbF" novalidate>
-      <div class="onb__head"><span class="onb__ava" style="background:${u.color}" id="onbAva">?</span><div><h3>Давайте познакомимся</h3><p>Это займёт полминуты — и можно размещать объявления.</p></div></div>
-      <div class="field"><input id="oName" maxlength="40" placeholder=" " autocomplete="given-name" required><label for="oName">Имя</label><em>Напишите, как к вам обращаться</em></div>
-      <div class="field field--ic"><input id="oPhone" inputmode="tel" placeholder=" " autocomplete="tel" required><label for="oPhone">Номер телефона</label><span class="field__ic">${VO.ico.phone}</span><em>Номер должен быть из 11 цифр</em></div>
+      <div class="onb__head"><span class="onb__ava" style="background:${u.color}" id="onbAva">?</span><div><h3>Давайте познакомимся</h3><p>Полминуты — и можно размещать объявления и писать продавцам.</p></div></div>
+      <div class="seg seg--sm" role="tablist" id="oType"><button role="tab" type="button" data-ty="person" aria-selected="true">Частное лицо</button><button role="tab" type="button" data-ty="company" aria-selected="false">Компания или ИП</button><span class="seg__ink"></span></div>
+      <div class="field" id="oCompW" hidden><input id="oComp" maxlength="60" placeholder=" "><label for="oComp">Название компании или ИП</label><em>Укажите название</em></div>
+      <div class="field"><input id="oName" maxlength="40" placeholder=" " autocomplete="given-name" required><label for="oName">Ваше имя</label><em>Напишите, как к вам обращаться</em></div>
+      <div class="field field--ic"><input id="oPhone" inputmode="tel" placeholder=" " autocomplete="tel" required><label for="oPhone">Номер телефона</label><span class="field__ic">${VO.ico.phone}</span><em id="oPhoneE">Проверьте номер</em></div>
       <div class="onb__note"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2F9E6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6Z"/><path d="m9 12 2 2 4-4"/></svg><span>Номер нужен для безопасности аккаунта. <b>Без вашего разрешения он не появится в объявлениях</b> и никому не передаётся.</span></div>
-      <label class="switch-l switch-l--block"><input type="checkbox" id="oShow"><span class="sw"></span><span>Показывать номер в моих объявлениях<small>Можно изменить в любой момент в профиле</small></span></label>
-      <div class="field field--select"><select id="oCity">${cities.map(c => `<option${c === (window.VO_CITY ? window.VO_CITY() : "") ? " selected" : ""}>${c}</option>`).join("")}</select><label for="oCity">Город</label></div>
+      <div class="fs"><h4>Кто увидит номер в объявлениях</h4><div class="vis vis--row">${[["none", "Никто", "только сообщения"], ["auth", "Вошедшие", "меньше спама"], ["all", "Все", "любой посетитель"]].map(([k, t, d], i) => `<label><input type="radio" name="vis" value="${k}"${i ? "" : " checked"}><span><b>${t}</b><small>${d}</small></span></label>`).join("")}</div></div>
+      <div class="field"><input id="oCity" maxlength="60" placeholder=" " value="${esc(window.VO_CITY && window.VO_CITY() !== "Вся Россия" ? window.VO_CITY() : "")}"><label for="oCity">Город или населённый пункт</label><em>Укажите, где вы находитесь</em></div>
       <label class="check"><input type="checkbox" id="oAgree"><span></span><span>Я согласен(на) на <a href="#/doc/consent" target="_blank">обработку персональных данных</a> и принимаю <a href="#/doc/terms" target="_blank">Пользовательское соглашение</a></span></label>
       <em class="onb__err" id="oErr"></em>
       <button class="btn btn--accent btn--wide btn--lg" type="submit">Готово</button>
       <button class="link onb__out" type="button" data-onb-out>Выйти из аккаунта</button>
     </form>`, { cls: "sheet--onb", locked: true });
-    const f = $("#onbF", el), name = $("#oName", el), phone = $("#oPhone", el);
+    const f = $("#onbF", el), name = $("#oName", el), phone = $("#oPhone", el), city = $("#oCity", el);
+    let type = "person";
+    requestAnimationFrame(VO.syncInks);
+    VO.cityField(city);
+    $("#oType", el).addEventListener("click", e => { const b = e.target.closest("[data-ty]"); if (!b) return; type = b.dataset.ty; VO.selectTab($("#oType", el), b); $("#oCompW", el).hidden = type !== "company"; });
     name.addEventListener("input", () => { $("#onbAva", el).textContent = (name.value.trim()[0] || "?").toUpperCase(); name.parentElement.classList.remove("bad"); });
     phone.addEventListener("input", () => { phone.value = phone.value ? VO.phoneMask(phone.value) : ""; phone.parentElement.classList.remove("bad"); });
+    phone.addEventListener("blur", () => { if (VO.phoneOk(phone.value) || phone.value.replace(/\D/g, "").length < 11) return; $("#oPhoneE", el).textContent = VO.phoneProblem(phone.value); phone.parentElement.classList.add("bad"); });
     phone.addEventListener("focus", () => { if (!phone.value) phone.value = "+7 ("; });
+    city.addEventListener("input", () => city.parentElement.classList.remove("bad"));
     $("[data-onb-out]", el).addEventListener("click", () => { VO.closeSheet(true); VO.logout(); });
     f.addEventListener("submit", e => {
       e.preventDefault();
-      const ok = [VO.check(name.parentElement, name.value.trim().length > 0), VO.check(phone.parentElement, VO.phoneOk(phone.value))].every(Boolean);
+      const pp = VO.phoneProblem(phone.value); $("#oPhoneE", el).textContent = pp || "";
+      const ok = [VO.check(name.parentElement, name.value.trim().length > 0), VO.check(phone.parentElement, !pp), VO.check(city.parentElement, city.value.trim().length > 1), type !== "company" || VO.check($("#oComp", el).parentElement, $("#oComp", el).value.trim().length > 1)].every(Boolean);
       const agree = $("#oAgree", el).checked;
       $("#oErr", el).textContent = !agree && ok ? "Нужно согласие на обработку данных — без него мы не можем хранить ваш профиль" : "";
       if (!ok || !agree) return;
-      Object.assign(u, { name: name.value.trim().slice(0, 40), phone: phone.value, showPhone: $("#oShow", el).checked, city: $("#oCity", el).value, onboarded: true, consentAt: Date.now() });
+      const vis = f.querySelector("[name=vis]:checked").value;
+      Object.assign(u, { type, company: type === "company" ? $("#oComp", el).value.trim() : "", name: name.value.trim().slice(0, 40), phone: phone.value, phoneVis: vis, showPhone: vis !== "none", city: city.value.trim().slice(0, 60), onboarded: true, consentAt: Date.now() });
       VO.closeSheet(true); VO.saveUser(u);
       VO.toast(`Готово, ${esc(u.name)}! Профиль заполнен`);
     });

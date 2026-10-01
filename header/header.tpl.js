@@ -69,9 +69,18 @@
   const regionBtn = $("#regionBtn"), cityBox = $(".city"), cityInput = cityBox.querySelector("input"), cityList = cityBox.querySelector("ul");
   let city = (() => { try { return localStorage.getItem("vo_city"); } catch (e) { return null; } })() || "Москва";
   regionBtn.querySelector(".txt").textContent = city;
+  // полный список городов подгружается позже (cities.js); пока его нет — короткий список выше
+  const allCities = () => ["Вся Россия", ...(window.VO_CITIES_ALL || CITIES.slice(1))];
+  const topCities = () => ["Вся Россия", ...(window.VO_CITIES_TOP || CITIES.slice(1, 13))];
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function renderCities() {
-    const q = cityInput.value.trim().toLowerCase(), list = CITIES.filter(c => c.toLowerCase().includes(q));
-    cityList.innerHTML = list.length ? list.map(c => `<li><button type="button" role="option" aria-selected="${c === city}">${c}</button></li>`).join("") : '<li class="empty">Такого города пока нет в списке</li>';
+    const raw = cityInput.value.trim(), q = raw.toLowerCase().replace(/ё/g, "е");
+    const norm = c => c.toLowerCase().replace(/ё/g, "е");
+    let list = q ? allCities().filter(c => norm(c).startsWith(q)).concat(allCities().filter(c => !norm(c).startsWith(q) && norm(c).includes(q))).slice(0, 40) : topCities();
+    let html = list.map(c => `<li><button type="button" role="option" aria-selected="${c === city}">${esc(c)}</button></li>`).join("");
+    if (raw.length > 1 && !allCities().some(c => norm(c) === q)) html += `<li><button type="button" role="option" class="city__own" data-own="${esc(raw)}">Другой населённый пункт: <b>${esc(raw)}</b></button></li>`;
+    if (!q) html = `<li class="empty">Популярные города. Начните вводить название — найдём любой.</li>` + html;
+    cityList.innerHTML = html;
   }
   regionBtn.addEventListener("click", () => {
     const on = !search.classList.contains("is-city");
@@ -81,14 +90,14 @@
   cityInput.addEventListener("input", renderCities);
   cityList.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
-    city = b.textContent; regionBtn.querySelector(".txt").textContent = city;
+    city = (b.dataset.own || b.textContent).trim().slice(0, 60); city = city[0].toUpperCase() + city.slice(1); regionBtn.querySelector(".txt").textContent = city;
     try { localStorage.setItem("vo_city", city); } catch (e) {}
     search.classList.remove("is-city"); regionBtn.setAttribute("aria-expanded", "false");
     window.dispatchEvent(new CustomEvent("city:change", { detail: city }));
   });
   window.VO_CITY = () => city;
-  window.VO_CITIES = CITIES;
-  cityInput.addEventListener("keydown", e => { if (e.key === "Escape") { search.classList.remove("is-city"); regionBtn.focus(); } });
+  Object.defineProperty(window, "VO_CITIES", { get: allCities, configurable: true });
+  cityInput.addEventListener("keydown", e => { if (e.key === "Escape") { search.classList.remove("is-city"); regionBtn.focus(); } if (e.key === "Enter") { e.preventDefault(); const b = cityList.querySelector("button"); if (b) b.click(); } });
 
   /* ---------- избранное ---------- */
 

@@ -127,3 +127,26 @@ window.VO_ATTR_NAMES = { type: "Тип", brand: "Бренд / марка", memor
 /* Какая иллюстрация подставляется в новое объявление без фото */
 window.VO_CAT_ILL = { auto: "car", parts: "tires", realty: "house", job: "cup", service: "washer", tech: "phone", wear: "sneaker", home: "sofa", kids: "scooter", hobby: "guitar", pets: "aquarium", free: "plant" };
 window.VO_CAT_BG = { auto: "#E3EEFB", parts: "#E3EEFB", realty: "#F7EBDD", job: "#FFE4DF", service: "#FFE4DF", tech: "#E3EEFB", wear: "#FFE4DF", home: "#F7EBDD", kids: "#FFF1C9", hobby: "#ECE4FA", pets: "#FFF1C9", free: "#DDF3EA" };
+
+/* Города тестовых продавцов — берём из их объявлений */
+window.VO_ADS.forEach(a => { const s = window.VO_SELLERS[a.seller]; if (s && !s.city) s.city = a.city; });
+
+/* ДЕМО (до сервера): покупатели, которые пишут по вашим объявлениям, чтобы можно было проверить переписку и сделки */
+window.VO_DEMO_BUYERS = {
+  d1: { name: "Андрей", city: "Москва", demo: true }, d2: { name: "Екатерина", city: "Санкт-Петербург", demo: true },
+  d3: { name: "Тимур", city: "Казань", demo: true }, d4: { name: "Полина", city: "Новосибирск", demo: true },
+};
+
+/* Стартовые отзывы о тестовых продавцах. verified — сделка прошла через сайт. role — в какой роли оценивают человека. */
+window.VO_REVIEWS_SEED = [
+  { target: "s1", authorName: "Игорь", role: "seller", stars: 5, verified: true, ad: "iPhone 12, 64 ГБ", text: "Всё как в описании, показал телефон при встрече, проверили вместе. Рекомендую.", d: 12 },
+  { target: "s1", authorName: "Наталья", role: "seller", stars: 4, verified: false, text: "Быстро отвечает, вежливый. До сделки не дошли, но впечатление хорошее.", d: 30 },
+  { target: "s1", authorName: "Олег", role: "buyer", stars: 5, verified: true, ad: "Чехол и зарядка", text: "Приятный покупатель, пришёл вовремя.", d: 45 },
+  { target: "s3", authorName: "Анастасия", role: "seller", stars: 5, verified: true, ad: "Кресло-мешок", text: "Мария помогла донести до машины, всё чистое и аккуратное.", d: 8 },
+  { target: "s3", authorName: "Влад", role: "seller", stars: 3, verified: false, text: "Долго отвечала, в итоге купил в другом месте.", d: 60 },
+  { target: "s9", authorName: "Кирилл", role: "seller", stars: 5, verified: true, ad: "Колонка", text: "Отправила СДЭКом наложенным платежом, упаковано отлично.", d: 20 },
+  { target: "s15", authorName: "Дмитрий", role: "seller", stars: 5, verified: true, ad: "Летние шины", text: "Честный продавец, всё как договаривались.", d: 90 },
+  { target: "s16", authorName: "Светлана", role: "seller", stars: 5, verified: true, ad: "Ремонт стиральной машины", text: "Приехал в тот же день, починил за час, дал гарантию.", d: 5 },
+  { target: "s16", authorName: "Павел", role: "seller", stars: 4, verified: true, ad: "Диагностика", text: "Всё сделал, но опоздал на полчаса — предупредил заранее.", d: 33 },
+  { target: "s10", authorName: "Мила", role: "seller", stars: 5, verified: false, text: "Хорошее место работы, адекватный руководитель.", d: 15 },
+];
