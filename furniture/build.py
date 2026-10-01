@@ -3,6 +3,7 @@
 Логотип вставляется шаблоном: циркуль, капли и буквы получают классы,
 чтобы их можно было анимировать по отдельности.
 """
+import base64
 import pathlib
 import re
 
@@ -37,5 +38,11 @@ for name in ("header", "header-v2"):
     if not src_path.exists():
         continue
     src = src_path.read_text(encoding="utf-8")
+    # картинки встраиваются в страницу: просмотрщик не всегда отдаёт соседние файлы
+    img_dir = HERE / name / "img"
+    if img_dir.exists():
+        for f in sorted(img_dir.glob("*.webp")):
+            uri = "data:image/webp;base64," + base64.b64encode(f.read_bytes()).decode()
+            src = src.replace(f"img/{f.name}", uri)
     (HERE / name / "index.html").write_text(src.replace("{{LOGO}}", logo), encoding="utf-8")
     print(f"{name}/index.html:", len(src) + len(logo), "bytes")
