@@ -44,7 +44,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 <div class="scene"><svg id="stage" aria-label="Интро BAD Design: циркуль чертит логотип, краска заполняет буквы" role="img"></svg></div>
 <div class="corner corner--l"><b>BAD Design</b> · интро «Чертёж»</div>
-<div class="corner corner--r">6,6 с</div>
+<div class="corner corner--r">6,1 с</div>
 <div class="bar">
   <button class="btn btn--main" id="play" type="button">Пауза</button>
   <button class="btn" id="again" type="button">Повторить</button>
@@ -53,7 +53,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     <button class="btn" type="button" data-speed=".5">0.5×</button>
     <button class="btn is-on" type="button" data-speed="1">1×</button>
   </div>
-  <input class="scrub" id="scrub" type="range" min="0" max="6.6" step="0.01" value="0" aria-label="Время">
+  <input class="scrub" id="scrub" type="range" min="0" max="6.1" step="0.01" value="0" aria-label="Время">
   <span class="time" id="time">0.00 с</span>
   <span class="label" id="label">Лист</span>
 </div>
@@ -62,8 +62,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 (function(){
   var L = {{LOGO_JSON}};
   var NS = 'http://www.w3.org/2000/svg', RED = '#BC4242', INK = '#333333', SOFT = '#6F6766';
-  var T = 6.6;
-  var SCENES = [[0,'Лист'],[.5,'Окружность'],[1.3,'Циркуль'],[1.8,'Построение'],[3,'Краска'],[4.6,'Капля'],[5.1,'Подпись'],[6.2,'Финал']];
+  var T = 6.1, K_T = 6.6 / 6.1;   // сцены рассчитаны на 6,6 с и проигрываются чуть быстрее
+  var SCENES = [[0,'Лист'],[.5,'Окружность'],[1.3,'Циркуль'],[1.8,'Построение'],[3,'Краска'],[4.6,'Капля'],[5.1,'Подпись'],[6.2,'Финал']].map(function(s){ return [s[0] / K_T, s[1]]; });
   var svg = document.getElementById('stage');
 
   function el(tag, attrs, parent){
@@ -156,7 +156,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     K = Math.min(W * .68 / 216, H * .66 / 175);
   }
 
-  function render(t){
+  function render(tt){
+    var t = tt * K_T;
     var c = track(CAM, t);
     var bump = t > 5.1 && t < 5.4 ? Math.sin(seg(t, 5.1, 5.4) * Math.PI) * .012 : 0;
     cam.setAttribute('transform', 'translate(' + W/2 + ' ' + H/2 + ') rotate(' + c[3].toFixed(3) + ') scale(' + (K * (c[2] + bump)).toFixed(4) + ') translate(' + (-c[0]).toFixed(2) + ' ' + (-c[1]).toFixed(2) + ')');

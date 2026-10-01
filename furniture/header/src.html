@@ -508,7 +508,7 @@ svg{display:block}
 /* ───────── Новинки ───────── */
 .nv{padding-block:0 clamp(80px,10vw,150px)}
 .nv__head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:28px 40px;margin-bottom:clamp(40px,5vw,72px)}
-.nv__t{position:relative;margin:0;font:400 clamp(52px,7.6vw,124px)/.86 var(--f-display);color:var(--red);text-transform:uppercase;letter-spacing:-.01em}
+.nv__t{position:relative;margin:0;font:400 clamp(38px,4.6vw,76px)/.9 var(--f-display);color:var(--red);text-transform:uppercase;letter-spacing:-.01em}
 .nv__drip{position:absolute;top:calc(100% - .14em);left:var(--x);width:.075em;height:var(--h);background:var(--red);border-radius:0 0 .04em .04em;transform:scaleY(0);transform-origin:50% 0;transition:transform 1.3s var(--d) var(--ease-out)}
 .nv__drip::after{content:"";position:absolute;left:-.02em;bottom:-.05em;width:.115em;height:.115em;border-radius:50%;background:inherit}
 .nv__drip i{position:absolute;left:50%;top:100%;width:.08em;height:.08em;margin-left:-.04em;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:var(--red);opacity:0}
@@ -610,69 +610,69 @@ svg{display:block}
   .mf__c{width:52px;height:52px}
 }
 
-/* ───────── О компании ───────── */
-.ab{padding-block:clamp(40px,6vw,90px) clamp(80px,10vw,150px)}
-.ab__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(40px,6vw,110px);align-items:start}
-.ab__media{position:relative;height:clamp(520px,52vw,800px)}
-.ab__ph{position:absolute;max-width:100%;transform:translateY(calc(var(--py,0) * 1px)) rotate(var(--rot));transition:box-shadow .4s}
-.ab__ph .ph{inset:0}
-.ab__ph:hover{z-index:3}
-.ab__ph--a{left:0;top:0;width:62%;aspect-ratio:3/4;--rot:-1.5deg;z-index:1}
-.ab__ph--b{right:0;top:22%;width:46%;aspect-ratio:1/1;--rot:2deg;z-index:2}
-.ab__ph--c{left:18%;bottom:0;width:44%;aspect-ratio:4/3;--rot:-.5deg;z-index:2}
-.ab__ph .ph{box-shadow:0 30px 50px -36px rgba(51,51,51,.55);border:1.5px solid var(--paper)}
-.ab__cap{position:absolute;left:12px;bottom:12px;padding:6px 10px;background:var(--paper);font:500 10.5px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
-.ab__cap b{color:var(--red);font-weight:500}
+/* ───────── О компании: графитовая полоса, всё по сетке ───────── */
+.ab{--fg:#FFFFFF;--fg2:rgba(255,255,255,.66);--rule:rgba(255,255,255,.16);background:var(--ink);color:var(--fg);padding-block:clamp(64px,8vw,120px)}
+.ab__grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);row-gap:clamp(36px,4.5vw,64px)}
+.ab__head{grid-column:1/6;display:grid;align-content:start;gap:20px}
+.ab__k{display:flex;align-items:center;gap:12px;margin:0;font:500 11.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
+.ab__k::before{content:"";width:32px;height:2px;background:var(--red)}
+.ab .nv__t{justify-self:start;color:var(--fg);font-size:clamp(32px,3.4vw,56px);white-space:nowrap}
+.ab .nv__t .nv__drip{background:var(--red)}
+.ab__lead{grid-column:6/13;margin:0;align-self:end;font:500 clamp(18px,1.45vw,22px)/1.5 var(--f-body);letter-spacing:-.01em;text-wrap:pretty}
+.ab__lead b{font-weight:600;color:#E8A5A5}
+.ab__photos{grid-column:1/-1;display:grid;grid-template-columns:2fr 1fr 1fr;gap:clamp(16px,2vw,28px);height:clamp(240px,24vw,380px)}
+.ab__ph{position:relative;margin:0;min-width:0;overflow:hidden}
+.ab .ph{background:
+  linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px) -1px -1px/24px 24px,
+  linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) -1px -1px/24px 24px,#3D3C3C}
+.ab .ph__paint{background:rgba(188,66,66,.22)}
+.ab .ph__draw{width:clamp(84px,9vw,140px);height:auto;color:rgba(255,255,255,.75)}
+.ab .ph__draw .wfill{fill:#3D3C3C}
+.ab .ph__dim{background:rgba(255,255,255,.4);bottom:16%}
+.ab .ph__dim b{background:#3D3C3C;color:var(--fg2)}
+.ab .cm{border-color:rgba(255,255,255,.5)}
 .ab__ph:hover .ph__paint{transform:translateX(0) skewX(-14deg) scaleX(1.3)}
-.ab__ph:hover .ph__draw{color:var(--red)}
+.ab__ph:hover .ph__draw{color:#FFFFFF}
 .ab__ph:hover .cm{border-color:var(--red);opacity:1}
-.ab__ph .ph__draw{width:42%}
-.ab__ring{position:absolute;right:6%;bottom:6%;width:clamp(110px,11vw,160px);aspect-ratio:1;max-width:100%;z-index:3;pointer-events:none}
-.ab__ring svg{width:100%;height:100%;overflow:visible}
-.ab__ring .rot{transform-box:view-box;transform-origin:60px 60px;animation:spin 26s linear infinite}
-.ab__ring text{fill:var(--ink);font:600 9.6px var(--f-mono);letter-spacing:.2em}
-.ab__ring .yr{fill:var(--red);font:400 26px var(--f-display);letter-spacing:0}
-.ab__text{display:grid;gap:22px;padding-top:clamp(0px,2vw,24px)}
-.ab__k{display:flex;align-items:center;gap:12px;margin:0;font:500 11.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
-.ab__k::before{content:"";width:38px;height:2px;background:var(--red)}
-.ab .nv__t{font-size:clamp(46px,6vw,100px);margin-bottom:.3em}
-.ab__lead{margin:0;font:500 clamp(19px,1.6vw,25px)/1.45 var(--f-body);letter-spacing:-.01em;color:var(--ink);text-wrap:pretty}
-.ab__lead b{font-weight:600;color:var(--red)}
-.ab__p{margin:0;max-width:62ch;font-size:16.5px;line-height:1.7;color:var(--ink-soft);text-wrap:pretty}
-.ab__facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px;border-top:1.5px solid var(--ink)}
-.ab__fact{display:grid;gap:8px;padding:20px 18px 4px 0}
-.ab__fact+.ab__fact{padding-left:18px;border-left:1px solid var(--line)}
-.ab__fact b{font:400 clamp(28px,2.8vw,44px)/1 var(--f-display);color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ab__cap{position:absolute;left:14px;top:14px;display:flex;gap:8px;align-items:center;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg)}
+.ab__cap b{color:#E8A5A5;font-weight:500}
+.ab__body{grid-column:1/7;display:grid;gap:18px;align-content:start}
+.ab__p{margin:0;font-size:15.5px;line-height:1.7;color:var(--fg2);text-wrap:pretty}
+.ab__side{grid-column:7/13;display:grid;gap:28px;align-content:start}
+.ab__facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1.5px solid var(--rule)}
+.ab__fact{display:grid;gap:10px;padding:20px 18px}
+.ab__fact+.ab__fact{border-left:1px solid var(--rule)}
+.ab__fact b{font:400 clamp(20px,1.6vw,26px)/1 var(--f-display);color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ab__fact b sup{font-size:.45em;vertical-align:.9em}
-.ab__fact>span{font:400 13.5px/1.35 var(--f-body);color:var(--ink-soft)}
-.ab__fact:first-child b{color:var(--red)}
-.ab__acts{display:flex;flex-wrap:wrap;align-items:center;gap:16px 26px;margin-top:12px}
-.ab__acts .cta{height:56px}
-.ab__note{font:500 11.5px/1.4 var(--f-mono);letter-spacing:.06em;color:var(--ink-soft)}
+.ab__fact>span{font:400 12.5px/1.35 var(--f-body);color:var(--fg2)}
+.ab__fact:first-child b{color:#E8A5A5}
+.ab__acts{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+.ab__acts .cta{box-shadow:none}
+.ab__note{font:500 11px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
 /* этапы */
-.st{position:relative;margin-top:clamp(64px,8vw,120px);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
-.st::before{content:"";position:absolute;left:0;right:0;top:22px;height:1.5px;background:var(--ink);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.6s var(--ease-out)}
+.st{grid-column:1/-1;position:relative;margin:0;padding:clamp(28px,3vw,40px) 0 0;list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);border-top:1px solid var(--rule)}
+.st::before{content:"";position:absolute;left:0;top:-1px;width:100%;height:2px;background:var(--red);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.6s var(--ease-out)}
 .st.is-in::before{transform:scaleX(1)}
-.st__i{position:relative;display:grid;gap:10px;padding-top:56px}
-.st__n{position:absolute;top:0;left:0;width:45px;height:45px;border-radius:50%;display:grid;place-items:center;background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--ink);font:500 12px/1 var(--f-mono);color:var(--ink);transform:scale(0);transition:transform .6s calc(.2s + var(--i)*.22s) var(--ease-spring),background-color .3s,color .3s,box-shadow .3s}
-.st.is-in .st__n{transform:none}
-.st__i:hover .st__n{background:var(--red);color:var(--paper);box-shadow:inset 0 0 0 1.5px var(--red)}
-.st__i b{font:600 16px/1.25 var(--f-body)}
-.st__i span{font:400 13.5px/1.45 var(--f-body);color:var(--ink-soft);max-width:24ch}
-.st__i b,.st__i span{opacity:.15;transform:translateY(10px);transition:opacity .6s calc(.4s + var(--i)*.22s),transform .7s calc(.4s + var(--i)*.22s) var(--ease-out)}
-.st.is-in .st__i b,.st.is-in .st__i span{opacity:1;transform:none}
-@media (max-width:980px){
-  .ab__grid{grid-template-columns:1fr}
-  .ab__media{height:clamp(420px,95vw,640px);order:2}
-  .st{grid-template-columns:1fr;gap:0}
-  .st::before{left:22px;right:auto;top:0;bottom:0;width:1.5px;height:auto;transform:scaleY(0);transform-origin:50% 0}
-  .st.is-in::before{transform:scaleY(1)}
-  .st__i{padding:0 0 26px 66px;min-height:70px}
+.st__i{position:relative;display:grid;gap:8px;align-content:start}
+.st__n{font:500 11.5px/1 var(--f-mono);letter-spacing:.1em;color:#E8A5A5}
+.st__i b{font:600 15.5px/1.3 var(--f-body);color:var(--fg)}
+.st__i span:last-child{font:400 13.5px/1.5 var(--f-body);color:var(--fg2)}
+.st__i>*{opacity:.15;transform:translateY(8px);transition:opacity .6s calc(.3s + var(--i)*.15s),transform .7s calc(.3s + var(--i)*.15s) var(--ease-out)}
+.st.is-in .st__i>*{opacity:1;transform:none}
+@media (max-width:1100px){
+  .ab__head{grid-column:1/-1}
+  .ab__lead{grid-column:1/-1}
+  .ab__body{grid-column:1/-1}
+  .ab__side{grid-column:1/-1}
+  .st{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:28px}
 }
-@media (max-width:560px){
+@media (max-width:700px){
+  .ab__photos{grid-template-columns:1fr 1fr;height:auto}
+  .ab__ph{aspect-ratio:1/1}
+  .ab__ph:first-child{grid-column:1/-1;aspect-ratio:16/10}
   .ab__facts{grid-template-columns:1fr}
-  .ab__fact+.ab__fact{padding-left:0;border-left:0;border-top:1px solid var(--line)}
-  .ab__fact{padding:16px 0}
+  .ab__fact+.ab__fact{border-left:0;border-top:1px solid var(--rule)}
+  .st{grid-template-columns:1fr 1fr}
 }
 
 /* ───────── Адаптив ───────── */
@@ -702,7 +702,7 @@ svg{display:block}
 }
 @media (prefers-reduced-motion:reduce){
   .tape__track{animation:none!important}
-  .seal .rot,.nv__drip i,.ab__ring .rot{animation:none!important}
+  .seal .rot,.nv__drip i{animation:none!important}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}
 }
 </style>
@@ -948,37 +948,41 @@ svg{display:block}
     </div>
     <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill"></span><span class="nv__pos">01–04 / 08</span></div>
   </section>
-  <section class="ab wrap" id="about" aria-labelledby="ab-title">
-    <div class="ab__grid">
-      <div class="ab__media js-par" aria-label="Фото студии (заглушки)">
-        <figure class="ab__ph ab__ph--a" data-sp="-.06" role="img" aria-label="Место для фото мастерской"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2v3"/><circle cx="16" cy="7" r="2"/><path d="M15 9 9 27M17 9l6 18M11.5 19.5h9"/><path d="M4 29.5h24" opacity=".5"/></svg><span class="ph__dim"><b>фото 1200 × 1600</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap"><b>2014</b> · мастерская</figcaption></figure>
-        <figure class="ab__ph ab__ph--b" data-sp=".05" role="img" aria-label="Место для фото производства"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path class="wfill" d="M3 28V15l7 4v-4l7 4v-4l7 4V6h4v22Z"/><path d="M7 23h3M13 23h3M19 23h3"/><path d="M25 3.5c1-1 2.5-1 3.5 0" opacity=".6"/></svg><span class="ph__dim"><b>фото 1200 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">производство · <b>2 500 м²</b></figcaption></figure>
-        <figure class="ab__ph ab__ph--c" data-sp=".1" role="img" aria-label="Место для фото сборки"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-arm"><path class="wfill" d="M10 7h12a2 2 0 0 1 2 2v8H8V9a2 2 0 0 1 2-2Z"/><path class="wfill" d="M5 16a2 2 0 0 1 4 0v3h14v-3a2 2 0 0 1 4 0v6H5Z"/><path d="M8 22l-1 5M24 22l1 5"/></g><path d="M27 4l-4 4M22 9l-1 1" stroke-width="2"/></svg><span class="ph__dim"><b>фото 1600 × 1200</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">сборка и контроль</figcaption></figure>
-        <div class="ab__ring" aria-hidden="true"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="58" fill="#FFFFFF" stroke="#333333" stroke-width="1.5"/><circle cx="60" cy="60" r="36" fill="none" stroke="#BC4242" stroke-width="1" stroke-dasharray="2 3"/><defs><path id="ab-ring" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"/></defs><g class="rot"><text><textPath href="#ab-ring" textLength="284" lengthAdjust="spacing">МОСКОВСКАЯ ОБЛАСТЬ · С 2014 ГОДА · </textPath></text></g><text class="yr" x="60" y="70" text-anchor="middle">BAD</text></svg></div>
+  <section class="ab" id="about" aria-labelledby="ab-title">
+    <div class="wrap ab__grid">
+      <div class="ab__head">
+        <p class="ab__k">BADesign · с 2014 года</p>
+        <h2 class="nv__t js-reveal" id="ab-title">О компании<i class="nv__drip" style="--x:6%;--h:.3em;--d:.15s"><i></i></i><i class="nv__drip" style="--x:47%;--h:.2em;--d:.35s"></i><i class="nv__drip" style="--x:84%;--h:.38em;--d:.25s"><i></i></i></h2>
       </div>
-      <div class="ab__text">
-        <p class="ab__k">BADesign · производство</p>
-        <h2 class="nv__t js-reveal" id="ab-title">О компании<i class="nv__drip" style="--x:6%;--h:.3em;--d:.15s"><i></i></i><i class="nv__drip" style="--x:47%;--h:.22em;--d:.35s"></i><i class="nv__drip" style="--x:83%;--h:.4em;--d:.25s"><i></i></i></h2>
-        <p class="ab__lead">BADesign вырос из мастерской, основанной в <b>2014 году</b> в Московской области, в современное мебельное производство площадью <b>2500 м²</b>. Мы создаём дизайнерскую мебель полного цикла — от идеи и эскиза до финальной сборки.</p>
+      <p class="ab__lead">BADesign вырос из мастерской, основанной в <b>2014 году</b> в Московской области, в современное мебельное производство площадью <b>2500 м²</b>. Мы создаём дизайнерскую мебель полного цикла — от идеи и эскиза до финальной сборки.</p>
+      <div class="ab__photos" aria-label="Фото студии (заглушки)">
+        <figure class="ab__ph" role="img" aria-label="Место для фото производства"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path class="wfill" d="M3 28V15l7 4v-4l7 4v-4l7 4V6h4v22Z"/><path d="M7 23h3M13 23h3M19 23h3"/></svg><span class="ph__dim"><b>фото 1600 × 900</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">Производство · <b>2 500 м²</b></figcaption></figure>
+        <figure class="ab__ph" role="img" aria-label="Место для фото мастерской"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2v3"/><circle cx="16" cy="7" r="2"/><path d="M15 9 9 27M17 9l6 18M11.5 19.5h9"/><path d="M4 29.5h24" opacity=".5"/></svg><span class="ph__dim"><b>фото 900 × 1000</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">Мастерская · <b>2014</b></figcaption></figure>
+        <figure class="ab__ph" role="img" aria-label="Место для фото сборки"><div class="ph"><span class="ph__paint"></span><svg class="ph__draw" viewBox="0 0 32 32" aria-hidden="true"><g class="i-arm"><path class="wfill" d="M10 7h12a2 2 0 0 1 2 2v8H8V9a2 2 0 0 1 2-2Z"/><path class="wfill" d="M5 16a2 2 0 0 1 4 0v3h14v-3a2 2 0 0 1 4 0v6H5Z"/><path d="M8 22l-1 5M24 22l1 5"/></g><path d="M27 4l-4 4M22 9l-1 1" stroke-width="2"/></svg><span class="ph__dim"><b>фото 900 × 1000</b></span><i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i></div><figcaption class="ab__cap">Сборка</figcaption></figure>
+      </div>
+      <div class="ab__body">
         <p class="ab__p">В нашем производстве объединены опыт мастеров, современные технологии и внимательное отношение к деталям. Мы работаем с проверенными материалами, подбираем ткани, фурнитуру и конструктив под задачи каждого проекта, чтобы мебель была не только красивой, но и удобной в ежедневном использовании.</p>
         <p class="ab__p">BADesign создаёт диваны, кресла, кровати, пуфы и комплексные интерьерные решения для квартир, домов, коммерческих пространств и дизайнерских проектов. Каждый заказ проходит этапы проектирования, производства и контроля качества, поэтому результат выглядит аккуратно, служит долго и точно вписывается в пространство.</p>
-        <div class="ab__facts js-reveal">
+      </div>
+      <div class="ab__side">
+        <div class="ab__facts">
           <div class="ab__fact"><b data-count="2014" data-from="1990">2014</b><span>год основания мастерской</span></div>
           <div class="ab__fact"><b><span data-count="2500" data-sep="1">2 500</span> м<sup>2</sup></b><span>площадь производства</span></div>
           <div class="ab__fact"><b>Полный</b><span>цикл: от эскиза до сборки</span></div>
         </div>
         <div class="ab__acts">
           <a class="cta" href="#about" data-splash data-t="Подробнее" data-s1="о компании и производстве" data-s2="как мы работаем"></a>
+          <span class="ab__note">Московская область</span>
         </div>
       </div>
+      <ol class="st js-reveal" aria-label="Как мы делаем мебель">
+        <li class="st__i" style="--i:0"><span class="st__n">01</span><b>Идея и эскиз</b><span>Обсуждаем задачу, размеры и стиль интерьера</span></li>
+        <li class="st__i" style="--i:1"><span class="st__n">02</span><b>Проектирование</b><span>Чертим конструктив, подбираем ткани и фурнитуру</span></li>
+        <li class="st__i" style="--i:2"><span class="st__n">03</span><b>Производство</b><span>Собираем каркас и обивку на своём производстве</span></li>
+        <li class="st__i" style="--i:3"><span class="st__n">04</span><b>Контроль качества</b><span>Проверяем каждую деталь перед отправкой</span></li>
+        <li class="st__i" style="--i:4"><span class="st__n">05</span><b>Финальная сборка</b><span>Готовая мебель точно встаёт в пространство</span></li>
+      </ol>
     </div>
-    <ol class="st js-reveal" aria-label="Как мы делаем мебель">
-      <li class="st__i" style="--i:0"><span class="st__n">01</span><b>Идея и эскиз</b><span>Обсуждаем задачу, размеры и стиль интерьера</span></li>
-      <li class="st__i" style="--i:1"><span class="st__n">02</span><b>Проектирование</b><span>Чертим конструктив, подбираем ткани и фурнитуру</span></li>
-      <li class="st__i" style="--i:2"><span class="st__n">03</span><b>Производство</b><span>Мастера собирают каркас и обивку на нашем производстве</span></li>
-      <li class="st__i" style="--i:3"><span class="st__n">04</span><b>Контроль качества</b><span>Проверяем каждую деталь перед отправкой</span></li>
-      <li class="st__i" style="--i:4"><span class="st__n">05</span><b>Финальная сборка</b><span>Привозим и собираем мебель на месте</span></li>
-    </ol>
   </section>
 </main>
 
@@ -1540,17 +1544,5 @@ svg{display:block}
     }, {threshold: .6});
     io.observe(el);
   });
-  // фото «О компании» плывут с разной скоростью
-  var box = document.querySelector('.js-par');
-  if (!box || still.matches) return;
-  var phs = box.querySelectorAll('[data-sp]'), tick = false;
-  function par(){
-    tick = false;
-    var r = box.getBoundingClientRect(), c = r.top + r.height / 2 - window.innerHeight / 2;
-    if (r.bottom < -200 || r.top > window.innerHeight + 200) return;
-    phs.forEach(function(el){ el.style.setProperty('--py', (c * +el.dataset.sp).toFixed(1)); });
-  }
-  window.addEventListener('scroll', function(){ if (!tick) { tick = true; requestAnimationFrame(par); } }, {passive: true});
-  par();
 })();
 </script>
