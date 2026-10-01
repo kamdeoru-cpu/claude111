@@ -31,6 +31,16 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 :focus-visible{outline:2px solid var(--red);outline-offset:3px;border-radius:6px}
 svg{display:block}
 
+/* ───────── Заставка (интро «Чертёж») ───────── */
+.splash{position:fixed;inset:0;z-index:1000;background:var(--paper);transition:opacity .75s var(--ease-out),transform .9s var(--ease-out),filter .75s}
+.splash svg{display:block;width:100%;height:100%}
+.splash.is-out{opacity:0;transform:scale(1.06);filter:blur(6px);pointer-events:none}
+.splash__skip{position:absolute;right:clamp(16px,3vw,32px);bottom:calc(clamp(16px,3vw,28px) + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 16px;border-radius:20px;box-shadow:inset 0 0 0 1.5px var(--line);font:600 12px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);background:var(--paper);transition:box-shadow .25s,color .25s}
+.splash__skip:hover,.splash__skip:focus-visible{box-shadow:inset 0 0 0 1.5px var(--red);color:var(--red)}
+.splash__skip i{position:relative;width:26px;height:2px;background:var(--line);overflow:hidden}
+.splash__skip i::after{content:"";position:absolute;inset:0;background:var(--red);transform-origin:0 50%;transform:scaleX(var(--p,0))}
+html.splash-on{overflow:hidden}
+
 /* ───────── Логотип ───────── */
 .logo{display:block;width:132px;flex:none;transition:width .35s var(--ease-out)}
 .lg{width:100%;height:auto;overflow:visible}
@@ -611,31 +621,33 @@ svg{display:block}
 }
 
 /* ───────── О компании: графитовая полоса, всё по сетке ───────── */
-.ab{--fg:#FFFFFF;--fg2:rgba(255,255,255,.66);--rule:rgba(255,255,255,.16);background:var(--ink);color:var(--fg);padding-block:clamp(64px,8vw,120px)}
+.ab{--fg:#FFFFFF;--fg2:rgba(255,255,255,.82);--rule:rgba(255,255,255,.32);--ph-bg:#A93939;color:var(--fg);padding-block:clamp(64px,8vw,120px);background:
+  linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/32px 32px,
+  linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/32px 32px,var(--red)}
 .ab__grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);row-gap:clamp(36px,4.5vw,64px)}
 .ab__head{grid-column:1/6;display:grid;align-content:start;gap:20px}
 .ab__k{display:flex;align-items:center;gap:12px;margin:0;font:500 11.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--fg2)}
-.ab__k::before{content:"";width:32px;height:2px;background:var(--red)}
+.ab__k::before{content:"";width:32px;height:2px;background:var(--fg)}
 .ab .nv__t{justify-self:start;color:var(--fg);font-size:clamp(32px,3.4vw,56px);white-space:nowrap}
-.ab .nv__t .nv__drip{background:var(--red)}
+.ab .nv__t .nv__drip,.ab .nv__t .nv__drip i{background:var(--ink)}
 .ab__lead{grid-column:6/13;margin:0;align-self:end;font:500 clamp(18px,1.45vw,22px)/1.5 var(--f-body);letter-spacing:-.01em;text-wrap:pretty}
-.ab__lead b{font-weight:600;color:#E8A5A5}
+.ab__lead b{font-weight:600;color:var(--fg);background:linear-gradient(var(--ink),var(--ink)) 0 100%/100% 2px no-repeat;padding-bottom:1px}
 .ab__photos{grid-column:1/-1;display:grid;grid-template-columns:2fr 1fr 1fr;gap:clamp(16px,2vw,28px);height:clamp(240px,24vw,380px)}
 .ab__ph{position:relative;margin:0;min-width:0;overflow:hidden}
 .ab .ph{background:
-  linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px) -1px -1px/24px 24px,
-  linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px) -1px -1px/24px 24px,#3D3C3C}
-.ab .ph__paint{background:rgba(188,66,66,.22)}
-.ab .ph__draw{width:clamp(84px,9vw,140px);height:auto;color:rgba(255,255,255,.75)}
-.ab .ph__draw .wfill{fill:#3D3C3C}
-.ab .ph__dim{background:rgba(255,255,255,.4);bottom:16%}
-.ab .ph__dim b{background:#3D3C3C;color:var(--fg2)}
+  linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px) -1px -1px/24px 24px,
+  linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px) -1px -1px/24px 24px,var(--ph-bg)}
+.ab .ph__paint{background:rgba(51,51,51,.28)}
+.ab .ph__draw{width:clamp(84px,9vw,140px);height:auto;color:rgba(255,255,255,.88)}
+.ab .ph__draw .wfill{fill:var(--ph-bg)}
+.ab .ph__dim{background:rgba(255,255,255,.5);bottom:16%}
+.ab .ph__dim b{background:var(--ph-bg);color:var(--fg2)}
 .ab .cm{border-color:rgba(255,255,255,.5)}
 .ab__ph:hover .ph__paint{transform:translateX(0) skewX(-14deg) scaleX(1.3)}
 .ab__ph:hover .ph__draw{color:#FFFFFF}
-.ab__ph:hover .cm{border-color:var(--red);opacity:1}
+.ab__ph:hover .cm{border-color:var(--fg);opacity:1}
 .ab__cap{position:absolute;left:14px;top:14px;display:flex;gap:8px;align-items:center;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg)}
-.ab__cap b{color:#E8A5A5;font-weight:500}
+.ab__cap b{color:var(--fg);font-weight:500;border-bottom:1.5px solid var(--ink)}
 .ab__body{grid-column:1/7;display:grid;gap:18px;align-content:start}
 .ab__p{margin:0;font-size:15.5px;line-height:1.7;color:var(--fg2);text-wrap:pretty}
 .ab__side{grid-column:7/13;display:grid;gap:28px;align-content:start}
@@ -645,16 +657,19 @@ svg{display:block}
 .ab__fact b{font:400 clamp(20px,1.6vw,26px)/1 var(--f-display);color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ab__fact b sup{font-size:.45em;vertical-align:.9em}
 .ab__fact>span{font:400 12.5px/1.35 var(--f-body);color:var(--fg2)}
-.ab__fact:first-child b{color:#E8A5A5}
+.ab__fact:first-child b{color:var(--ink)}
 .ab__acts{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
 .ab__acts .cta{box-shadow:none}
+.ab .cta__flood{background:var(--ink)}
+.ab .cta__ico{color:var(--paper)}
+.ab__facts{background:rgba(51,51,51,.12)}
 .ab__note{font:500 11px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
 /* этапы */
 .st{grid-column:1/-1;position:relative;margin:0;padding:clamp(28px,3vw,40px) 0 0;list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);border-top:1px solid var(--rule)}
-.st::before{content:"";position:absolute;left:0;top:-1px;width:100%;height:2px;background:var(--red);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.6s var(--ease-out)}
+.st::before{content:"";position:absolute;left:0;top:-1px;width:100%;height:2px;background:var(--fg);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.6s var(--ease-out)}
 .st.is-in::before{transform:scaleX(1)}
 .st__i{position:relative;display:grid;gap:8px;align-content:start}
-.st__n{font:500 11.5px/1 var(--f-mono);letter-spacing:.1em;color:#E8A5A5}
+.st__n{justify-self:start;padding:5px 8px;background:var(--ink);font:500 11px/1 var(--f-mono);letter-spacing:.1em;color:var(--fg)}
 .st__i b{font:600 15.5px/1.3 var(--f-body);color:var(--fg)}
 .st__i span:last-child{font:400 13.5px/1.5 var(--f-body);color:var(--fg2)}
 .st__i>*{opacity:.15;transform:translateY(8px);transition:opacity .6s calc(.3s + var(--i)*.15s),transform .7s calc(.3s + var(--i)*.15s) var(--ease-out)}
@@ -673,6 +688,109 @@ svg{display:block}
   .ab__facts{grid-template-columns:1fr}
   .ab__fact+.ab__fact{border-left:0;border-top:1px solid var(--rule)}
   .st{grid-template-columns:1fr 1fr}
+}
+
+/* ───────── Кровати: живой чертёж-конфигуратор ───────── */
+.bd{padding-block:clamp(72px,9vw,140px)}
+.bd__head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px 40px;margin-bottom:clamp(36px,4.5vw,64px)}
+.bd__hl{display:grid;gap:18px;justify-items:start}
+.bd__sub{margin:0;font:500 clamp(17px,1.4vw,21px)/1.4 var(--f-body);color:var(--ink);letter-spacing:-.01em}
+.draft{position:relative;display:inline-flex;align-items:center;gap:12px;height:48px;padding-inline:22px;font:600 13px/1 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--ink);transition:color .3s}
+.draft__l{position:absolute;background:var(--ink);transition:inset .45s var(--ease-out),background-color .3s}
+.draft__l--t{top:0;left:0;right:0;height:1.5px}.draft__l--b{bottom:0;left:0;right:0;height:1.5px}
+.draft__l--l{left:0;top:0;bottom:0;width:1.5px}.draft__l--r{right:0;top:0;bottom:0;width:1.5px}
+.draft__arr{width:22px;height:12px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;transition:transform .45s var(--ease-out)}
+.draft:hover,.draft:focus-visible{color:var(--red)}
+.draft:hover .draft__l--t,.draft:hover .draft__l--b,.draft:focus-visible .draft__l--t,.draft:focus-visible .draft__l--b{left:-12px;right:-12px}
+.draft:hover .draft__l--l,.draft:hover .draft__l--r,.draft:focus-visible .draft__l--l,.draft:focus-visible .draft__l--r{top:-10px;bottom:-10px}
+.draft:hover .draft__arr,.draft:focus-visible .draft__arr{transform:translateX(6px)}
+
+.bd__main{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:clamp(16px,2vw,28px);row-gap:36px;align-items:start}
+.bd__stage{grid-column:1/8;position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;background:
+  linear-gradient(var(--grid) 1px,transparent 1px) -1px -1px/24px 24px,
+  linear-gradient(90deg,var(--grid) 1px,transparent 1px) -1px -1px/24px 24px,var(--ph)}
+.bd__stage .cm{opacity:.5}
+.bd__meta{position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;gap:12px;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);pointer-events:none}
+.bd__meta b{color:var(--red);font-weight:500}
+.bd__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bd__draw{transition:opacity .2s}
+.bd__draw.is-swap{opacity:0}
+.bd__svg .ln{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.bd__svg .fab{stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round;transition:fill .6s var(--ease-out)}
+.bd__svg .sheet{fill:#FBFAF8;stroke:var(--ink);stroke-width:1.4}
+.bd__svg .cover{fill:#D9CFC3;stroke:var(--ink);stroke-width:1.4}
+.bd__svg .throw{fill:#5B5856;stroke:var(--ink);stroke-width:1.2}
+.bd__svg .pil{fill:#FFFFFF;stroke:var(--ink);stroke-width:1.4}
+.bd__svg .box{fill:#4A4644;stroke:var(--ink);stroke-width:1.4}
+.bd__svg .strut{stroke:var(--red);stroke-width:2.2;stroke-linecap:round}
+.bd__svg .gnd{stroke:var(--ink);stroke-width:1;opacity:.35}
+.bd__svg .dim{stroke:var(--red);stroke-width:1.1}
+.bd__svg .dimt{fill:var(--red);font:500 12px var(--f-mono);letter-spacing:.06em}
+.bd__svg .note{fill:#F3EEEA;font:500 10px var(--f-mono);letter-spacing:.12em}
+.bd__svg [pathLength]{stroke-dasharray:1;stroke-dashoffset:0}
+.bd__stage:not(.is-in) .bd__draw [pathLength]{stroke-dashoffset:1;fill-opacity:0}
+.bd__stage.is-in .bd__draw [pathLength]{transition:stroke-dashoffset 1.4s var(--ease-out),fill-opacity .8s 1s,fill .6s var(--ease-out)}
+.bd__stage:not(.is-in) .bd__dims{opacity:0}
+.bd__dims{transition:opacity .6s 1.2s}
+
+.bd__info{grid-column:9/13;display:grid;gap:22px;align-content:start}
+.bd__k{display:flex;align-items:center;gap:10px;margin:0;font:600 11.5px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+.bd__k::before{content:"";width:28px;height:2px;background:var(--red)}
+.bd__name{margin:0;font:600 clamp(28px,2.6vw,40px)/1.05 var(--f-body);letter-spacing:-.03em;transition:opacity .25s,transform .35s var(--ease-out)}
+.bd__price{margin:-8px 0 0;font:600 clamp(18px,1.4vw,22px)/1 var(--f-body);font-variant-numeric:tabular-nums;transition:opacity .25s,transform .35s var(--ease-out)}
+.bd__price small{font-weight:500;font-size:.75em;color:var(--ink-soft)}
+.bd__desc{margin:-6px 0 0;font-size:15px;color:var(--ink-soft)}
+.bd__info.is-swap .bd__name,.bd__info.is-swap .bd__price{opacity:0;transform:translateY(8px)}
+.bd__opt{display:grid;gap:10px}
+.bd__lbl{display:flex;justify-content:space-between;align-items:baseline;font:600 14px/1 var(--f-body)}
+.bd__lbl span{font:500 11px/1 var(--f-mono);letter-spacing:.06em;color:var(--ink-soft)}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{position:relative;height:40px;padding:0 16px;border-radius:20px;box-shadow:inset 0 0 0 1.2px var(--line);font:500 14px/1 var(--f-body);font-variant-numeric:tabular-nums;color:var(--ink);overflow:hidden;isolation:isolate;transition:box-shadow .25s,color .25s}
+.pill::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--red);transform:scaleY(0);transform-origin:50% 100%;transition:transform .35s var(--ease-out)}
+.pill:hover{box-shadow:inset 0 0 0 1.2px var(--ink)}
+.pill[aria-pressed="true"]{color:var(--paper);box-shadow:inset 0 0 0 1.2px var(--red)}
+.pill[aria-pressed="true"]::before{transform:none}
+.fabric{position:relative}
+.fabric__btn{display:flex;align-items:center;gap:14px;width:100%;padding:10px 16px 10px 10px;border-radius:12px;box-shadow:inset 0 0 0 1.2px var(--line);text-align:left;transition:box-shadow .25s}
+.fabric__btn:hover,.fabric__btn[aria-expanded="true"]{box-shadow:inset 0 0 0 1.2px var(--ink)}
+.fabric__sw{width:44px;height:44px;flex:none;border-radius:8px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 2px,transparent 2px 5px);transition:background-color .4s}
+.fabric__n{flex:1;min-width:0;font:500 15px/1.3 var(--f-body)}
+.fabric__n small{display:block;font:500 11px/1.3 var(--f-mono);letter-spacing:.06em;color:var(--ink-soft)}
+.fabric__btn svg{width:10px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .35s var(--ease-spring)}
+.fabric__btn[aria-expanded="true"] svg{transform:rotate(90deg)}
+.fabric__list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding-top:0;max-height:0;overflow:hidden;transition:max-height .45s var(--ease-out),padding .45s var(--ease-out)}
+.fabric.is-open .fabric__list{max-height:140px;padding-top:10px}
+.fabric__opt{display:grid;gap:6px;justify-items:center;padding:6px 4px;border-radius:10px;font:500 11.5px/1.2 var(--f-body);color:var(--ink-soft);text-align:center;transition:background-color .2s,color .2s}
+.fabric__opt i{width:100%;max-width:56px;aspect-ratio:1;border-radius:8px;background:var(--c);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 2px,transparent 2px 5px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);transition:transform .3s var(--ease-spring)}
+.fabric__opt:hover i{transform:scale(1.08) rotate(-3deg)}
+.fabric__opt[aria-pressed="true"]{color:var(--ink);background:var(--red-tint)}
+.fabric__opt[aria-pressed="true"] i{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 0 0 2px var(--paper),0 0 0 3.5px var(--red)}
+.bd__acts{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:4px}
+
+.bd__rail{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(12px,1.6vw,24px);margin-top:clamp(24px,3vw,48px)}
+.bc{display:grid;gap:12px;text-align:left;transform:translateY(26px);transition:transform .9s calc(var(--k)*.08s) var(--ease-out)}
+.bd__rail.is-in .bc{transform:none}
+.bc__ph{position:relative;aspect-ratio:1/1;max-width:100%;background:var(--ph);overflow:hidden;transition:background-color .3s}
+.bc__ph::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 0 var(--red);transition:box-shadow .3s}
+.bc__ph svg{position:absolute;inset:6% 4%;width:92%;height:88%}
+.bc__ph .ln,.bc__ph .fab{stroke-width:2.6}
+.bc:hover .bc__ph{background:var(--red-tint)}
+.bc[aria-pressed="true"] .bc__ph::after{box-shadow:inset 0 0 0 2px var(--red)}
+.bc__now{position:absolute;left:10px;top:10px;padding:5px 8px;background:var(--red);color:var(--paper);font:500 10px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(-8px);transition:transform .35s var(--ease-out),opacity .25s}
+.bc[aria-pressed="true"] .bc__now{transform:none;opacity:1}
+.bc__n{font:600 15px/1.2 var(--f-body);letter-spacing:.02em;text-transform:uppercase;color:var(--ink);transition:color .25s}
+.bc:hover .bc__n,.bc[aria-pressed="true"] .bc__n{color:var(--red)}
+.bc__p{margin-top:-6px;font:500 15px/1 var(--f-body);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+@media (max-width:1100px){
+  .bd__stage{grid-column:1/-1}
+  .bd__info{grid-column:1/-1}
+}
+@media (max-width:760px){
+  .bd__rail{display:grid;grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:44%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:6px}
+  .bd__rail::-webkit-scrollbar{display:none}
+  .bc{scroll-snap-align:start}
+  .bd__meta span:last-child{display:none}
+  .fabric__list{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
 
 /* ───────── Адаптив ───────── */
@@ -708,6 +826,215 @@ svg{display:block}
 </style>
 
 <template id="logo-tpl">{{LOGO}}</template>
+
+<div class="splash" id="splash" aria-label="Заставка BAD Design"><svg role="img" aria-label="Циркуль чертит логотип BAD Design"></svg><button class="splash__skip" type="button">Пропустить<i></i></button></div>
+<script>
+(function(){
+  // Заставка показывается при каждом открытии; чтобы показывать раз за сессию, поставьте ONCE = true.
+  var ONCE = false;
+  var box = document.getElementById('splash');
+  var seen = false;
+  try { seen = ONCE && sessionStorage.getItem('bad-intro') === '1'; } catch (e) {}
+  if (seen || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { box.remove(); return; }
+  try { if (ONCE) sessionStorage.setItem('bad-intro', '1'); } catch (e) {}
+  document.documentElement.classList.add('splash-on');
+  var done, finished = false;
+  window.BAD_SPLASH = new Promise(function(r){ done = r; });
+  var svg = box.querySelector('svg'), skip = box.querySelector('.splash__skip');
+  var L = {{LOGO_JSON}};
+  var NS = 'http://www.w3.org/2000/svg', RED = '#BC4242', INK = '#333333', SOFT = '#6F6766';
+  var T = 6.1, K_T = 6.6 / 6.1;   // сцены рассчитаны на 6,6 с и проигрываются чуть быстрее
+  var SCENES = [[0,'Лист'],[.5,'Окружность'],[1.3,'Циркуль'],[1.8,'Построение'],[3,'Краска'],[4.6,'Капля'],[5.1,'Подпись'],[6.2,'Финал']].map(function(s){ return [s[0] / K_T, s[1]]; });
+
+  function el(tag, attrs, parent){
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+  function clamp(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function seg(t, a, b){ return clamp((t - a) / (b - a)); }
+  function eio(u){ return u < .5 ? 4*u*u*u : 1 - Math.pow(-2*u + 2, 3) / 2; }
+  function eo(u){ return 1 - Math.pow(1 - u, 3); }
+  function ei(u){ return u * u * u; }
+  function track(keys, t){
+    if (t <= keys[0][0]) return keys[0][1];
+    for (var i = 1; i < keys.length; i++) {
+      if (t <= keys[i][0]) {
+        var a = keys[i-1], b = keys[i], u = eio((t - a[0]) / (b[0] - a[0]));
+        if (typeof a[1] === 'number') return a[1] + (b[1] - a[1]) * u;
+        return a[1].map(function(v, j){ return v + (b[1][j] - v) * u; });
+      }
+    }
+    return keys[keys.length - 1][1];
+  }
+
+  // ── сцена в координатах логотипа (216 × 123) ──
+  var defs = el('defs', {});
+  var pat = el('pattern', {id: 'grid', width: 6, height: 6, patternUnits: 'userSpaceOnUse'}, defs);
+  el('path', {d: 'M6 0H0V6', fill: 'none', stroke: RED, 'stroke-opacity': .16, 'stroke-width': .12}, pat);
+  var cpC = el('rect', {x: 30, y: -10, width: 60, height: 0}, el('clipPath', {id: 'cpC'}, defs));
+  var cpBD = el('path', {d: 'M0 0Z'}, el('clipPath', {id: 'cpBD'}, defs));
+  var cpE = el('rect', {x: 120, y: 40, width: 0, height: 40}, el('clipPath', {id: 'cpE'}, defs));
+  el('rect', {x: 77.1, y: 34.6, width: 139, height: 51.9}, el('clipPath', {id: 'cpD'}, defs));
+
+  var cam = el('g', {});
+  var grid = el('rect', {x: -500, y: -400, width: 1216, height: 923, fill: 'url(#grid)'}, cam);
+
+  // укол иглы и окружность
+  var ring = el('circle', {cx: 108, cy: 62, r: 2, fill: 'none', stroke: RED, 'stroke-width': .35}, cam);
+  var prick = el('circle', {cx: 108, cy: 62, r: 1.4, fill: RED}, cam);
+  var circ = el('circle', {cx: 108, cy: 62, r: 92, fill: 'none', stroke: RED, 'stroke-width': .45, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1, transform: 'rotate(-90 108 62)'}, cam);
+  var radius = el('line', {x1: 108, y1: 62, x2: 108, y2: -30, stroke: RED, 'stroke-width': .25, 'stroke-dasharray': '1.5 1.5'}, cam);
+  var tip = el('circle', {r: 1.3, fill: RED}, cam);
+
+  // линии построения и размеры
+  var CONS = [[-30,35,246,35],[-30,86.5,246,86.5],[-30,54,246,54],[-30,70,246,70],[0,-6,0,130],[44,-6,44,130],[77.5,-6,77.5,130],[121,-6,121,130],[216,-6,216,130]];
+  var cons = CONS.map(function(c, i){
+    return el('path', {d: 'M' + c[0] + ' ' + c[1] + 'L' + c[2] + ' ' + c[3], stroke: INK, 'stroke-opacity': .35, 'stroke-width': .2, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1, fill: 'none'}, cam);
+  });
+  var dims = el('g', {opacity: 0, fill: RED, 'font-family': 'JetBrains Mono, monospace', 'font-size': 3.6, 'text-anchor': 'middle'}, cam);
+  el('path', {d: 'M0 -12H216M0 -14.5V-9.5M216 -14.5V-9.5', stroke: RED, 'stroke-width': .25, fill: 'none'}, dims);
+  el('text', {x: 108, y: -14}, dims).textContent = '216';
+  el('path', {d: 'M232 0V123M229.5 0H234.5M229.5 123H234.5', stroke: RED, 'stroke-width': .25, fill: 'none'}, dims);
+  var t123 = el('text', {x: 238, y: 63, transform: 'rotate(90 238 63)'}, dims); t123.textContent = '123';
+
+  // контуры
+  function outline(d, color, parent){ return el('path', {d: d, fill: 'none', stroke: color, 'stroke-width': .38, 'stroke-linejoin': 'round', pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1}, parent || cam); }
+  var compassG = el('g', {}, cam);
+  var oCompass = L.compass.map(function(d){ return outline(d, RED, compassG); });
+  var fCompass = el('g', {'clip-path': 'url(#cpC)'}, compassG);
+  L.compass.forEach(function(d){ el('path', {d: d, fill: RED}, fCompass); });
+  var oB = outline(L.b, RED);
+  var dG = el('g', {'clip-path': 'url(#cpD)'}, cam);
+  var oD = outline(L.d, RED, dG);
+  var oE = L.esign.map(function(d){ return outline(d, INK); });
+  var fBD = el('g', {'clip-path': 'url(#cpBD)'}, cam);
+  el('path', {d: L.b, fill: RED}, fBD);
+  el('path', {d: L.d, fill: RED, 'clip-path': 'url(#cpD)'}, fBD);
+  L.drips.forEach(function(d){ el('path', {d: d, fill: RED}, fBD); });
+  var fE = el('g', {'clip-path': 'url(#cpE)'}, cam);
+  L.esign.forEach(function(d){ el('path', {d: d, fill: INK}, fE); });
+
+  // капля, всплеск, подпись
+  var drop = el('path', {d: 'M0 0C1.1 2 2.1 3.4 2.1 4.6a2.1 2.1 0 0 1-4.2 0C-2.1 3.4-1.1 2 0 0Z', fill: RED}, cam);
+  var splash = el('ellipse', {cx: 91.7, cy: 146, rx: 0, ry: 0, fill: 'none', stroke: RED, 'stroke-width': .4}, cam);
+  var bits = [[-9,-7],[-5,-11],[3,-12],[8,-8],[12,-4],[-13,-3]].map(function(v){ return {v: v, e: el('circle', {r: .7, fill: RED}, cam)}; });
+  var lineL = el('path', {d: 'M91.7 146H30', stroke: INK, 'stroke-width': .3, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1}, cam);
+  var lineR = el('path', {d: 'M91.7 146H186', stroke: INK, 'stroke-width': .3, pathLength: 1, 'stroke-dasharray': 1, 'stroke-dashoffset': 1}, cam);
+  var ticks = el('path', {d: 'M28.5 147.5 31.5 144.5M184.5 147.5 187.5 144.5', stroke: INK, 'stroke-width': .3, opacity: 0}, cam);
+  var TAG = 'МЕБЕЛЬНОЕ ПРОИЗВОДСТВО · С 2014 ГОДА';
+  var tagText = el('text', {x: 108, y: 158, 'text-anchor': 'middle', fill: SOFT, 'font-family': 'Golos Text, sans-serif', 'font-weight': 500, 'font-size': 4.6, 'letter-spacing': 1.15}, cam);
+  var chars = TAG.split('').map(function(c){ var s = el('tspan', {}, tagText); s.textContent = c; return s; });
+
+  // ── камера: точка фокуса, зум, поворот ──
+  var CAM = [[0,[108,62,2.7,-7]],[.45,[108,62,2.6,-6]],[1.6,[96,50,1.85,-3]],[2.6,[78,60,1.65,-1.2]],[3.6,[118,62,1.32,1.2]],[4.6,[104,80,1.1,0]],[5.2,[100,104,1.04,0]],[5.9,[108,92,1,0]],[6.6,[108,92,.985,0]]];
+  var W = 0, H = 0, K = 1;
+  function size(){
+    var r = svg.getBoundingClientRect(); W = r.width; H = r.height;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    K = Math.min(W * .68 / 216, H * .66 / 175);
+  }
+
+  function render(tt){
+    var t = tt * K_T;
+    var c = track(CAM, t);
+    var bump = t > 5.1 && t < 5.4 ? Math.sin(seg(t, 5.1, 5.4) * Math.PI) * .012 : 0;
+    cam.setAttribute('transform', 'translate(' + W/2 + ' ' + H/2 + ') rotate(' + c[3].toFixed(3) + ') scale(' + (K * (c[2] + bump)).toFixed(4) + ') translate(' + (-c[0]).toFixed(2) + ' ' + (-c[1]).toFixed(2) + ')');
+
+    grid.setAttribute('opacity', (eo(seg(t, 0, .7)) * (1 - .7 * seg(t, 4.6, 5.8))).toFixed(3));
+
+    var pk = seg(t, .12, .42);
+    prick.setAttribute('r', (1.4 * eo(pk) * (1 - .4 * seg(t, 4.4, 5.2))).toFixed(2));
+    prick.setAttribute('opacity', (1 - seg(t, 4.4, 5.2)).toFixed(3));
+    var rg = seg(t, .2, 1);
+    ring.setAttribute('r', (2 + 14 * eo(rg)).toFixed(2));
+    ring.setAttribute('opacity', (rg > 0 ? 1 - rg : 0).toFixed(3));
+
+    var cp = eio(seg(t, .5, 1.6));
+    circ.setAttribute('stroke-dashoffset', (1 - cp).toFixed(4));
+    var cf = 1 - seg(t, 4.3, 5.3);
+    circ.setAttribute('opacity', cf.toFixed(3));
+    var ang = (-90 + 360 * cp) * Math.PI / 180, tx = 108 + 92 * Math.cos(ang), ty = 62 + 92 * Math.sin(ang);
+    tip.setAttribute('cx', tx.toFixed(2)); tip.setAttribute('cy', ty.toFixed(2));
+    tip.setAttribute('opacity', cp > 0 && cp < 1 ? 1 : 0);
+    radius.setAttribute('x2', tx.toFixed(2)); radius.setAttribute('y2', ty.toFixed(2));
+    radius.setAttribute('opacity', (cp > 0 ? (cp < 1 ? .9 : .9 * (1 - seg(t, 1.6, 2))) : 0).toFixed(3));
+
+    var co = eio(seg(t, 1.3, 2.3));
+    oCompass.forEach(function(p){ p.setAttribute('stroke-dashoffset', (1 - co).toFixed(4)); });
+    var sw = track([[1.3,-26],[2.4,7],[2.8,-2.5],[3.1,0]], t);
+    compassG.setAttribute('transform', 'rotate(' + sw.toFixed(2) + ' 53 27)');
+
+    cons.forEach(function(p, i){
+      var u = eio(seg(t, 1.8 + i * .06, 2.5 + i * .06));
+      p.setAttribute('stroke-dashoffset', (1 - u).toFixed(4));
+      p.setAttribute('opacity', u > 0 ? (1 - seg(t, 4.5, 5.3)).toFixed(3) : 0);
+    });
+    dims.setAttribute('opacity', (seg(t, 2.3, 2.7) * (1 - seg(t, 4.5, 5.1))).toFixed(3));
+
+    var ob = eio(seg(t, 1.9, 3)), oe = eio(seg(t, 2.3, 3.2)), fade = 1 - seg(t, 4.2, 4.9);
+    [oB, oD].forEach(function(p){ p.setAttribute('stroke-dashoffset', (1 - ob).toFixed(4)); p.setAttribute('opacity', ob > 0 ? fade.toFixed(3) : 0); });
+    oE.forEach(function(p){ p.setAttribute('stroke-dashoffset', (1 - oe).toFixed(4)); p.setAttribute('opacity', oe > 0 ? fade.toFixed(3) : 0); });
+    oCompass.forEach(function(p){ p.setAttribute('opacity', co > 0 ? fade.toFixed(3) : 0); });
+
+    cpC.setAttribute('height', (135 * eio(seg(t, 3, 3.5))).toFixed(2));
+    var bp = seg(t, 3.15, 4.45), by = -6 + 136 * (bp < .7 ? eio(bp / .7) * .62 : .62 + .38 * ei((bp - .7) / .3)), amp = 1.8 * (1 - bp), d = 'M-30 -30H250V' + by.toFixed(2);
+    for (var x = 250; x >= -30; x -= 10) d += 'L' + x + ' ' + (by + amp * Math.sin(x / 6 + t * 9)).toFixed(2);
+    cpBD.setAttribute('d', d + 'Z');
+    cpE.setAttribute('width', (96 * eio(seg(t, 3.9, 4.6))).toFixed(2));
+
+    var dg = seg(t, 4.62, 4.85), df = ei(seg(t, 4.85, 5.1)), dy = 84.5 + (146 - 4.6 - 84.5) * df;
+    drop.setAttribute('transform', 'translate(91.7 ' + dy.toFixed(2) + ') scale(' + (eo(dg) * (1 + .25 * df)).toFixed(3) + ' ' + (eo(dg) * (1 + .5 * df)).toFixed(3) + ')');
+    drop.setAttribute('opacity', t < 5.1 ? 1 : 0);
+    var sp = seg(t, 5.1, 5.8);
+    splash.setAttribute('rx', (16 * eo(sp)).toFixed(2)); splash.setAttribute('ry', (2.6 * eo(sp)).toFixed(2));
+    splash.setAttribute('opacity', (sp > 0 ? 1 - sp : 0).toFixed(3));
+    var bt = seg(t, 5.1, 5.6);
+    bits.forEach(function(b){
+      b.e.setAttribute('cx', (91.7 + b.v[0] * eo(bt)).toFixed(2));
+      b.e.setAttribute('cy', (146 + b.v[1] * Math.sin(bt * Math.PI) * .8 + 6 * bt * bt).toFixed(2));
+      b.e.setAttribute('opacity', (bt > 0 && bt < 1 ? 1 - bt * .6 : 0).toFixed(3));
+    });
+    var lp = eio(seg(t, 5.1, 5.75));
+    lineL.setAttribute('stroke-dashoffset', (1 - lp).toFixed(4)); lineR.setAttribute('stroke-dashoffset', (1 - lp).toFixed(4));
+    lineL.setAttribute('opacity', lp > 0 ? 1 : 0); lineR.setAttribute('opacity', lp > 0 ? 1 : 0);
+    circ.setAttribute('visibility', cp > 0 ? 'visible' : 'hidden');
+    ticks.setAttribute('opacity', seg(t, 5.6, 5.8).toFixed(3));
+    chars.forEach(function(s, i){
+      var u = eo(seg(t, 5.25 + i * .02, 5.6 + i * .02));
+      s.setAttribute('opacity', u.toFixed(3));
+      s.setAttribute('dy', i === 0 ? (3 * (1 - u)).toFixed(2) : '0');
+    });
+    tagText.setAttribute('transform', 'translate(0 ' + (2 * (1 - eo(seg(t, 5.25, 6)))).toFixed(2) + ')');
+  }
+
+  var t = 0, last = 0;
+  function finish(){
+    if (finished) return;
+    finished = true;
+    render(T);
+    box.classList.add('is-out');
+    document.documentElement.classList.remove('splash-on');
+    done();
+    setTimeout(function(){ box.remove(); }, 950);
+  }
+  function loop(now){
+    if (finished) return;
+    var dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now;
+    t = Math.min(T, t + dt);
+    render(t);
+    skip.style.setProperty('--p', (t / T).toFixed(3));
+    if (t >= T) setTimeout(finish, 280); else requestAnimationFrame(loop);
+  }
+  skip.addEventListener('click', finish);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') finish(); });
+  window.addEventListener('resize', function(){ if (!finished) { size(); render(t); } });
+  size(); render(0);
+  var go = function(){ requestAnimationFrame(loop); };
+  if (document.fonts && document.fonts.ready) Promise.race([document.fonts.ready, new Promise(function(r){ setTimeout(r, 500); })]).then(go); else go();
+})();
+</script>
 
 <header class="hdr" id="hdr" data-mscope>
   <div class="tape"><div class="tape__track"></div><a class="tape__tel" href="tel:+70000000000">+7 (000) 000-00-00</a></div>
@@ -984,6 +1311,73 @@ svg{display:block}
       </ol>
     </div>
   </section>
+  <section class="bd wrap" id="beds" aria-labelledby="bd-title">
+    <div class="bd__head">
+      <div class="bd__hl">
+        <h2 class="nv__t js-reveal" id="bd-title">Кровати<i class="nv__drip" style="--x:10%;--h:.32em;--d:.1s"><i></i></i><i class="nv__drip" style="--x:52%;--h:.2em;--d:.3s"></i><i class="nv__drip" style="--x:86%;--h:.4em;--d:.2s"><i></i></i></h2>
+        <p class="bd__sub">Пространство для идеального сна и гармонии</p>
+      </div>
+      <a class="draft" href="#beds"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Все кровати<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
+    </div>
+    <div class="bd__main">
+      <div class="bd__stage js-reveal" role="img" aria-label="Чертёж выбранной кровати, вид спереди">
+        <div class="bd__meta"><span>Модель · <b class="js-bd-model">Блан</b></span><span>Вид спереди · М 1:20</span></div>
+        <svg class="bd__svg" viewBox="0 0 480 360" aria-hidden="true">
+          <g class="bd__draw">
+            <path class="gnd" d="M20 300H460"/>
+            <path class="fab js-head" pathLength="1" d=""/>
+            <path class="fab js-base" pathLength="1" d=""/>
+            <path class="box js-box" d=""/>
+            <path class="strut js-strut" d=""/>
+            <g class="js-top">
+              <path class="sheet js-sheet" pathLength="1" d=""/>
+              <path class="cover js-cover" pathLength="1" d=""/>
+              <path class="throw js-throw" pathLength="1" d=""/>
+              <path class="pil js-pil" pathLength="1" d=""/>
+            </g>
+            <path class="ln js-legs" pathLength="1" d=""/>
+            <text class="note js-note" text-anchor="middle" opacity="0">НИША ДЛЯ ХРАНЕНИЯ</text>
+          </g>
+          <g class="bd__dims">
+            <path class="dim js-dim" d=""/>
+            <text class="dimt js-dimt" text-anchor="middle" y="334">1400 мм</text>
+          </g>
+        </svg>
+        <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+      </div>
+      <div class="bd__info">
+        <p class="bd__k">Выбранный товар</p>
+        <h3 class="bd__name js-bd-name">Блан</h3>
+        <p class="bd__price js-bd-price">117 369 ₽</p>
+        <p class="bd__desc js-bd-desc">Кровать Blan</p>
+        <div class="bd__opt">
+          <div class="bd__lbl">Габариты<span class="js-bd-size">1400 × 2000 мм</span></div>
+          <div class="pills js-sizes">
+            <button class="pill" type="button" data-w="140" aria-pressed="true">140×200</button>
+            <button class="pill" type="button" data-w="160" aria-pressed="false">160×200</button>
+            <button class="pill" type="button" data-w="180" aria-pressed="false">180×200</button>
+            <button class="pill" type="button" data-w="200" aria-pressed="false">200×200</button>
+          </div>
+        </div>
+        <div class="bd__opt fabric">
+          <div class="bd__lbl">Цвет обивки</div>
+          <button class="fabric__btn" type="button" aria-expanded="false"><span class="fabric__sw" style="--c:#EFE7D3"></span><span class="fabric__n"><small>Romantica</small><span class="js-fab-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
+          <div class="fabric__list js-fabrics"></div>
+        </div>
+        <div class="bd__opt">
+          <div class="bd__lbl">Механизм</div>
+          <div class="pills js-mech">
+            <button class="pill" type="button" data-lift="0" aria-pressed="true">Без механизма</button>
+            <button class="pill" type="button" data-lift="1" aria-pressed="false">Подъёмный механизм</button>
+          </div>
+        </div>
+        <div class="bd__acts">
+          <a class="cta" href="#beds" data-splash data-t="Подробнее" data-s1="о кровати Блан" data-s2="размеры и ткани"></a>
+        </div>
+      </div>
+      <div class="bd__rail js-reveal js-beds" aria-label="Другие кровати"></div>
+    </div>
+  </section>
 </main>
 
 <script>
@@ -1238,7 +1632,17 @@ svg{display:block}
     }
     introRaf = requestAnimationFrame(frame);
   }
-  if (!still.matches) {
+  function quickReveal(){
+    var logo = hin.querySelector('.logo');
+    introParts().forEach(function(el, i){ setTimeout(function(){ el.classList.remove('pre'); el.classList.add('pop'); }, 60 + i * 45); });
+    logo.classList.add('lg-intro');
+    setTimeout(function(){ hdr.classList.remove('is-intro'); }, 250);
+    setTimeout(function(){ introParts().forEach(function(el){ el.classList.remove('pop', 'lg-intro'); }); }, 1900);
+  }
+  if (window.BAD_SPLASH) {
+    hideParts();
+    window.BAD_SPLASH.then(quickReveal);
+  } else if (!still.matches) {
     hideParts();
     var go = false, run = function(){ if (!go) { go = true; playIntro(); } };
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ setTimeout(run, 120); });
@@ -1395,10 +1799,13 @@ svg{display:block}
     requestAnimationFrame(function(){ hero.classList.remove('is-pre'); });
     setTimeout(function(){ slides[0].classList.add('is-active'); update(); }, 950);
   }
-  var first = slides[0].querySelector('img');
-  if (first.complete) setTimeout(open, 150);
-  else { first.addEventListener('load', function(){ setTimeout(open, 100); }); first.addEventListener('error', open); }
-  setTimeout(open, 1500);
+  function boot(){
+    var first = slides[0].querySelector('img');
+    if (first.complete) setTimeout(open, 150);
+    else { first.addEventListener('load', function(){ setTimeout(open, 100); }); first.addEventListener('error', open); }
+    setTimeout(open, 1500);
+  }
+  if (window.BAD_SPLASH) window.BAD_SPLASH.then(function(){ setTimeout(boot, 200); }); else boot();
   par();
 })();
 </script>
@@ -1544,5 +1951,140 @@ svg{display:block}
     }, {threshold: .6});
     io.observe(el);
   });
+})();
+</script>
+
+<script>
+(function(){
+  var root = document.getElementById('beds');
+  if (!root) return;
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var BEDS = [
+    {name: 'Блан', desc: 'Кровать Blan', price: '117 369 ₽', head: 'blan'},
+    {name: 'Изи 2.0', desc: 'Кровать Изи 2.0', price: '<small>от</small> 161 094 ₽', head: 'wing'},
+    {name: 'Изи', desc: 'Кровать Изи', price: '<small>от</small> 148 725 ₽', head: 'wing', legs: true},
+    {name: 'Мон', desc: 'Кровать Мон', price: '<small>от</small> 114 096 ₽', head: 'tall'},
+    {name: 'Лиз', desc: 'Кровать Лиз', price: '<small>от</small> 116 401 ₽', head: 'low'}
+  ];
+  var FABRICS = [
+    {code: 'Romantica 01', name: 'Лепесток жасмина', c: '#EFE7D3'},
+    {code: 'Ткань', name: 'Туман', c: '#CFCBC4'},
+    {code: 'Ткань', name: 'Олива', c: '#8A8F6E'},
+    {code: 'Ткань', name: 'Терракота', c: '#B8664E'},
+    {code: 'Ткань', name: 'Графит', c: '#5E5B58'}
+  ];
+  var CX = 240, GROUND = 300;
+  function rr(x, y, w, h, r){ r = Math.min(r, w / 2, h / 2); return 'M' + (x + r) + ' ' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ' ' + y + ' ' + (x + w) + ' ' + (y + r) + 'V' + (y + h - r) + 'Q' + (x + w) + ' ' + (y + h) + ' ' + (x + w - r) + ' ' + (y + h) + 'H' + (x + r) + 'Q' + x + ' ' + (y + h) + ' ' + x + ' ' + (y + h - r) + 'V' + (y + r) + 'Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + 'Z'; }
+  // геометрия: w — ширина в пикселях чертежа, lift 0…1
+  function geo(bed, w, lift){
+    var x0 = CX - w / 2, legs = !!bed.legs, baseTop = legs ? 214 : 222, baseBot = legs ? 272 : GROUND - 2, g = {};
+    var hb = {blan: [62, 26], wing: [86, 12], tall: [70, 8], low: [130, 8]}[bed.head];
+    if (bed.head === 'blan') {
+      var half = w / 2 - 3;
+      g.head = rr(x0 + 2, hb[0], half, baseTop - hb[0] + 10, hb[1]) + rr(CX + 1, hb[0], half, baseTop - hb[0] + 10, hb[1]);
+    } else if (bed.head === 'wing') {
+      g.head = rr(x0 + 8, hb[0], w - 16, baseTop - hb[0] + 10, hb[1]) + 'M' + (x0 - 6) + ' ' + (hb[0] + 18) + 'L' + (x0 + 10) + ' ' + hb[0] + 'V' + (baseTop + 4) + 'H' + (x0 - 6) + 'Z' + 'M' + (x0 + w + 6) + ' ' + (hb[0] + 18) + 'L' + (x0 + w - 10) + ' ' + hb[0] + 'V' + (baseTop + 4) + 'H' + (x0 + w + 6) + 'Z';
+    } else if (bed.head === 'tall') {
+      g.head = rr(x0 - 4, hb[0], w + 8, baseTop - hb[0] + 10, hb[1]);
+    } else {
+      g.head = rr(x0 + 10, hb[0], w - 20, baseTop - hb[0] + 10, hb[1]);
+    }
+    g.base = rr(x0, baseTop, w, baseBot - baseTop, 12);
+    g.legs = legs ? 'M' + (x0 + 14) + ' ' + baseBot + 'v' + (GROUND - baseBot) + 'M' + (x0 + w - 14) + ' ' + baseBot + 'v' + (GROUND - baseBot) + 'M' + (x0 + 14 + 8) + ' ' + baseBot + 'v' + (GROUND - baseBot - 6) + 'M' + (x0 + w - 22) + ' ' + baseBot + 'v' + (GROUND - baseBot - 6) : 'M' + (x0 + 16) + ' ' + GROUND + 'h6M' + (x0 + w - 22) + ' ' + GROUND + 'h6';
+    var dy = -64 * lift, mt = baseTop - 30 + dy;
+    g.sheet = rr(x0 + 6, mt, w - 12, 34, 8);
+    g.cover = 'M' + (x0 + 4) + ' ' + (mt + 10) + 'Q' + CX + ' ' + (mt - 2) + ' ' + (x0 + w - 4) + ' ' + (mt + 10) + 'V' + (mt + 40) + 'H' + (x0 + 4) + 'Z';
+    g.throw = 'M' + (x0 - 2) + ' ' + (mt + 16) + 'Q' + CX + ' ' + (mt + 4) + ' ' + (x0 + w + 2) + ' ' + (mt + 16) + 'L' + (x0 + w + 6) + ' ' + (mt + 34) + 'Q' + CX + ' ' + (mt + 22) + ' ' + (x0 - 6) + ' ' + (mt + 34) + 'Z';
+    var pw = Math.min(110, w / 2 - 22), py = mt - 18;
+    g.pil = rr(CX - pw - 8, py, pw, 26, 13) + rr(CX + 8, py, pw, 26, 13);
+    g.box = lift > .01 ? rr(x0 + 12, baseTop + 2, w - 24, 26 * lift + 4, 4) : '';
+    g.strut = lift > .01 ? 'M' + (x0 + 24) + ' ' + (baseTop + 18) + 'L' + (x0 + 40) + ' ' + (mt + 34) + 'M' + (x0 + w - 24) + ' ' + (baseTop + 18) + 'L' + (x0 + w - 40) + ' ' + (mt + 34) : '';
+    g.dim = 'M' + x0 + ' 318H' + (x0 + w) + 'M' + (x0 - 4) + ' 322l8-8M' + (x0 + w - 4) + ' 322l8-8M' + x0 + ' ' + (GROUND + 4) + 'V324M' + (x0 + w) + ' ' + (GROUND + 4) + 'V324';
+    g.noteY = baseTop + 2 + (26 * lift + 4) / 2 + 3.5;
+    return g;
+  }
+  function px(cm){ return 1.55 * cm; }
+
+  var $ = function(sel){ return root.querySelector(sel); };
+  var stage = $('.bd__stage'), draw = $('.bd__draw'), info = $('.bd__info');
+  var parts = {head: $('.js-head'), base: $('.js-base'), legs: $('.js-legs'), sheet: $('.js-sheet'), cover: $('.js-cover'), throw: $('.js-throw'), pil: $('.js-pil'), box: $('.js-box'), strut: $('.js-strut'), dim: $('.js-dim')};
+  var note = $('.js-note'), dimT = $('.js-dimt');
+  var state = {bed: 0, w: 140, lift: 0, fab: 0}, cur = {w: 140, lift: 0}, anim = 0;
+
+  function paint(){
+    var g = geo(BEDS[state.bed], px(cur.w), cur.lift);
+    for (var k in parts) parts[k].setAttribute('d', g[k] || '');
+    note.setAttribute('x', CX); note.setAttribute('y', g.noteY);
+    note.setAttribute('opacity', Math.max(0, (cur.lift - .6) / .4).toFixed(2));
+    dimT.setAttribute('x', CX);
+    dimT.textContent = Math.round(cur.w * 10) + ' мм';
+  }
+  function tween(){
+    cancelAnimationFrame(anim);
+    if (still.matches) { cur.w = state.w; cur.lift = state.lift; paint(); return; }
+    var from = {w: cur.w, lift: cur.lift}, t0 = performance.now(), dur = 650;
+    (function step(now){
+      var k = Math.min(1, (now - t0) / dur), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      cur.w = from.w + (state.w - from.w) * e; cur.lift = from.lift + (state.lift - from.lift) * e;
+      paint();
+      if (k < 1) anim = requestAnimationFrame(step);
+    })(t0);
+  }
+  function setFabric(i){
+    state.fab = i;
+    var f = FABRICS[i];
+    [parts.head, parts.base].forEach(function(p){ p.style.fill = f.c; });
+    $('.fabric__sw').style.setProperty('--c', f.c);
+    $('.fabric__n small').textContent = f.code === 'Ткань' ? 'Ткань' : 'Romantica';
+    $('.js-fab-name').textContent = (f.code === 'Ткань' ? '' : f.code + ' ') + f.name;
+    root.querySelectorAll('.fabric__opt').forEach(function(o, j){ o.setAttribute('aria-pressed', String(j === i)); });
+    railSvgs.forEach(function(r){ r.querySelectorAll('.fab').forEach(function(p){ p.style.fill = f.c; }); });
+  }
+  function pressGroup(group, btn){ group.querySelectorAll('.pill').forEach(function(b){ b.setAttribute('aria-pressed', String(b === btn)); }); }
+
+  // размеры
+  $('.js-sizes').addEventListener('click', function(e){
+    var b = e.target.closest('.pill'); if (!b) return;
+    pressGroup(this, b); state.w = +b.dataset.w;
+    $('.js-bd-size').textContent = state.w * 10 + ' × 2000 мм';
+    tween();
+  });
+  // механизм
+  $('.js-mech').addEventListener('click', function(e){
+    var b = e.target.closest('.pill'); if (!b) return;
+    pressGroup(this, b); state.lift = +b.dataset.lift; tween();
+  });
+  // ткани
+  var fl = $('.js-fabrics'), fbtn = $('.fabric__btn'), fabric = $('.fabric');
+  fl.innerHTML = FABRICS.map(function(f, i){ return '<button class="fabric__opt" type="button" aria-pressed="' + (i === 0) + '"><i style="--c:' + f.c + '"></i>' + f.name + '</button>'; }).join('');
+  fbtn.addEventListener('click', function(){ var o = !fabric.classList.contains('is-open'); fabric.classList.toggle('is-open', o); fbtn.setAttribute('aria-expanded', String(o)); });
+  fl.querySelectorAll('.fabric__opt').forEach(function(o, i){ o.addEventListener('click', function(){ setFabric(i); }); });
+
+  // лента моделей
+  var rail = $('.js-beds');
+  rail.innerHTML = BEDS.map(function(b, i){
+    var g = geo(b, px(150), 0);
+    return '<button class="bc" type="button" style="--k:' + i + '" aria-pressed="' + (i === 0) + '"><span class="bc__ph"><span class="bc__now">Выбрано</span><svg viewBox="40 40 400 280" aria-hidden="true"><path class="fab" d="' + g.head + '"/><path class="sheet" d="' + g.sheet + '"/><path class="cover" d="' + g.cover + '"/><path class="throw" d="' + g.throw + '"/><path class="pil" d="' + g.pil + '"/><path class="fab" d="' + g.base + '"/><path class="ln" d="' + g.legs + '"/></svg></span><span class="bc__n">' + b.name + '</span><span class="bc__p">' + b.price + '</span></button>';
+  }).join('');
+  var railSvgs = [].slice.call(rail.querySelectorAll('svg'));
+  rail.querySelectorAll('.bd__svg, svg').forEach(function(s){ s.classList.add('bd__svg'); });
+  rail.querySelectorAll('.bc').forEach(function(card, i){
+    card.addEventListener('click', function(){
+      if (state.bed === i) return;
+      rail.querySelectorAll('.bc').forEach(function(c){ c.setAttribute('aria-pressed', String(c === card)); });
+      draw.classList.add('is-swap'); info.classList.add('is-swap');
+      setTimeout(function(){
+        state.bed = i;
+        var b = BEDS[i];
+        $('.js-bd-name').textContent = b.name; $('.js-bd-price').innerHTML = b.price; $('.js-bd-desc').textContent = b.desc;
+        $('.js-bd-model').textContent = b.name;
+        var c = $('.bd__acts .cta small span'); if (c) c.textContent = 'о кровати ' + b.name;
+        paint();
+        draw.classList.remove('is-swap'); info.classList.remove('is-swap');
+      }, 220);
+      if (window.innerWidth < 1100) stage.scrollIntoView({behavior: still.matches ? 'auto' : 'smooth', block: 'center'});
+    });
+  });
+  paint(); setFabric(0);
 })();
 </script>
