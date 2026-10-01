@@ -22,6 +22,15 @@
     forAd: adId => mine().filter(c => c.ad.id === adId),
     popRow: c => { const p = VO.person(c.peer), l = last(c), u = unreadOf(c); return `<li><a class="pop__item" href="#/me/msg/${c.id}"><span class="pop__thumb" style="background:${c.ad.bg}">${c.ad.photo ? `<img src="${c.ad.photo}" alt="">` : window.VO_ILL[c.ad.ill] || ""}</span><span class="pop__txt"><b>${esc(p.name)}${u ? ` <em class="dot-n">${u}</em>` : ""}</b><span>${l.from === "me" ? "Вы: " : ""}${esc(l.text || (l.photo ? "Фото" : ""))}</span></span></a></li>`; },
     all: () => chats,
+    // служебный чат «Команда «Все объявления»» — для сообщений и предупреждений от модераторов
+    teamGet: email => chats.find(c => c.owner === email && c.team),
+    teamSay(email, text, note = true) {
+      let c = chats.find(x => x.owner === email && x.team);
+      if (!c) { c = { id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), owner: email, team: true, ad: { id: "", title: "Служебные сообщения", price: null, ill: null, bg: "#FFEDEA", photo: null }, peer: "team", role: "buyer", created: Date.now(), msgs: [], pinned: true, muted: false, blocked: false, deal: null }; chats.unshift(c); }
+      push(c, { from: "peer", text: String(text).slice(0, 2000), read: false });
+      if (note) VO.addNote("Сообщение от команды сайта", String(text).slice(0, 140), { cat: "msg", owner: email, link: "#/me/msg/" + c.id });
+      return c;
+    },
   };
 
   /* ---------- создание и отправка ---------- */
@@ -38,6 +47,7 @@
   function sys(c, text) { push(c, { from: "sys", text }); }
   function send(c, text, photo) {
     if (c.blocked) { VO.toast("Вы заблокировали собеседника — сначала разблокируйте"); return false; }
+    const lim = !c.team && VO.restrict && VO.restrict("noMsg"); if (lim) { VO.toast(`Отправка сообщений ограничена ${VO.adm.until(lim)}${lim.reason ? ". Причина: " + lim.reason : ""}`, 4500); return false; }
     const G = VO.guard;
     text = G.clean(text, { multiline: true, maxLines: 30 }).slice(0, 2000); if (!text && !photo) return false;
     const bad = text && G.text(text, "chat"); if (bad) { VO.toast(bad); return false; }
@@ -49,7 +59,8 @@
   }
 
   /* ---------- ДЕМО: автоответы ---------- */
-  const isBot = c => { const p = VO.person(c.peer); return p && p.bot; };
+  const botsOn = () => !VO.adm || VO.adm.cfg().bots !== false;
+  const isBot = c => { const p = VO.person(c.peer); return botsOn() && p && p.bot; };
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
   function replyFor(c, text) {
     const t = text.toLowerCase(), seller = c.role === "buyer"; // собеседник — продавец, если я покупатель
@@ -87,7 +98,7 @@
   }
   // ДЕМО: по каждому вашему объявлению через полминуты пишет демо-покупатель
   function demoBuyers() {
-    const u = VO.user(); if (!u) return;
+    const u = VO.user(); if (!u || !botsOn()) return;
     const ids = Object.keys(window.VO_DEMO_BUYERS);
     S.mine.filter(a => a.owner === u.email && a.status === "active" && Date.now() - (a.first || a.created) > 30e3).forEach(a => {
       if (mine().some(c => c.ad.id === a.id)) return;
@@ -157,7 +168,7 @@
   }
   function dealBar(c) {
     const d = c.deal, seller = c.role === "seller", p = VO.person(c.peer);
-    if (c.blocked) return "";
+    if (c.blocked || c.team) return "";
     if (!d || d.stage === "cancelled") return `<div class="deal-bar deal-bar--start"><span>${d ? "Сделка отменена. " : ""}Договорились? Оформите сделку — так обоим видно этап, а отзыв получит отметку «Сделка на сайте».</span><button class="btn btn--ink btn--sm" type="button" data-deal="start">Оформить сделку</button></div>`;
     const idx = stageIdx(d);
     const steps = `<ol class="deal-steps">${STAGES.map(([k, n], i) => `<li class="${i < idx || d.stage === "done" ? "done" : i === idx ? "cur" : ""}"><i>${i + 1}</i><span>${n}</span></li>`).join("")}</ol>`;
@@ -178,12 +189,12 @@
       html += `<div class="msg msg--${m.from}"><div class="msg__b">${m.photo ? `<img src="${m.photo}" alt="Фото" class="msg__ph">` : ""}${m.text ? `<p>${esc(m.text)}</p>` : ""}<span class="msg__t">${fmtTime(m.t)}${m.from === "me" ? `<i class="tick${m.seen ? " seen" : ""}" title="${m.seen ? "Прочитано" : "Доставлено"}">${m.seen ? "✓✓" : "✓"}</i>` : ""}</span></div>${risk ? `<div class="msg__risk">Осторожно: похоже на просьбу о предоплате, коде или ссылке. Не переводите деньги заранее и не сообщайте коды. <a href="#/safety">Подробнее</a></div>` : ""}</div>`;
     });
     if (!c.msgs.length) html = `<div class="chat__hello"><b>Начните разговор</b><span>Выберите быстрый вопрос ниже или напишите свой. Номер телефона в чате не показывается.</span></div>`;
-    const quick = QUICK[c.role === "buyer" ? "buyer" : "seller"];
+    const quick = c.team ? [] : QUICK[c.role === "buyer" ? "buyer" : "seller"];
     return `<div class="chat">
       <header class="chat__h">
         <a class="chat__back" href="#/me/msg" aria-label="К списку диалогов">‹</a>
         <a class="chat__who" href="#/u/${p.id}"><span class="crow__ava" style="${p.color ? `background:${p.color}` : ""}">${esc(p.name[0])}</span><span><b>${esc(p.name)}${p.demo ? ' <em class="tag-demo">демо</em>' : ""}</b><small>${c.role === "buyer" ? "Продавец" : "Покупатель"}${VO.rating ? VO.rating.short(p.id) : ""}</small></span></a>
-        <a class="chat__ad" href="#/ad/${c.ad.id}"><span class="pop__thumb" style="background:${c.ad.bg}">${c.ad.photo ? `<img src="${c.ad.photo}" alt="">` : window.VO_ILL[c.ad.ill] || ""}</span><span><b>${c.ad.price ? VO.rub(c.ad.price) : "Даром"}</b><small>${esc(c.ad.title)}</small></span></a>
+        ${c.team ? `<span class="chat__ad chat__ad--team"><span><b>Служебный чат</b><small>Сообщения от команды сайта</small></span></span>` : `<a class="chat__ad" href="#/ad/${c.ad.id}"><span class="pop__thumb" style="background:${c.ad.bg}">${c.ad.photo ? `<img src="${c.ad.photo}" alt="">` : window.VO_ILL[c.ad.ill] || ""}</span><span><b>${c.ad.price ? VO.rub(c.ad.price) : "Даром"}</b><small>${esc(c.ad.title)}</small></span></a>`}
         <div class="chat__menu"><button class="icb" type="button" data-cm="menu" aria-label="Действия с диалогом" aria-haspopup="menu">⋯</button>
           <div class="chat__mm" role="menu"><button type="button" data-cm="pin">${c.pinned ? "Открепить" : "Закрепить диалог"}</button><button type="button" data-cm="mute">${c.muted ? "Включить уведомления" : "Без уведомлений"}</button><button type="button" data-cm="block">${c.blocked ? "Разблокировать" : "Заблокировать"}</button><button type="button" data-cm="report" class="danger">Пожаловаться</button><small>Диалоги не удаляются — так проще разобраться, если что-то пойдёт не так.</small></div></div>
       </header>

@@ -149,5 +149,18 @@
   }
   // клавиши ← → листают фото
   addEventListener("keydown", e => { if (VO.current() === "ad" && cur && !document.querySelector(".sheet") && (e.key === "ArrowLeft" || e.key === "ArrowRight") && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) setView(view + (e.key === "ArrowRight" ? 1 : -1)); });
-  VO.routes.ad = p => render(p[1]);
+  VO.routes.ad = p => {
+    const a = VO.findAd(p[1]), A = VO.adm, u = VO.user();
+    // объявление скрыто модератором или ждёт проверки: видят только автор и команда
+    if (a && A && !A.visible(a)) {
+      const own = u && a.owner === u.email, m = a.adm || {};
+      if (!own && !A.isAdmin()) { page.innerHTML = `<div class="wrap"><div class="empty"><b>Объявление недоступно</b><span>Оно на проверке или скрыто модератором.</span><div class="empty__acts"><a class="btn btn--ink" href="#/">Все объявления</a></div></div></div>`; return VO.show("ad", "Объявление недоступно"); }
+      render(p[1]);
+      const why = a.mod === "pending" ? "Объявление на проверке — в ленте появится после одобрения модератором." : a.mod === "rejected" ? `Объявление отклонено модератором${m.reason ? ": " + m.reason : ""}. Исправьте и сохраните — проверим снова.` : m.state === "blocked" ? `Объявление заблокировано ${A.until(m)}${m.reason ? ". Причина: " + m.reason : ""}.` : m.state === "hidden" ? `Объявление скрыто модератором${m.reason ? ": " + m.reason : ""}.` : "Объявление сейчас не видно в ленте.";
+      const w = page.querySelector(".wrap"); if (w) w.insertAdjacentHTML("afterbegin", `<div class="ad-modnote">${VO.esc(why)}${A.isAdmin() ? ` <a href="#/admin/ads/${VO.esc(a.id)}">Открыть в админке →</a>` : ""}</div>`);
+      return;
+    }
+    render(p[1]);
+    if (a && A && A.isAdmin()) { const w = page.querySelector(".wrap"); if (w) w.insertAdjacentHTML("afterbegin", `<a class="ad-admlink" href="#/admin/ads/${VO.esc(a.id)}">Управлять объявлением в админке →</a>`); }
+  };
 })();

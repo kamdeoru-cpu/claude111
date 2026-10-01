@@ -1,7 +1,12 @@
 /* Все объявления — шапка: только переключение классов, всё движение — в CSS. */
 (() => {
-  const CATS = __CATS__;
+  // Категории можно менять в админке: тогда список берётся из сохранённых настроек
+  const BASE_CATS = __CATS__;
+  window.VO_CATS_BASE = JSON.parse(JSON.stringify(BASE_CATS));
+  const CATS = (() => { try { const o = JSON.parse(localStorage.getItem("vo_site_cats")); if (Array.isArray(o) && o.length) return o; } catch (e) {} return BASE_CATS; })();
   window.VO_CATS = CATS;
+  const visCats = () => CATS.filter(c => !c.hidden);
+  const he = t => String(t).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[ch]);
   const hdr = document.getElementById("hdr");
   if (!hdr) return;
   const $ = s => hdr.querySelector(s);
@@ -33,7 +38,7 @@
   /* ---------- поиск: фокус, подсказки ---------- */
   // обводка поиска: подгоняем прямоугольник под размер поля
   const ring = $(".search__ring rect");
-  new ResizeObserver(() => { const r = box.getBoundingClientRect(); ring.setAttribute("width", r.width - 2); ring.setAttribute("height", r.height - 2); ring.setAttribute("rx", (r.height - 2) / 2); }).observe(box);
+  new ResizeObserver(() => { const r = box.getBoundingClientRect(); if (r.width < 4) return; ring.setAttribute("width", r.width - 2); ring.setAttribute("height", r.height - 2); ring.setAttribute("rx", (r.height - 2) / 2); }).observe(box);
   const syncValue = () => search.classList.toggle("has-value", !!input.value);
   input.addEventListener("input", syncValue);
   input.addEventListener("focus", () => { stopTyping(); renderRecent(); search.classList.add("is-focus"); search.classList.remove("is-city"); closeMega(); });
@@ -112,16 +117,24 @@
 
   /* ---------- мега-меню ---------- */
   const catBtn = $("#catBtn"), nav = $(".mega__nav"), body = $(".mega__body"), scrim = document.getElementById("scrim");
-  nav.innerHTML = CATS.map((c, i) => `<li style="--i:${i}"><button type="button" data-i="${i}">${c.icon}<span>${c.name}</span></button></li>`).join("");
+  // строка категорий и левая колонка мега-меню — из актуального списка
+  function renderCats() {
+    const V = visCats();
+    const row = document.querySelector(".hdr-cats .cats");
+    if (row) row.innerHTML = V.map(c => `<a class="cat${c.id === "free" ? " cat--free" : ""}" href="#/c/${he(c.id)}" data-cat="${he(c.id)}"><span class="cat__ic">${c.icon}</span><span>${he(c.name)}</span></a>`).join("");
+    nav.innerHTML = V.map((c, i) => `<li style="--i:${i}"><button type="button" data-i="${i}">${c.icon}<span>${he(c.name)}</span></button></li>`).join("");
+    if (V.length) show(0);
+  }
+  window.VO_renderCats = renderCats;
   function show(i) {
-    const c = CATS[i];
+    const c = visCats()[i]; if (!c) return;
     nav.querySelectorAll("button").forEach(b => b.classList.toggle("is-on", +b.dataset.i === i));
     body.querySelector("h3").textContent = c.name;
     const per = Math.ceil(c.subs.length / 3), cols = [0, 1, 2].map(k => c.subs.slice(k * per, k * per + per));
-    body.querySelector(".mega__cols").innerHTML = cols.map((list, k) => `<div class="mega__col" style="--i:${k + 1}">${list.map(s => `<a href="#/c/${c.id}">${s}</a>`).join("")}</div>`).join("");
+    body.querySelector(".mega__cols").innerHTML = cols.map((list, k) => `<div class="mega__col" style="--i:${k + 1}">${list.map(s => `<a href="#/c/${he(c.id)}">${he(s)}</a>`).join("")}</div>`).join("");
     body.classList.remove("swap"); void body.offsetWidth; body.classList.add("swap");
   }
-  show(0);
+  renderCats();
   nav.addEventListener("pointerover", e => { const b = e.target.closest("button"); if (b && !b.classList.contains("is-on")) show(+b.dataset.i); });
   nav.addEventListener("click", e => { const b = e.target.closest("button"); if (b) show(+b.dataset.i); });
   function openMega() {

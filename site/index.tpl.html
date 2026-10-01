@@ -57,7 +57,11 @@ html.intro-on { overflow: hidden; }
 <script>
 /* ===== интро: играет при заходе на главную ===== */
 addEventListener("intro:done", () => document.documentElement.classList.remove("intro-on"), { once: true });
-if (!/^#?\/?$/.test(location.hash)) {
+/* окно предпросмотра в админке и свой логотип — без заставки */
+const VO_PREVIEW = /[?&]preview/.test(location.search);
+if (VO_PREVIEW) document.documentElement.classList.add("preview");
+let VO_OWN_LOGO = false; try { VO_OWN_LOGO = !!(JSON.parse(localStorage.getItem("vo_site_brand") || "{}").logo); } catch (e) {}
+if (!/^#?\/?$/.test(location.hash) || VO_PREVIEW || VO_OWN_LOGO) {
   document.getElementById("intro").remove();
   document.documentElement.classList.remove("intro-on");
 }

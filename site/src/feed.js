@@ -95,8 +95,8 @@
     if (ctx.sort === "cheap") l.sort((a, b) => a.price - b.price);
     if (ctx.sort === "dear") l.sort((a, b) => b.price - a.price);
     if (ctx.sort === "pop") l.sort((a, b) => VO.views(b) - VO.views(a));
-    if (ctx.mode === "search" && ctx.sort === "new") return list; // по релевантности
-    return l;
+    if (ctx.mode === "search" && ctx.sort === "new") return VO.rankSort ? VO.rankSort(list) : list; // по релевантности
+    return VO.rankSort ? VO.rankSort(l) : l;
   };
 
   /* ---------- панель фильтров ---------- */

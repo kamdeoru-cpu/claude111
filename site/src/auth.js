@@ -68,6 +68,9 @@
     e.preventDefault();
     const m = $("#aMail", page).value.trim().toLowerCase();
     if (!VO.check($("#aMail", page).parentElement, VO.MAIL_RX.test(m) && m.length <= 120)) return;
+    const A = VO.adm, acc = VO.state.accounts[m];
+    if (A && !acc && !A.cfg().regOpen && !A.role(m)) return VO.guard.mark($("#aMail", page), "Регистрация новых пользователей временно закрыта");
+    if (A && acc) { const ban = A.limits(VO.uid(m)).ban; if (ban) return VO.guard.mark($("#aMail", page), `Аккаунт заблокирован ${A.until(ban)}${ban.reason ? ". Причина: " + ban.reason : ""}`); }
     if (VO.guard.tempMail(m)) return VO.guard.mark($("#aMail", page), "Одноразовые почтовые ящики не подходят — укажите постоянную почту");
     const bot = VO.guard.isBot($("#authMail", page), 600); if (bot) return VO.toast(bot);
     const w = VO.guard.rate("otp:" + m, 5, 36e5) || VO.guard.rate("otp", 12, 36e5); if (w) return VO.toast(`Слишком много запросов кода. Попробуйте через ${VO.guard.wait(w)}`);
@@ -105,6 +108,7 @@
     const S = VO.state;
     let u = S.accounts[email];
     const isNew = !u;
+    store.set("vo_login_t", Date.now());
     if (!u) u = { email, created: Date.now(), color: COLORS[Math.floor(Math.random() * COLORS.length)], notif: { msg: true, fav: true, search: true, news: false }, sessions: [] };
     u.sessions = [{ id: Date.now(), ua: navigator.userAgent.replace(/.*(Firefox|Edg|OPR|YaBrowser|Chrome|Safari)\/?([\d.]*).*/, "$1").replace("Edg", "Edge").replace("OPR", "Opera").replace("YaBrowser", "Яндекс Браузер"), t: Date.now(), current: true }, ...(u.sessions || []).map(s => ({ ...s, current: false }))].slice(0, 5);
     VO.saveUser(u);

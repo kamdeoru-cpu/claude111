@@ -4,7 +4,10 @@
   const { $, $$, esc, store } = VO;
   let own = store.get("vo_reviews", []);
   const seed = (window.VO_REVIEWS_SEED || []).map((r, i) => ({ id: "seed" + i, author: "x" + i, t: Date.now() - r.d * 864e5, ...r }));
-  const all = () => [...own, ...seed];
+  // модерация: скрытые и удалённые админом отзывы не показываем
+  let mod = store.get("vo_adm_rev", {});
+  const raw = () => [...own, ...seed].map(r => mod[r.id] ? { ...r, ...mod[r.id] } : r).filter(r => !r.deleted);
+  const all = () => raw().filter(r => !r.hidden);
   const save = () => { store.set("vo_reviews", own); VO.emit("reviews"); };
   const star = (n, size = 16) => `<span class="stars" style="--s:${size}px" aria-label="${n} из 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= Math.round(n) ? "on" : ""}">★</i>`).join("")}</span>`;
   const doneDeal = (me, peer, peerRole) => VO.chats && VO.chats.all().some(c => c.owner && VO.uid(c.owner) === me && c.peer === peer && c.deal && c.deal.stage === "done" && (peerRole === "seller" ? c.role === "buyer" : c.role === "seller"));
@@ -20,6 +23,8 @@
       if (r.target === VO.me()) VO.addNote("Новый отзыв", `${r.authorName} оценил(а) вас на ${r.stars} из 5`, { cat: "review", link: "#/me/reviews" });
     },
     star,
+    adminAll: () => raw(),
+    adminSet(id, patch) { mod[id] = { ...(mod[id] || {}), ...patch }; Object.keys(mod[id]).forEach(k => mod[id][k] == null && delete mod[id][k]); store.set("vo_adm_rev", mod); VO.emit("reviews"); },
   };
   VO.rating = (id, role) => { const l = R.of(id, role); return { n: l.length, avg: l.length ? l.reduce((s, r) => s + r.stars, 0) / l.length : 0 }; };
   VO.rating.short = id => { const r = VO.rating(id); return r.n ? ` · ★ ${r.avg.toFixed(1).replace(".", ",")}` : ""; };

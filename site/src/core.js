@@ -377,7 +377,7 @@
     $(".me__name", meWrap).textContent = u.name || "Профиль";
     const act = S.mine.filter(a => a.owner === u.email && a.status !== "archived").length;
     const unreadMsg = VO.chats ? VO.chats.unread() : 0;
-    mePop.innerHTML = `<a class="pop--me__head" href="#/me"><span class="me__ava" style="background:${u.color || ""}">${esc((u.name || u.email)[0].toUpperCase())}</span><span class="pop--me__n"><b>${esc(VO.displayName(u) || "Без имени")}</b><small>${VO.kind(u)}${VO.rating ? VO.rating.short(VO.me()) : ""}</small></span></a><div class="sep"></div>
+    mePop.innerHTML = `<a class="pop--me__head" href="#/me"><span class="me__ava" style="background:${u.color || ""}">${esc((u.name || u.email)[0].toUpperCase())}</span><span class="pop--me__n"><b>${esc(VO.displayName(u) || "Без имени")}</b><small>${VO.kind(u)}${VO.rating ? VO.rating.short(VO.me()) : ""}</small></span></a><div class="sep"></div>${VO.adm && VO.adm.isAdmin() ? `<a href="#/admin" class="pop--me__adm">Панель управления</a>` : ""}
       <a href="#/me">Личный кабинет</a><a href="#/me/ads">Мои объявления <small>${act}</small></a><a href="#/me/msg">Сообщения ${unreadMsg ? `<small class="hot">${unreadMsg}</small>` : ""}</a><a href="#/me/deals">Сделки</a><a href="#/me/fav">Избранное <small>${S.favs.size}</small></a><a href="#/me/profile">Профиль и настройки</a>
       <div class="sep"></div><button type="button" class="out" data-logout>Выйти</button>`;
   }

@@ -12,7 +12,9 @@
   /* ---------- иконка вкладки ---------- */
   const link = document.querySelector('link[rel="icon"]');
   const base = link ? decodeURIComponent(link.getAttribute("href").replace(/^data:image\/svg\+xml,/, "")) : "";
-  const inner = base.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+  // свой значок из админки может быть картинкой — тогда кладём его как изображение
+  const isSvg = link && /^data:image\/svg\+xml,/.test(link.getAttribute("href"));
+  const inner = isSvg ? base.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "") : `<image href="${link ? link.getAttribute("href") : ""}" width="150" height="214" preserveAspectRatio="xMidYMid meet"/>`;
   const svgUrl = s => "data:image/svg+xml," + encodeURIComponent(s);
   const plain = link ? link.getAttribute("href") : "";
   // логотип сдвигаем влево, справа сверху — красный кружок с числом

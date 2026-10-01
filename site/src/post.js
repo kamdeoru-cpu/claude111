@@ -2,7 +2,9 @@
 (() => {
   const { $, $$, esc, store, state: S } = VO;
   const page = VO.page("post");
-  const MAX_PHOTOS = 8, DAY_LIMIT = 10;
+  // лимиты задаются в админке («Правила сайта»)
+  let MAX_PHOTOS = 8, DAY_LIMIT = 10;
+  const limits = () => { const c = VO.adm ? VO.adm.cfg() : {}; MAX_PHOTOS = c.maxPhotos || 8; DAY_LIMIT = c.dayLimit || 10; };
   const G = VO.guard, TMAX = 50, DMAX = 3000;
   // разумный потолок цены по категориям — от опечаток и «цен-шуток»
   const PMAX = { realty: 5e9, auto: 1e9, job: 5e6, service: 1e7 };
@@ -256,20 +258,27 @@
   function publish() {
     const p = problems(); if (p.length) return VO.toast(p[0]);
     if (busy) return VO.toast("Подождите — фото ещё обрабатываются");
-    const u = VO.user(), ad = toAd();
+    const u = VO.user(), ad = toAd(); limits();
+    const lim = VO.restrict && VO.restrict("noPost"); if (lim) return VO.toast(`Размещение объявлений ограничено ${VO.adm.until(lim)}${lim.reason ? ". Причина: " + lim.reason : ""}`, 5000);
+    // проверка модератором: если включена в правилах или объявление раньше отклоняли
+    const old = editId && S.mine.find(a => a.id === editId), premod = VO.adm && VO.adm.cfg().premod;
+    ad.mod = premod || (old && old.mod === "rejected") ? "pending" : old ? old.mod : undefined;
+    if (old && old.mod === "rejected" && old.adm) { old.adm = { ...old.adm }; delete old.adm.reason; }
     if (!editId && S.mine.filter(a => a.owner === u.email && Date.now() - (a.first || a.created) < 864e5).length >= DAY_LIMIT) return VO.toast(`Можно размещать до ${DAY_LIMIT} объявлений в сутки. Попробуйте завтра`);
     if (editId) { const i = S.mine.findIndex(a => a.id === editId), old = S.mine[i]; S.mine[i] = { ...old, ...ad, id: editId, owner: u.email, created: old.created, first: old.first || old.created, status: old.status }; }
     else S.mine.unshift({ ...ad, id: "m" + Date.now(), owner: u.email, created: Date.now(), first: Date.now(), status: "active" });
     if (!VO.saveMine()) { if (!editId) S.mine.shift(); return VO.toast("Не хватает места в браузере — уберите пару фото"); }
     store.del("vo_draft_" + S.session);
     VO.emit("mine"); VO.search.build();
-    VO.addNote(editId ? "Объявление обновлено" : "Объявление опубликовано", `«${ad.title}»`, { cat: "ads", link: "#/ad/" + (editId || S.mine[0].id) });
-    VO.toast(editId ? "Изменения сохранены" : "Опубликовано! Объявление уже в ленте");
+    if (ad.mod === "pending") { VO.addNote("Объявление на проверке", `«${ad.title}» появится в ленте после проверки модератором`, { cat: "ads", link: "#/me/ads" }); VO.toast("Отправили на проверку — обычно это занимает немного времени", 4000); }
+    else { VO.addNote(editId ? "Объявление обновлено" : "Объявление опубликовано", `«${ad.title}»`, { cat: "ads", link: "#/ad/" + (editId || S.mine[0].id) }); VO.toast(editId ? "Изменения сохранены" : "Опубликовано! Объявление уже в ленте"); }
     location.hash = "#/ad/" + (editId || S.mine[0].id);
   }
 
   VO.routes.post = (p, q) => {
     if (!VO.user()) return VO.needLogin(location.hash, "Войдите, чтобы разместить объявление");
+    limits();
+    const lim = VO.restrict && VO.restrict("noPost"); if (lim) { VO.toast(`Размещение объявлений ограничено ${VO.adm.until(lim)}${lim.reason ? ". Причина: " + lim.reason : ""}`, 5000); location.hash = "#/me"; return; }
     const id = q.get("edit");
     if (id) {
       const ad = S.mine.find(a => a.id === id && a.owner === VO.user().email);

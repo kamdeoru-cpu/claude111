@@ -15,7 +15,7 @@ assert "const SITE_MODE = true;" in intro_js
 hdr = rd("header/header.html")
 hdr_markup = hdr[hdr.index('<header class="hdr"'):hdr.index('<main class="demo"')]
 
-MODULES = ["core", "guard", "chat", "notify", "reviews", "search", "feed", "ad", "auth", "cabinet", "post", "info", "docs", "ads", "ui"]  # порядок важен: core первым, ui (запуск) последним
+MODULES = ["core", "guard", "control", "chat", "notify", "reviews", "search", "feed", "ad", "auth", "cabinet", "post", "info", "docs", "ads", "editor", "admin", "admin-site", "ui"]  # порядок важен: core первым, ui (запуск) последним
 tpl = rd("site/index.tpl.html")
 out = (tpl.replace("/*__HEADER_CSS__*/", rd("header/header.css"))
           .replace("/*__COOKIE_CSS__*/", rd("cookies/cookies.css"))
@@ -24,7 +24,7 @@ out = (tpl.replace("/*__HEADER_CSS__*/", rd("header/header.css"))
           .replace("/*__INTRO_JS__*/", intro_js)
           .replace("/*__HEADER_JS__*/", js("header/header.js"))
           .replace("/*__COOKIE_JS__*/", js("cookies/cookies.js"))
-          .replace("/*__APP_CSS__*/", rd("site/src/app.css"))
+          .replace("/*__APP_CSS__*/", rd("site/src/app.css") + "\n" + rd("site/src/admin.css"))
           .replace("<!--__PAGES__-->", rd("site/src/pages.html"))
           .replace("/*__DATA_JS__*/", js("site/src/data.js") + "\n" + js("site/src/cities.js") + "\n" + js("site/src/contacts.js"))
           .replace("/*__APP_JS__*/", "\n".join(js("site/src/" + m + ".js") for m in MODULES)))

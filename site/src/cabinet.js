@@ -94,7 +94,7 @@
       <div class="tabs" role="tablist" id="adsTabs"><button role="tab" data-t="active" aria-selected="${adsTab === "active"}">Активные · ${all.filter(a => a.status === "active" || !a.status).length}</button><button role="tab" data-t="sold" aria-selected="${adsTab === "sold"}">Проданные · ${all.filter(a => a.status === "sold").length}</button><button role="tab" data-t="archived" aria-selected="${adsTab === "archived"}">Снятые · ${all.filter(a => a.status === "archived").length}</button><span class="tabs__ink"></span></div>
       <div class="row-ads">${list.length ? list.map(a => { const w = VO.viewsByDay(a, 7); return `<article class="row-ad" data-id="${a.id}">
         <a href="#/ad/${a.id}">${thumb(a)}</a>
-        <div class="row-ad__t"><a href="#/ad/${a.id}"><b>${esc(a.title)}</b></a><span>${a.price ? VO.rub(a.price) : "Даром"} · ${esc(VO.catName(a.cat))} · ${VO.agoText(a)}</span><span class="pill ${a.status === "active" ? "pill--on" : ""}">${a.status === "archived" ? "Снято" : a.status === "sold" ? "Продано" : "В ленте"}</span></div>
+        <div class="row-ad__t"><a href="#/ad/${a.id}"><b>${esc(a.title)}</b></a><span>${a.price ? VO.rub(a.price) : "Даром"} · ${esc(VO.catName(a.cat))} · ${VO.agoText(a)}</span>${modPill(a)}</div>
         <div class="row-ad__st"><b>${VO.views(a)}</b><small>просмотров</small>${VO.spark(w, 110, 32)}<a class="row-ad__chats" href="#/me/msg">${VO.chats ? VO.chats.forAd(a.id).length : 0} ${VO.plural(VO.chats ? VO.chats.forAd(a.id).length : 0, "диалог", "диалога", "диалогов")}</a></div>
         <div class="row-ad__acts"><a class="icb" href="#/post?edit=${a.id}" title="Редактировать" aria-label="Редактировать">${VO.ico.edit}</a><button class="icb" type="button" data-act="share" title="Поделиться" aria-label="Поделиться">${VO.ico.share}</button><button class="btn btn--ghost btn--sm" type="button" data-act="arch">${a.status === "active" ? "Снять" : "Вернуть"}</button><button class="icb icb--del" type="button" data-act="del" title="Удалить" aria-label="Удалить">${I('<path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/>', 16)}</button></div>
       </article>`; }).join("") : `<div class="cab-empty cab-empty--big"><svg width="120" height="90" viewBox="0 0 120 90"><rect x="20" y="10" width="60" height="70" rx="10" fill="#F4F5F7"/><path d="M34 30h32M34 42h20" stroke="#D5D8DE" stroke-width="6" stroke-linecap="round"/><circle cx="86" cy="62" r="18" fill="#FF4F3A"/><path d="M86 54v16M78 62h16" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg><b>${adsTab === "active" ? "Нет активных объявлений" : "Снятых объявлений нет"}</b><span>Размещение бесплатное и занимает пару минут.</span><a class="btn btn--ink" href="#/post">Разместить объявление</a></div>`}</div>`);
@@ -188,10 +188,20 @@
   });
 
   /* ---------- обращения ---------- */
+  // статус объявления с учётом решений модератора
+  function modPill(a) {
+    const m = a.adm || {}, live = VO.adm ? VO.adm.live(m) : true, why = m.reason ? ` title="Причина: ${esc(m.reason)}"` : "";
+    if (m.deleted) return `<span class="pill pill--bad"${why}>Удалено модератором</span>`;
+    if (m.state === "blocked" && live) return `<span class="pill pill--bad"${why}>Заблокировано ${esc(VO.adm.until(m))}</span>${m.reason ? `<small class="row-ad__why">Причина: ${esc(m.reason)}</small>` : ""}`;
+    if (m.state === "hidden" && live) return `<span class="pill"${why}>Скрыто модератором</span>${m.reason ? `<small class="row-ad__why">Причина: ${esc(m.reason)}</small>` : ""}`;
+    if (a.mod === "pending") return `<span class="pill pill--wait">На проверке</span>`;
+    if (a.mod === "rejected") return `<span class="pill pill--bad">Отклонено</span>${m.reason ? `<small class="row-ad__why">Причина: ${esc(m.reason)}. Исправьте и сохраните — проверим снова.</small>` : ""}`;
+    return `<span class="pill ${a.status === "active" ? "pill--on" : ""}">${a.status === "archived" ? "Снято" : a.status === "sold" ? "Продано" : "В ленте"}</span>`;
+  }
   function tickets() {
     const L = VO.tickets();
     shell("tickets", `<header class="cab__hi"><div><h1>Обращения</h1><span class="muted">Сообщения, которые вы отправляли через «Написать нам» — в том числе до регистрации, с этого устройства или с вашей почты.</span></div><a class="btn btn--ink" href="#/contact">Новое обращение</a></header>
-      <div class="row-ads">${L.length ? L.map(t => `<article class="ticket"><header><b>${esc(t.topic)}</b><span class="pill ${t.status === "answered" ? "pill--on" : ""}">${t.status === "answered" ? "Есть ответ" : "Отправлено"}</span><small>№ ${t.id.slice(-6).toUpperCase()} · ${new Date(t.t).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</small></header><p>${esc(t.msg)}</p><footer class="muted">Ответ придёт на ${esc(t.email)}</footer></article>`).join("")
+      <div class="row-ads">${L.length ? L.map(t => `<article class="ticket"><header><b>${esc(t.topic)}</b><span class="pill ${t.status === "answered" ? "pill--on" : ""}">${t.status === "answered" ? "Есть ответ" : "Отправлено"}</span><small>№ ${t.id.slice(-6).toUpperCase()} · ${new Date(t.t).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</small></header><p>${esc(t.msg)}</p>${(t.replies || (t.answer ? [{ text: t.answer, t: t.answeredAt }] : [])).map(r => `<div class="ticket__ans"><b>Ответ команды</b><p>${esc(r.text)}</p><small>${new Date(r.t).toLocaleString("ru-RU", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</small></div>`).join("")}<footer class="muted">${t.status === "answered" ? "Мы ответили — если остались вопросы, напишите ещё" : t.status === "closed" ? "Обращение закрыто" : "Ответ придёт на " + esc(t.email)}</footer></article>`).join("")
         : `<div class="cab-empty cab-empty--big"><b>Обращений пока нет</b><span>Если что-то не получается или есть идея — напишите нам.</span><a class="btn btn--ink" href="#/contact">Написать нам</a></div>`}</div>`);
   }
 
