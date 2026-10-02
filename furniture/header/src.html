@@ -529,13 +529,29 @@ html.splash-on{overflow:hidden}
 .nv__meta{display:grid;gap:6px;font:500 11.5px/1.2 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
 .nv__meta b{font:600 15px/1 var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink)}
 .nv__arrs{display:flex;gap:10px}
-.nv__arr{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);transition:background-color .25s,color .25s,opacity .25s,transform .2s}
-.nv__arr svg{width:22px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .4s var(--ease-out)}
-.nv__arr:hover:not(:disabled),.nv__arr:focus-visible{background:var(--ink);color:var(--paper)}
-.nv__arr--p:hover:not(:disabled) svg{transform:translateX(-4px)}
-.nv__arr--n:hover:not(:disabled) svg{transform:translateX(4px)}
-.nv__arr:active:not(:disabled){transform:scale(.94)}
-.nv__arr:disabled{opacity:.25;cursor:default}
+.nv__arr{position:relative;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;color:var(--ink);isolation:isolate;transition:color .3s .05s,transform .25s var(--ease-spring)}
+.arr__ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible;pointer-events:none}
+.arr__ring circle{fill:none}
+.arr__ring .b{stroke:var(--ink);stroke-width:1.5;transition:stroke-dasharray .3s,opacity .3s}
+.arr__ring .d{stroke:var(--red);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .55s var(--ease-out)}
+.nv__arr--p .arr__ring{transform:rotate(-90deg) scaleY(-1)}
+.arr__fill{position:absolute;inset:5px;z-index:-1;border-radius:50%;background:var(--red);transform:scale(0);transition:transform .45s .12s var(--ease-spring)}
+.arr__ico{position:relative;width:22px;height:12px;overflow:hidden}
+.arr__ico svg{position:absolute;inset:0;width:22px;height:12px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .45s var(--ease-out)}
+.nv__arr--n .arr__ico svg+svg{transform:translateX(-160%)}
+.nv__arr--p .arr__ico svg+svg{transform:translateX(160%)}
+.nv__arr:not(:disabled):hover,.nv__arr:not(:disabled):focus-visible{color:var(--paper)}
+.nv__arr:not(:disabled):hover .arr__ring .d,.nv__arr:not(:disabled):focus-visible .arr__ring .d{stroke-dashoffset:0}
+.nv__arr:not(:disabled):hover .arr__fill,.nv__arr:not(:disabled):focus-visible .arr__fill{transform:scale(1)}
+.nv__arr--n:not(:disabled):hover .arr__ico svg:first-child{transform:translateX(160%)}
+.nv__arr--n:not(:disabled):hover .arr__ico svg+svg,.nv__arr--p:not(:disabled):hover .arr__ico svg+svg{transform:none}
+.nv__arr--p:not(:disabled):hover .arr__ico svg:first-child{transform:translateX(-160%)}
+.nv__arr:not(:disabled):active{transform:scale(.9)}
+.nv__arr.is-kick .arr__fill{animation:kick .5s var(--ease-out)}
+@keyframes kick{0%{box-shadow:0 0 0 0 rgba(188,66,66,.45)}100%{box-shadow:0 0 0 16px rgba(188,66,66,0)}}
+.nv__arr:disabled{cursor:default;color:var(--ink-soft)}
+.nv__arr:disabled .arr__ring .b{stroke-dasharray:3 4;opacity:.45}
+.nv__arr:disabled .arr__ico{opacity:.4}
 .nv__track{--g:clamp(14px,1.8vw,28px);display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 3*var(--g))/4);gap:var(--g);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding-block:4px 6px;cursor:grab}
 .nv__track::-webkit-scrollbar{display:none}
 .nv__track.is-drag{scroll-snap-type:none;cursor:grabbing;user-select:none}
@@ -725,11 +741,21 @@ html.splash-on{overflow:hidden}
 .bds__media .ph__dim{bottom:9%;left:16%;right:16%;transition:left .65s var(--ease-out),right .65s var(--ease-out)}
 .bds__tag{position:absolute;left:18px;top:18px;display:flex;gap:10px;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
 .bds__tag b{color:var(--red);font-weight:500}
+.bds__flag{padding:3px 6px;margin:-3px 0;background:var(--red);color:var(--paper)}
+.bds+.bds{padding-top:clamp(24px,3vw,48px)}
+.bds--alt .bds__media{grid-column:7/13;order:2}
+.bds--alt .bds__info{grid-column:1/6;order:1}
+.bds--alt .bds__media{clip-path:inset(0 0 0 100%)}
+.bds--alt .bds__media.is-in{clip-path:inset(0 0 0 0)}
+.bds__rail{cursor:grab}
+.bds__rail.is-drag{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.bds__rail.is-drag .bcd{pointer-events:none}
+.bcd[hidden]{display:none}
 .bds__num{position:absolute;right:18px;top:16px;font:400 13px/1 var(--f-mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .bds__num b{font:400 22px/1 var(--f-display);color:var(--ink)}
 .bds__wipe{position:absolute;inset:0;z-index:3;background:var(--red);transform:translateX(-101%);pointer-events:none}
-.bds__lift{position:absolute;right:18px;bottom:18px;padding:7px 10px;background:var(--ink);color:var(--paper);font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .4s var(--ease-out)}
-.bds__media.has-lift .bds__lift{opacity:1;transform:none}
+.bds__badge{position:absolute;right:18px;bottom:18px;padding:7px 10px;background:var(--ink);color:var(--paper);font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .4s var(--ease-out)}
+.bds__media.has-badge .bds__badge{opacity:1;transform:none}
 .bed{position:relative;width:72%;height:auto;margin-top:-4%;overflow:visible}
 .bed .fab{stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;transition:fill .6s var(--ease-out)}
 .bed .sheet{fill:#FBFAF8;stroke:var(--ink);stroke-width:1.3}
@@ -739,6 +765,11 @@ html.splash-on{overflow:hidden}
 .bed .ln{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round}
 .bed .box{fill:#4A4644;stroke:var(--ink);stroke-width:1.3}
 .bed .strut{stroke:var(--red);stroke-width:2.4;stroke-linecap:round}
+.bed .leg{fill:none;stroke-width:4;stroke-linecap:round}
+.bed .top{fill:#F3EFEA;stroke:var(--ink);stroke-width:1.3}
+.bed .wood{stroke:var(--ink);stroke-width:1.3}
+.bed .dot{fill:var(--ink);stroke:none}
+.bed .shade{fill:#FBFAF8;stroke:var(--ink);stroke-width:1.3}
 
 .bds__info{grid-column:8/13;display:grid;gap:20px;align-content:start}
 .bds__info>*{opacity:0;transform:translateY(16px);transition:opacity .6s calc(.3s + var(--i,0)*.08s),transform .8s calc(.3s + var(--i,0)*.08s) var(--ease-out)}
@@ -796,8 +827,8 @@ html.splash-on{overflow:hidden}
 .bcd:hover .bcd__n,.bcd[aria-pressed="true"] .bcd__n{color:var(--red);background-size:100% 1.5px}
 .bcd__p{margin-top:-4px;font:500 15px/1 var(--f-body);color:var(--ink-soft);font-variant-numeric:tabular-nums}
 @media (max-width:1100px){
-  .bds__media{grid-column:1/-1}
-  .bds__info{grid-column:1/-1;margin-top:32px}
+  .bds__media,.bds--alt .bds__media{grid-column:1/-1;order:0}
+  .bds__info,.bds--alt .bds__info{grid-column:1/-1;margin-top:32px;order:1}
   .bds__rail{grid-auto-columns:calc((100% - 2*var(--g))/3)}
 }
 @media (max-width:640px){
@@ -1323,24 +1354,24 @@ html.splash-on{overflow:hidden}
       </ol>
     </div>
   </section>
-  <section class="bds wrap" id="beds" aria-labelledby="bds-title">
+  <section class="bds wrap" id="beds" data-cat="beds" aria-labelledby="beds-title">
     <div class="bds__head">
       <div class="bds__hl">
-        <h2 class="nv__t js-reveal" id="bds-title">Кровати<i class="nv__drip" style="--x:10%;--h:.32em;--d:.1s"><i></i></i><i class="nv__drip" style="--x:52%;--h:.2em;--d:.3s"></i><i class="nv__drip" style="--x:86%;--h:.4em;--d:.2s"><i></i></i></h2>
+        <h2 class="nv__t js-reveal" id="beds-title">Кровати<i class="nv__drip" style="--x:10%;--h:0.32em;--d:0.1s"><i></i></i><i class="nv__drip" style="--x:52%;--h:0.2em;--d:0.3s"></i><i class="nv__drip" style="--x:86%;--h:0.4em;--d:0.2s"><i></i></i></h2>
         <p class="bds__sub">Пространство для идеального сна и гармонии</p>
       </div>
       <a class="draft" href="#beds"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Все кровати<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
     </div>
     <div class="bds__main">
-      <div class="bds__media js-reveal" role="img" aria-label="Место для фото выбранной кровати">
+      <div class="bds__media js-reveal" role="img" aria-label="Место для фото: кровати">
         <div class="ph">
-          <svg class="bed js-bed" viewBox="20 30 440 290" aria-hidden="true"></svg>
-          <span class="ph__dim js-dim"><b class="js-dim-t">1400 × 2000 мм</b></span>
+          <svg class="bed js-draw" viewBox="20 30 440 290" aria-hidden="true"></svg>
+          <span class="ph__dim js-dim"><b class="js-dim-t">фото 1600 × 1200</b></span>
           <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
         </div>
         <span class="bds__tag"><b class="js-m-name">Блан</b>фото 1600 × 1200</span>
         <span class="bds__num"><b class="js-m-num">01</b> / <span class="js-m-total">09</span></span>
-        <span class="bds__lift">с подъёмным механизмом</span>
+        <span class="bds__badge js-badge"></span>
         <span class="bds__wipe"></span>
       </div>
       <div class="bds__info js-reveal">
@@ -1351,19 +1382,19 @@ html.splash-on{overflow:hidden}
         </div>
         <div class="bds__opt" style="--i:2">
           <div class="bds__lbl">Габариты<span>ширина × длина, см</span></div>
-          <div class="seg js-size" role="group" aria-label="Габариты"><span class="seg__ind"></span><button type="button" data-v="140" aria-pressed="true">140×200</button><button type="button" data-v="160" aria-pressed="false">160×200</button><button type="button" data-v="180" aria-pressed="false">180×200</button><button type="button" data-v="200" aria-pressed="false">200×200</button></div>
+          <div class="seg" role="group" aria-label="Габариты" data-key="w"><span class="seg__ind"></span><button type="button" data-v="140" aria-pressed="true">140×200</button><button type="button" data-v="160" aria-pressed="false">160×200</button><button type="button" data-v="180" aria-pressed="false">180×200</button><button type="button" data-v="200" aria-pressed="false">200×200</button></div>
         </div>
-        <div class="bds__opt fsel" style="--i:3">
+        <div class="bds__opt" style="--i:3">
+          <div class="bds__lbl">Механизм</div>
+          <div class="seg" role="group" aria-label="Механизм" data-key="lift"><span class="seg__ind"></span><button type="button" data-v="0" aria-pressed="true">Без механизма</button><button type="button" data-v="1" aria-pressed="false">Подъёмный механизм</button></div>
+        </div>
+        <div class="bds__opt fsel" style="--i:4">
           <div class="bds__lbl">Цвет обивки</div>
           <button class="fsel__btn" type="button" aria-expanded="false"><span class="fsel__sw" style="--c:#EFE7D3"></span><span class="fsel__n"><small class="js-f-code">Romantica</small><span class="js-f-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
           <div class="fsel__list js-fabrics"></div>
         </div>
-        <div class="bds__opt" style="--i:4">
-          <div class="bds__lbl">Механизм</div>
-          <div class="seg js-mech" role="group" aria-label="Механизм"><span class="seg__ind"></span><button type="button" data-v="0" aria-pressed="true">Без механизма</button><button type="button" data-v="1" aria-pressed="false">Подъёмный механизм</button></div>
-        </div>
         <div class="bds__acts" style="--i:5">
-          <a class="cta" href="#beds" data-splash data-t="Подробнее" data-s1="о кровати Блан" data-s2="размеры и ткани"></a>
+          <a class="cta" href="#beds" data-splash data-t="Подробнее" data-s1="о модели Блан" data-s2="размеры и ткани"></a>
           <button class="ib ib--fav" type="button" aria-label="В избранное" aria-pressed="false" data-ico="heart"></button>
         </div>
       </div>
@@ -1376,7 +1407,260 @@ html.splash-on{overflow:hidden}
       </div>
     </div>
     <div class="bds__rail js-reveal js-brail" aria-label="Кровати, листайте вбок"></div>
-    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos">01–05 / 09</span></div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos"></span></div>
+  </section>
+  <section class="bds wrap bds--alt" id="sofas" data-cat="sofas" aria-labelledby="sofas-title">
+    <div class="bds__head">
+      <div class="bds__hl">
+        <h2 class="nv__t js-reveal" id="sofas-title">Диваны<i class="nv__drip" style="--x:14%;--h:0.28em;--d:0.15s"><i></i></i><i class="nv__drip" style="--x:58%;--h:0.36em;--d:0.3s"></i><i class="nv__drip" style="--x:90%;--h:0.18em;--d:0.2s"><i></i></i></h2>
+        <p class="bds__sub">Центр притяжения вашего дома</p>
+      </div>
+      <a class="draft" href="#sofas"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Все диваны<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
+    </div>
+    <div class="bds__main">
+      <div class="bds__media js-reveal" role="img" aria-label="Место для фото: диваны">
+        <div class="ph">
+          <svg class="bed js-draw" viewBox="20 30 440 290" aria-hidden="true"></svg>
+          <span class="ph__dim js-dim"><b class="js-dim-t">фото 1600 × 1200</b></span>
+          <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+        </div>
+        <span class="bds__tag"><b class="js-m-name">Элион</b>фото 1600 × 1200</span>
+        <span class="bds__num"><b class="js-m-num">01</b> / <span class="js-m-total">06</span></span>
+        <span class="bds__badge js-badge"></span>
+        <span class="bds__wipe"></span>
+      </div>
+      <div class="bds__info js-reveal">
+        <p class="bds__k" style="--i:0">Выбранный товар</p>
+        <div class="bds__title" style="--i:1">
+          <h3 class="bds__name js-name">Элион</h3>
+          <div class="bds__row"><span class="bds__price js-price"><small>от</small> 190 893 ₽</span><span class="bds__desc js-desc">Диван Элион модульный уютный</span></div>
+        </div>
+        <div class="bds__opt" style="--i:2">
+          <div class="bds__lbl">Длина<span>см</span></div>
+          <div class="seg" role="group" aria-label="Длина" data-key="w"><span class="seg__ind"></span><button type="button" data-v="200" aria-pressed="true">200</button><button type="button" data-v="240" aria-pressed="false">240</button><button type="button" data-v="280" aria-pressed="false">280</button><button type="button" data-v="320" aria-pressed="false">320</button></div>
+        </div>
+        <div class="bds__opt" style="--i:3">
+          <div class="bds__lbl">Конфигурация</div>
+          <div class="seg" role="group" aria-label="Конфигурация" data-key="corner"><span class="seg__ind"></span><button type="button" data-v="0" aria-pressed="true">Прямой</button><button type="button" data-v="1" aria-pressed="false">Угловой</button></div>
+        </div>
+        <div class="bds__opt fsel" style="--i:4">
+          <div class="bds__lbl">Цвет обивки</div>
+          <button class="fsel__btn" type="button" aria-expanded="false"><span class="fsel__sw" style="--c:#EFE7D3"></span><span class="fsel__n"><small class="js-f-code">Romantica</small><span class="js-f-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
+          <div class="fsel__list js-fabrics"></div>
+        </div>
+        <div class="bds__acts" style="--i:5">
+          <a class="cta" href="#sofas" data-splash data-t="Подробнее" data-s1="о модели Элион" data-s2="размеры и ткани"></a>
+          <button class="ib ib--fav" type="button" aria-label="В избранное" aria-pressed="false" data-ico="heart"></button>
+        </div>
+      </div>
+    </div>
+    <div class="bds__railhead">
+      <span class="bds__rt">Другие модели</span>
+      <div class="nv__arrs">
+        <button class="nv__arr nv__arr--p js-bp" type="button" aria-label="Листать назад"><svg viewBox="0 0 22 12"><path d="M21 6H2M7 1.5 2 6l5 4.5"/></svg></button>
+        <button class="nv__arr nv__arr--n js-bn" type="button" aria-label="Листать вперёд"><svg viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
+      </div>
+    </div>
+    <div class="bds__rail js-reveal js-brail" aria-label="Диваны, листайте вбок"></div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos"></span></div>
+  </section>
+  <section class="bds wrap" id="chairs" data-cat="chairs" aria-labelledby="chairs-title">
+    <div class="bds__head">
+      <div class="bds__hl">
+        <h2 class="nv__t js-reveal" id="chairs-title">Кресла и стулья<i class="nv__drip" style="--x:8%;--h:0.22em;--d:0.1s"><i></i></i><i class="nv__drip" style="--x:46%;--h:0.4em;--d:0.25s"></i><i class="nv__drip" style="--x:78%;--h:0.26em;--d:0.35s"><i></i></i></h2>
+        <p class="bds__sub">Личный остров спокойствия</p>
+      </div>
+      <a class="draft" href="#chairs"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Все кресла и стулья<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
+    </div>
+    <div class="bds__main">
+      <div class="bds__media js-reveal" role="img" aria-label="Место для фото: кресла и стулья">
+        <div class="ph">
+          <svg class="bed js-draw" viewBox="20 30 440 290" aria-hidden="true"></svg>
+          <span class="ph__dim js-dim"><b class="js-dim-t">фото 1600 × 1200</b></span>
+          <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+        </div>
+        <span class="bds__tag"><b class="js-m-name">Люриэль</b>фото 1600 × 1200</span>
+        <span class="bds__num"><b class="js-m-num">01</b> / <span class="js-m-total">06</span></span>
+        <span class="bds__badge js-badge"></span>
+        <span class="bds__wipe"></span>
+      </div>
+      <div class="bds__info js-reveal">
+        <p class="bds__k" style="--i:0">Выбранный товар</p>
+        <div class="bds__title" style="--i:1">
+          <h3 class="bds__name js-name">Люриэль</h3>
+          <div class="bds__row"><span class="bds__price js-price"><small>от</small> 116 725 ₽</span><span class="bds__desc js-desc">Кресло Люриэль</span></div>
+        </div>
+        <div class="bds__opt" style="--i:2">
+          <div class="bds__lbl">Ножки</div>
+          <div class="seg" role="group" aria-label="Ножки" data-key="legs"><span class="seg__ind"></span><button type="button" data-v="0" aria-pressed="true">Дерево</button><button type="button" data-v="1" aria-pressed="false">Металл</button></div>
+        </div>
+        <div class="bds__opt fsel" style="--i:3">
+          <div class="bds__lbl">Цвет обивки</div>
+          <button class="fsel__btn" type="button" aria-expanded="false"><span class="fsel__sw" style="--c:#EFE7D3"></span><span class="fsel__n"><small class="js-f-code">Romantica</small><span class="js-f-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
+          <div class="fsel__list js-fabrics"></div>
+        </div>
+        <div class="bds__acts" style="--i:4">
+          <a class="cta" href="#chairs" data-splash data-t="Подробнее" data-s1="о модели Люриэль" data-s2="размеры и ткани"></a>
+          <button class="ib ib--fav" type="button" aria-label="В избранное" aria-pressed="false" data-ico="heart"></button>
+        </div>
+      </div>
+    </div>
+    <div class="bds__railhead">
+      <span class="bds__rt">Другие модели</span>
+      <div class="nv__arrs">
+        <button class="nv__arr nv__arr--p js-bp" type="button" aria-label="Листать назад"><svg viewBox="0 0 22 12"><path d="M21 6H2M7 1.5 2 6l5 4.5"/></svg></button>
+        <button class="nv__arr nv__arr--n js-bn" type="button" aria-label="Листать вперёд"><svg viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
+      </div>
+    </div>
+    <div class="bds__rail js-reveal js-brail" aria-label="Кресла и стулья, листайте вбок"></div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos"></span></div>
+  </section>
+  <section class="bds wrap bds--alt" id="outlet" data-cat="outlet" aria-labelledby="outlet-title">
+    <div class="bds__head">
+      <div class="bds__hl">
+        <h2 class="nv__t js-reveal" id="outlet-title">Outlet<i class="nv__drip" style="--x:18%;--h:0.3em;--d:0.2s"><i></i></i><i class="nv__drip" style="--x:70%;--h:0.22em;--d:0.1s"></i></h2>
+        <p class="bds__sub">Образцы из шоурума и последние экземпляры по сниженным ценам</p>
+      </div>
+      <a class="draft" href="#outlet"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Весь Outlet<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
+    </div>
+    <div class="bds__main">
+      <div class="bds__media js-reveal" role="img" aria-label="Место для фото: outlet">
+        <div class="ph">
+          <svg class="bed js-draw" viewBox="20 30 440 290" aria-hidden="true"></svg>
+          <span class="ph__dim js-dim"><b class="js-dim-t">фото 1600 × 1200</b></span>
+          <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+        </div>
+        <span class="bds__tag"><span class="bds__flag">Outlet</span><b class="js-m-name">Образец: кровать</b>фото 1600 × 1200</span>
+        <span class="bds__num"><b class="js-m-num">01</b> / <span class="js-m-total">06</span></span>
+        <span class="bds__badge js-badge"></span>
+        <span class="bds__wipe"></span>
+      </div>
+      <div class="bds__info js-reveal">
+        <p class="bds__k" style="--i:0">Выбранный товар</p>
+        <div class="bds__title" style="--i:1">
+          <h3 class="bds__name js-name">Образец: кровать</h3>
+          <div class="bds__row"><span class="bds__price js-price">цена уточняется</span><span class="bds__desc js-desc">Образец из шоурума</span></div>
+        </div>
+        <div class="bds__opt" style="--i:2">
+          <div class="bds__lbl">Категория</div>
+          <div class="seg" role="group" aria-label="Категория" data-key="cat"><span class="seg__ind"></span><button type="button" data-v="all" aria-pressed="true">Все</button><button type="button" data-v="bed" aria-pressed="false">Кровати</button><button type="button" data-v="sofa" aria-pressed="false">Диваны</button><button type="button" data-v="seat" aria-pressed="false">Кресла</button></div>
+        </div>
+        <div class="bds__acts" style="--i:4">
+          <a class="cta" href="#outlet" data-splash data-t="Подробнее" data-s1="о модели Образец: кровать" data-s2="размеры и ткани"></a>
+          <button class="ib ib--fav" type="button" aria-label="В избранное" aria-pressed="false" data-ico="heart"></button>
+        </div>
+      </div>
+    </div>
+    <div class="bds__railhead">
+      <span class="bds__rt">Другие модели</span>
+      <div class="nv__arrs">
+        <button class="nv__arr nv__arr--p js-bp" type="button" aria-label="Листать назад"><svg viewBox="0 0 22 12"><path d="M21 6H2M7 1.5 2 6l5 4.5"/></svg></button>
+        <button class="nv__arr nv__arr--n js-bn" type="button" aria-label="Листать вперёд"><svg viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
+      </div>
+    </div>
+    <div class="bds__rail js-reveal js-brail" aria-label="Outlet, листайте вбок"></div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos"></span></div>
+  </section>
+  <section class="bds wrap" id="sets" data-cat="sets" aria-labelledby="sets-title">
+    <div class="bds__head">
+      <div class="bds__hl">
+        <h2 class="nv__t js-reveal" id="sets-title">Готовые решения<i class="nv__drip" style="--x:12%;--h:0.36em;--d:0.15s"><i></i></i><i class="nv__drip" style="--x:44%;--h:0.2em;--d:0.3s"></i><i class="nv__drip" style="--x:80%;--h:0.3em;--d:0.2s"><i></i></i></h2>
+      </div>
+      <a class="draft" href="#sets"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Все решения<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
+    </div>
+    <div class="bds__main">
+      <div class="bds__media js-reveal" role="img" aria-label="Место для фото: готовые решения">
+        <div class="ph">
+          <svg class="bed js-draw" viewBox="20 30 440 290" aria-hidden="true"></svg>
+          <span class="ph__dim js-dim"><b class="js-dim-t">фото 1600 × 1200</b></span>
+          <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+        </div>
+        <span class="bds__tag"><b class="js-m-name">Гостиная</b>фото 1600 × 1200</span>
+        <span class="bds__num"><b class="js-m-num">01</b> / <span class="js-m-total">04</span></span>
+        <span class="bds__badge js-badge"></span>
+        <span class="bds__wipe"></span>
+      </div>
+      <div class="bds__info js-reveal">
+        <p class="bds__k" style="--i:0">Выбранный товар</p>
+        <div class="bds__title" style="--i:1">
+          <h3 class="bds__name js-name">Гостиная</h3>
+          <div class="bds__row"><span class="bds__price js-price">цена уточняется</span><span class="bds__desc js-desc">Диван, журнальный стол, торшер</span></div>
+        </div>
+        <div class="bds__opt" style="--i:2">
+          <div class="bds__lbl">Состав</div>
+          <div class="seg" role="group" aria-label="Состав" data-key="full"><span class="seg__ind"></span><button type="button" data-v="0" aria-pressed="true">Базовый</button><button type="button" data-v="1" aria-pressed="false">Расширенный</button></div>
+        </div>
+        <div class="bds__opt fsel" style="--i:3">
+          <div class="bds__lbl">Цвет обивки</div>
+          <button class="fsel__btn" type="button" aria-expanded="false"><span class="fsel__sw" style="--c:#EFE7D3"></span><span class="fsel__n"><small class="js-f-code">Romantica</small><span class="js-f-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
+          <div class="fsel__list js-fabrics"></div>
+        </div>
+        <div class="bds__acts" style="--i:4">
+          <a class="cta" href="#sets" data-splash data-t="Подробнее" data-s1="о модели Гостиная" data-s2="размеры и ткани"></a>
+          <button class="ib ib--fav" type="button" aria-label="В избранное" aria-pressed="false" data-ico="heart"></button>
+        </div>
+      </div>
+    </div>
+    <div class="bds__railhead">
+      <span class="bds__rt">Другие модели</span>
+      <div class="nv__arrs">
+        <button class="nv__arr nv__arr--p js-bp" type="button" aria-label="Листать назад"><svg viewBox="0 0 22 12"><path d="M21 6H2M7 1.5 2 6l5 4.5"/></svg></button>
+        <button class="nv__arr nv__arr--n js-bn" type="button" aria-label="Листать вперёд"><svg viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
+      </div>
+    </div>
+    <div class="bds__rail js-reveal js-brail" aria-label="Готовые решения, листайте вбок"></div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos"></span></div>
+  </section>
+  <section class="bds wrap bds--alt" id="poufs" data-cat="poufs" aria-labelledby="poufs-title">
+    <div class="bds__head">
+      <div class="bds__hl">
+        <h2 class="nv__t js-reveal" id="poufs-title">Пуфы и банкетки<i class="nv__drip" style="--x:9%;--h:0.26em;--d:0.1s"><i></i></i><i class="nv__drip" style="--x:40%;--h:0.34em;--d:0.25s"></i><i class="nv__drip" style="--x:84%;--h:0.2em;--d:0.15s"><i></i></i></h2>
+        <p class="bds__sub">Место безупречного отдыха</p>
+      </div>
+      <a class="draft" href="#poufs"><i class="draft__l draft__l--t"></i><i class="draft__l draft__l--b"></i><i class="draft__l draft__l--l"></i><i class="draft__l draft__l--r"></i>Все пуфы и банкетки<svg class="draft__arr" viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></a>
+    </div>
+    <div class="bds__main">
+      <div class="bds__media js-reveal" role="img" aria-label="Место для фото: пуфы и банкетки">
+        <div class="ph">
+          <svg class="bed js-draw" viewBox="20 30 440 290" aria-hidden="true"></svg>
+          <span class="ph__dim js-dim"><b class="js-dim-t">фото 1600 × 1200</b></span>
+          <i class="cm"></i><i class="cm"></i><i class="cm"></i><i class="cm"></i>
+        </div>
+        <span class="bds__tag"><b class="js-m-name">Люриэль</b>фото 1600 × 1200</span>
+        <span class="bds__num"><b class="js-m-num">01</b> / <span class="js-m-total">05</span></span>
+        <span class="bds__badge js-badge"></span>
+        <span class="bds__wipe"></span>
+      </div>
+      <div class="bds__info js-reveal">
+        <p class="bds__k" style="--i:0">Выбранный товар</p>
+        <div class="bds__title" style="--i:1">
+          <h3 class="bds__name js-name">Люриэль</h3>
+          <div class="bds__row"><span class="bds__price js-price"><small>от</small> 61 610 ₽</span><span class="bds__desc js-desc">Пуф Люриэль</span></div>
+        </div>
+        <div class="bds__opt" style="--i:2">
+          <div class="bds__lbl">Размер</div>
+          <div class="seg" role="group" aria-label="Размер" data-key="s"><span class="seg__ind"></span><button type="button" data-v="0.8" aria-pressed="false">S</button><button type="button" data-v="1" aria-pressed="true">M</button><button type="button" data-v="1.2" aria-pressed="false">L</button></div>
+        </div>
+        <div class="bds__opt fsel" style="--i:3">
+          <div class="bds__lbl">Цвет обивки</div>
+          <button class="fsel__btn" type="button" aria-expanded="false"><span class="fsel__sw" style="--c:#EFE7D3"></span><span class="fsel__n"><small class="js-f-code">Romantica</small><span class="js-f-name">Romantica 01 Лепесток жасмина</span></span><svg viewBox="0 0 10 16"><path d="M2 2l6 6-6 6"/></svg></button>
+          <div class="fsel__list js-fabrics"></div>
+        </div>
+        <div class="bds__acts" style="--i:4">
+          <a class="cta" href="#poufs" data-splash data-t="Подробнее" data-s1="о модели Люриэль" data-s2="размеры и ткани"></a>
+          <button class="ib ib--fav" type="button" aria-label="В избранное" aria-pressed="false" data-ico="heart"></button>
+        </div>
+      </div>
+    </div>
+    <div class="bds__railhead">
+      <span class="bds__rt">Другие модели</span>
+      <div class="nv__arrs">
+        <button class="nv__arr nv__arr--p js-bp" type="button" aria-label="Листать назад"><svg viewBox="0 0 22 12"><path d="M21 6H2M7 1.5 2 6l5 4.5"/></svg></button>
+        <button class="nv__arr nv__arr--n js-bn" type="button" aria-label="Листать вперёд"><svg viewBox="0 0 22 12"><path d="M1 6h19M15 1.5 20 6l-5 4.5"/></svg></button>
+      </div>
+    </div>
+    <div class="bds__rail js-reveal js-brail" aria-label="Пуфы и банкетки, листайте вбок"></div>
+    <div class="nv__bar" aria-hidden="true"><span class="nv__rule"></span><span class="nv__fill js-bfill"></span><span class="nv__pos js-bpos"></span></div>
   </section>
 </main>
 
@@ -1956,21 +2240,8 @@ html.splash-on{overflow:hidden}
 
 <script>
 (function(){
-  var root = document.getElementById('beds');
-  if (!root) return;
   var still = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var $ = function(q){ return root.querySelector(q); };
-  var BEDS = [
-    {name: 'Блан', desc: 'Кровать Blan', price: '117 369 ₽', head: 'blan'},
-    {name: 'Изи 2.0', desc: 'Кровать Изи 2.0', price: '<small>от</small> 161 094 ₽', head: 'wing'},
-    {name: 'Изи', desc: 'Кровать Изи', price: '<small>от</small> 148 725 ₽', head: 'wing', legs: true},
-    {name: 'Мон', desc: 'Кровать Мон', price: '<small>от</small> 114 096 ₽', head: 'tall'},
-    {name: 'Лиз', desc: 'Кровать Лиз', price: '<small>от</small> 116 401 ₽', head: 'low'},
-    {name: 'Скоро в каталоге', desc: 'Арочное изголовье', price: 'цена уточняется', head: 'arch'},
-    {name: 'Скоро в каталоге', desc: 'Изголовье с каналами', price: 'цена уточняется', head: 'tuft'},
-    {name: 'Скоро в каталоге', desc: 'Каретная стяжка', price: 'цена уточняется', head: 'capi', legs: true},
-    {name: 'Скоро в каталоге', desc: 'Изголовье из реек', price: 'цена уточняется', head: 'slat'}
-  ];
+  var CATS = [{"id": "beds", "title": "Кровати", "sub": "Пространство для идеального сна и гармонии", "all": "Все кровати", "kind": "bed", "fabric": true, "options": [{"key": "w", "label": "Габариты", "hint": "ширина × длина, см", "dim": "{v}0 × 2000 мм", "values": [[140, "140×200"], [160, "160×200"], [180, "180×200"], [200, "200×200"]]}, {"key": "lift", "label": "Механизм", "badge": "с подъёмным механизмом", "values": [[0, "Без механизма"], [1, "Подъёмный механизм"]]}], "items": [{"name": "Блан", "desc": "Кровать Blan", "price": "117 369 ₽", "v": "blan"}, {"name": "Изи 2.0", "desc": "Кровать Изи 2.0", "price": "<small>от</small> 161 094 ₽", "v": "wing"}, {"name": "Изи", "desc": "Кровать Изи", "price": "<small>от</small> 148 725 ₽", "v": "wing", "legs": 1}, {"name": "Мон", "desc": "Кровать Мон", "price": "<small>от</small> 114 096 ₽", "v": "tall"}, {"name": "Лиз", "desc": "Кровать Лиз", "price": "<small>от</small> 116 401 ₽", "v": "low"}, {"name": "Арочное изголовье", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "arch"}, {"name": "Изголовье с каналами", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "tuft"}, {"name": "Каретная стяжка", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "capi", "legs": 1}, {"name": "Изголовье из реек", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "slat"}]}, {"id": "sofas", "title": "Диваны", "sub": "Центр притяжения вашего дома", "all": "Все диваны", "kind": "sofa", "fabric": true, "options": [{"key": "w", "label": "Длина", "hint": "см", "dim": "{v}0 мм", "values": [[200, "200"], [240, "240"], [280, "280"], [320, "320"]]}, {"key": "corner", "label": "Конфигурация", "badge": "угловая конфигурация", "values": [[0, "Прямой"], [1, "Угловой"]]}], "items": [{"name": "Элион", "desc": "Диван Элион модульный уютный", "price": "<small>от</small> 190 893 ₽", "v": "modular"}, {"name": "Бренден", "desc": "Диван Бренден", "price": "<small>от</small> 355 631 ₽", "v": "loose"}, {"name": "Диван на ножках", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "legs"}, {"name": "Капитоне", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "capi"}, {"name": "Модульный низкий", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "low"}, {"name": "Диван с подушками", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "loose", "legs": 1}]}, {"id": "chairs", "title": "Кресла и стулья", "sub": "Личный остров спокойствия", "all": "Все кресла и стулья", "kind": "seat", "fabric": true, "options": [{"key": "legs", "label": "Ножки", "values": [[0, "Дерево"], [1, "Металл"]]}], "items": [{"name": "Люриэль", "desc": "Кресло Люриэль", "price": "<small>от</small> 116 725 ₽", "v": "round"}, {"name": "Кресло с ушами", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "wing"}, {"name": "Стул мягкий", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "chair"}, {"name": "Барный стул", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "bar"}, {"name": "Кресло-ракушка", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "shell"}, {"name": "Полукресло", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "half"}]}, {"id": "outlet", "title": "Outlet", "sub": "Образцы из шоурума и последние экземпляры по сниженным ценам", "all": "Весь Outlet", "kind": "mixed", "fabric": false, "tag": "Outlet", "options": [{"key": "cat", "label": "Категория", "filter": true, "values": [["all", "Все"], ["bed", "Кровати"], ["sofa", "Диваны"], ["seat", "Кресла"]]}], "items": [{"name": "Образец: кровать", "desc": "Образец из шоурума", "price": "цена уточняется", "k": "bed", "v": "tall", "c": "#CFCBC4"}, {"name": "Образец: диван", "desc": "Образец из шоурума", "price": "цена уточняется", "k": "sofa", "v": "modular", "c": "#8A8F6E"}, {"name": "Образец: кресло", "desc": "Образец из шоурума", "price": "цена уточняется", "k": "seat", "v": "round", "c": "#B8664E"}, {"name": "Последний экземпляр", "desc": "Диван, 1 шт.", "price": "цена уточняется", "k": "sofa", "v": "legs", "c": "#5E5B58"}, {"name": "Образец: кровать", "desc": "Образец из шоурума", "price": "цена уточняется", "k": "bed", "v": "blan", "c": "#EFE7D3"}, {"name": "Последний экземпляр", "desc": "Стул, 1 шт.", "price": "цена уточняется", "k": "seat", "v": "chair", "c": "#CFCBC4"}]}, {"id": "sets", "title": "Готовые решения", "sub": "", "all": "Все решения", "kind": "set", "fabric": true, "options": [{"key": "full", "label": "Состав", "badge": "расширенный состав", "values": [[0, "Базовый"], [1, "Расширенный"]]}], "items": [{"name": "Гостиная", "desc": "Диван, журнальный стол, торшер", "price": "цена уточняется", "v": "living"}, {"name": "Спальня", "desc": "Кровать и прикроватные тумбы", "price": "цена уточняется", "v": "bedroom"}, {"name": "Лаунж-зона", "desc": "Два кресла и столик", "price": "цена уточняется", "v": "lounge"}, {"name": "Столовая", "desc": "Обеденный стол и стулья", "price": "цена уточняется", "v": "dining"}]}, {"id": "poufs", "title": "Пуфы и банкетки", "sub": "Место безупречного отдыха", "all": "Все пуфы и банкетки", "kind": "pouf", "fabric": true, "options": [{"key": "s", "label": "Размер", "values": [[0.8, "S"], [1, "M"], [1.2, "L"]], "start": 1}], "items": [{"name": "Люриэль", "desc": "Пуф Люриэль", "price": "<small>от</small> 61 610 ₽", "v": "round"}, {"name": "Банкетка", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "bench"}, {"name": "Пуф-куб", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "cube"}, {"name": "Банкетка с хранением", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "storage"}, {"name": "Пуф на ножках", "desc": "Новая модель · скоро в каталоге", "price": "цена уточняется", "v": "round", "legs": 1}]}];
   var FABRICS = [
     {code: 'Romantica', name: 'Romantica 01 Лепесток жасмина', short: 'Лепесток жасмина', c: '#EFE7D3'},
     {code: 'Ткань', name: 'Туман', short: 'Туман', c: '#CFCBC4'},
@@ -1978,144 +2249,265 @@ html.splash-on{overflow:hidden}
     {code: 'Ткань', name: 'Терракота', short: 'Терракота', c: '#B8664E'},
     {code: 'Ткань', name: 'Графит', short: 'Графит', c: '#5E5B58'}
   ];
-  var CX = 240, GROUND = 300;
-  function rr(x, y, w, h, r){ r = Math.min(r, w / 2, h / 2); return 'M' + (x + r) + ' ' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ' ' + y + ' ' + (x + w) + ' ' + (y + r) + 'V' + (y + h - r) + 'Q' + (x + w) + ' ' + (y + h) + ' ' + (x + w - r) + ' ' + (y + h) + 'H' + (x + r) + 'Q' + x + ' ' + (y + h) + ' ' + x + ' ' + (y + h - r) + 'V' + (y + r) + 'Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + 'Z'; }
-  function geo(bed, w, lift){
-    var x0 = CX - w / 2, legs = !!bed.legs, bt = legs ? 214 : 222, bb = legs ? 272 : GROUND - 2, g = {}, hh, i, n;
-    switch (bed.head) {
-      case 'blan': var half = w / 2 - 3; g.head = rr(x0 + 2, 62, half, bt - 52, 26) + rr(CX + 1, 62, half, bt - 52, 26); break;
-      case 'wing': g.head = rr(x0 + 8, 86, w - 16, bt - 76, 12) + 'M' + (x0 - 6) + ' 104L' + (x0 + 10) + ' 86V' + (bt + 4) + 'H' + (x0 - 6) + 'Z' + 'M' + (x0 + w + 6) + ' 104L' + (x0 + w - 10) + ' 86V' + (bt + 4) + 'H' + (x0 + w + 6) + 'Z'; break;
-      case 'tall': g.head = rr(x0 - 4, 70, w + 8, bt - 60, 8); break;
-      case 'low': g.head = rr(x0 + 10, 130, w - 20, bt - 120, 8); break;
-      case 'arch': g.head = 'M' + (x0 + 6) + ' ' + (bt + 10) + 'V120Q' + (x0 + 6) + ' 56 ' + CX + ' 56Q' + (x0 + w - 6) + ' 56 ' + (x0 + w - 6) + ' 120V' + (bt + 10) + 'Z'; break;
-      case 'tuft': g.head = rr(x0 + 4, 74, w - 8, bt - 64, 16); n = Math.round(w / 38); for (i = 1; i < n; i++) g.head += 'M' + (x0 + 4 + (w - 8) * i / n).toFixed(1) + ' 80V' + bt; break;
-      case 'capi': g.head = rr(x0 + 4, 66, w - 8, bt - 56, 10); for (var r = 0; r < 3; r++) { n = Math.floor((w - 40) / 34); for (i = 0; i <= n; i++) { var bx = x0 + 22 + i * (w - 44) / n + (r % 2 ? 17 : 0); if (bx > x0 + w - 20) continue; g.head += 'M' + (bx - 2).toFixed(1) + ' ' + (92 + r * 32) + 'a2 2 0 1 0 4 0a2 2 0 1 0-4 0'; } } break;
-      default: n = Math.max(4, Math.round(w / 30)); g.head = ''; var sw = (w - 8) / n; for (i = 0; i < n; i++) g.head += rr(x0 + 4 + i * sw + 2, 72, sw - 4, bt - 62, 4);
-    }
-    g.base = rr(x0, bt, w, bb - bt, 12);
-    g.legs = legs ? 'M' + (x0 + 14) + ' ' + bb + 'v' + (GROUND - bb) + 'M' + (x0 + w - 14) + ' ' + bb + 'v' + (GROUND - bb) : 'M' + (x0 + 16) + ' ' + GROUND + 'h6M' + (x0 + w - 22) + ' ' + GROUND + 'h6';
-    var mt = bt - 30 - 64 * lift;
-    g.sheet = rr(x0 + 6, mt, w - 12, 34, 8);
-    g.cover = 'M' + (x0 + 4) + ' ' + (mt + 10) + 'Q' + CX + ' ' + (mt - 2) + ' ' + (x0 + w - 4) + ' ' + (mt + 10) + 'V' + (mt + 40) + 'H' + (x0 + 4) + 'Z';
-    g.throw = 'M' + (x0 - 2) + ' ' + (mt + 16) + 'Q' + CX + ' ' + (mt + 4) + ' ' + (x0 + w + 2) + ' ' + (mt + 16) + 'L' + (x0 + w + 6) + ' ' + (mt + 34) + 'Q' + CX + ' ' + (mt + 22) + ' ' + (x0 - 6) + ' ' + (mt + 34) + 'Z';
-    var pw = Math.min(110, w / 2 - 22), py = mt - 18;
-    g.pil = rr(CX - pw - 8, py, pw, 26, 13) + rr(CX + 8, py, pw, 26, 13);
-    g.box = lift > .02 ? rr(x0 + 12, bt + 2, w - 24, 26 * lift + 4, 4) : '';
-    g.strut = lift > .02 ? 'M' + (x0 + 24) + ' ' + (bt + 18) + 'L' + (x0 + 40) + ' ' + (mt + 34) + 'M' + (x0 + w - 24) + ' ' + (bt + 18) + 'L' + (x0 + w - 40) + ' ' + (mt + 34) : '';
-    return g;
-  }
-  var ORDER = ['head', 'base', 'box', 'strut', 'sheet', 'cover', 'throw', 'pil', 'legs'];
-  var CLS = {head: 'fab', base: 'fab', box: 'box', strut: 'strut', sheet: 'sheet', cover: 'cover', throw: 'throw', pil: 'pil', legs: 'ln'};
-  function svgFor(g){ return ORDER.map(function(k){ return '<path class="' + CLS[k] + ' p-' + k + '" d="' + (g[k] || '') + '"/>'; }).join(''); }
-  function pxw(cm){ return 1.55 * cm; }
+  var WOOD = '#9A7350', METAL = '#333333', CX = 240, G = 300;
+  var DEF = {bed: {w: 160, lift: 0}, sofa: {w: 240, corner: 0}, seat: {legs: 0}, pouf: {s: 1}, set: {full: 0}};
 
-  var state = {bed: 0, w: 140, lift: 0, fab: 0}, cur = {w: 140, lift: 0}, anim = 0;
-  var bedSvg = $('.js-bed'), media = $('.bds__media');
-  bedSvg.innerHTML = svgFor(geo(BEDS[0], pxw(140), 0));
-  var P = {}; ORDER.forEach(function(k){ P[k] = bedSvg.querySelector('.p-' + k); });
-  function paint(){
-    var g = geo(BEDS[state.bed], pxw(cur.w), cur.lift);
-    ORDER.forEach(function(k){ P[k].setAttribute('d', g[k] || ''); });
-    var f = FABRICS[state.fab].c; P.head.style.fill = f; P.base.style.fill = f;
+  // ── рисунки-заглушки ──
+  function rr(x, y, w, h, r){ r = Math.max(0, Math.min(r, w / 2, h / 2)); return 'M' + (x + r) + ' ' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ' ' + y + ' ' + (x + w) + ' ' + (y + r) + 'V' + (y + h - r) + 'Q' + (x + w) + ' ' + (y + h) + ' ' + (x + w - r) + ' ' + (y + h) + 'H' + (x + r) + 'Q' + x + ' ' + (y + h) + ' ' + x + ' ' + (y + h - r) + 'V' + (y + r) + 'Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + 'Z'; }
+  function P(c, d, fill, extra){ return d ? '<path class="' + c + '" d="' + d + '"' + (fill ? ' style="fill:' + fill + '"' : '') + (extra || '') + '/>' : ''; }
+  function L(d, col, w){ return d ? '<path class="leg" d="' + d + '" style="stroke:' + col + (w ? ';stroke-width:' + w : '') + '"/>' : ''; }
+  function dots(pts){ return pts.map(function(p){ return 'M' + (p[0] - 2) + ' ' + p[1] + 'a2 2 0 1 0 4 0a2 2 0 1 0-4 0'; }).join(''); }
+
+  function bed(it, o, f){
+    var w = 1.55 * o.w, x0 = CX - w / 2, legs = !!it.legs, bt = legs ? 214 : 222, bb = legs ? 272 : G - 2, i, n, head = '';
+    switch (it.v) {
+      case 'blan': var half = w / 2 - 3; head = rr(x0 + 2, 62, half, bt - 52, 26) + rr(CX + 1, 62, half, bt - 52, 26); break;
+      case 'wing': head = rr(x0 + 8, 86, w - 16, bt - 76, 12) + 'M' + (x0 - 6) + ' 104L' + (x0 + 10) + ' 86V' + (bt + 4) + 'H' + (x0 - 6) + 'Z' + 'M' + (x0 + w + 6) + ' 104L' + (x0 + w - 10) + ' 86V' + (bt + 4) + 'H' + (x0 + w + 6) + 'Z'; break;
+      case 'tall': head = rr(x0 - 4, 70, w + 8, bt - 60, 8); break;
+      case 'low': head = rr(x0 + 10, 130, w - 20, bt - 120, 8); break;
+      case 'arch': head = 'M' + (x0 + 6) + ' ' + (bt + 10) + 'V120Q' + (x0 + 6) + ' 56 ' + CX + ' 56Q' + (x0 + w - 6) + ' 56 ' + (x0 + w - 6) + ' 120V' + (bt + 10) + 'Z'; break;
+      case 'tuft': head = rr(x0 + 4, 74, w - 8, bt - 64, 16); n = Math.round(w / 38); for (i = 1; i < n; i++) head += 'M' + (x0 + 4 + (w - 8) * i / n).toFixed(1) + ' 80V' + bt; break;
+      case 'capi': head = rr(x0 + 4, 66, w - 8, bt - 56, 10); var pts = []; for (var r = 0; r < 3; r++) { n = Math.floor((w - 40) / 34); for (i = 0; i <= n; i++) { var bx = x0 + 22 + i * (w - 44) / n + (r % 2 ? 17 : 0); if (bx < x0 + w - 20) pts.push([bx, 92 + r * 32]); } } head += dots(pts); break;
+      default: n = Math.max(4, Math.round(w / 30)); var sw = (w - 8) / n; for (i = 0; i < n; i++) head += rr(x0 + 4 + i * sw + 2, 72, sw - 4, bt - 62, 4);
+    }
+    var mt = bt - 30 - 64 * o.lift, pw = Math.min(110, w / 2 - 22), py = mt - 18;
+    return P('fab', head, f) + P('fab', rr(x0, bt, w, bb - bt, 12), f) +
+      (o.lift > .02 ? P('box', rr(x0 + 12, bt + 2, w - 24, 26 * o.lift + 4, 4)) + '<path class="strut" d="M' + (x0 + 24) + ' ' + (bt + 18) + 'L' + (x0 + 40) + ' ' + (mt + 34) + 'M' + (x0 + w - 24) + ' ' + (bt + 18) + 'L' + (x0 + w - 40) + ' ' + (mt + 34) + '"/>' : '') +
+      P('sheet', rr(x0 + 6, mt, w - 12, 34, 8)) +
+      P('cover', 'M' + (x0 + 4) + ' ' + (mt + 10) + 'Q' + CX + ' ' + (mt - 2) + ' ' + (x0 + w - 4) + ' ' + (mt + 10) + 'V' + (mt + 40) + 'H' + (x0 + 4) + 'Z') +
+      P('throw', 'M' + (x0 - 2) + ' ' + (mt + 16) + 'Q' + CX + ' ' + (mt + 4) + ' ' + (x0 + w + 2) + ' ' + (mt + 16) + 'L' + (x0 + w + 6) + ' ' + (mt + 34) + 'Q' + CX + ' ' + (mt + 22) + ' ' + (x0 - 6) + ' ' + (mt + 34) + 'Z') +
+      P('pil', rr(CX - pw - 8, py, pw, 26, 13) + rr(CX + 8, py, pw, 26, 13)) +
+      P('ln', legs ? 'M' + (x0 + 14) + ' ' + bb + 'V' + G + 'M' + (x0 + w - 14) + ' ' + bb + 'V' + G : 'M' + (x0 + 16) + ' ' + G + 'h6M' + (x0 + w - 22) + ' ' + G + 'h6');
   }
-  function tween(){
-    cancelAnimationFrame(anim);
-    if (still.matches) { cur.w = state.w; cur.lift = state.lift; paint(); return; }
-    var a = {w: cur.w, lift: cur.lift}, t0 = performance.now(), dur = 700;
-    (function step(now){
-      var k = Math.min(1, (now - t0) / dur);
-      var e = 1 - Math.pow(1 - k, 3), eb = 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2);
-      cur.w = a.w + (state.w - a.w) * e;
-      cur.lift = a.lift + (state.lift - a.lift) * (state.lift > a.lift ? eb : e);
-      paint();
-      if (k < 1) anim = requestAnimationFrame(step);
-    })(t0);
+
+  function sofa(it, o, f){
+    var w = 1.15 * o.w, ext = 86 * o.corner, tw = w + ext, x0 = CX - tw / 2, v = it.v;
+    var arm = v === 'loose' ? 26 : v === 'low' ? 30 : 36, legH = (v === 'legs' || it.legs) ? 28 : 8, bot = G - legH;
+    var backTop = v === 'low' ? 178 : 146, out = '';
+    var bx = x0 + arm - 4, bw = w - 2 * arm + 8;
+    out += P('fab', rr(bx, backTop, bw, bot - 50 - backTop + 18, 14), f);
+    if (v === 'capi') { var pts = [], n = Math.max(3, Math.round(bw / 40)); for (var r = 0; r < 2; r++) for (var i = 1; i < n; i++) pts.push([bx + i * bw / n + (r ? bw / n / 2 : 0), backTop + 22 + r * 26]); out += P('dot', dots(pts.filter(function(p){ return p[0] < bx + bw - 10; }))); }
+    var sx = x0 + arm, sw = tw - 2 * arm, ns = Math.max(2, Math.round(sw / 96)), cw = sw / ns;
+    if (v === 'loose') for (i = 0; i < Math.max(2, Math.round((w - 2 * arm) / 96)); i++) { var bcw = (w - 2 * arm) / Math.max(2, Math.round((w - 2 * arm) / 96)); out += P('fab', rr(sx + i * bcw + 4, backTop + 10, bcw - 8, 58, 22), f); }
+    out += P('fab', rr(x0 + 4, bot - 34, tw - 8, 34, 8), f);
+    for (i = 0; i < ns; i++) out += P('fab', rr(sx + i * cw + 2, bot - 66, cw - 4, 36, 10), f);
+    var at = v === 'loose' ? bot - 78 : v === 'low' ? bot - 72 : bot - 92;
+    out += P('fab', rr(x0, at, arm, bot - at, 12), f) + P('fab', rr(x0 + tw - arm, at, arm, bot - at, 12), f);
+    out += legH > 10 ? L('M' + (x0 + 16) + ' ' + bot + 'L' + (x0 + 12) + ' ' + G + 'M' + (x0 + tw - 16) + ' ' + bot + 'L' + (x0 + tw - 12) + ' ' + G, WOOD) : P('ln', 'M' + (x0 + 14) + ' ' + G + 'h8M' + (x0 + tw - 22) + ' ' + G + 'h8');
+    return out;
   }
-  // переключатели с бегущим ползунком
-  function seg(el, onPick){
-    var ind = el.querySelector('.seg__ind'), btns = el.querySelectorAll('button');
-    function place(){ var b = el.querySelector('[aria-pressed="true"]'); ind.style.setProperty('--x', b.offsetLeft + 'px'); ind.style.setProperty('--w', b.offsetWidth + 'px'); }
-    btns.forEach(function(b){ b.addEventListener('click', function(){ btns.forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); }); place(); onPick(+b.dataset.v); }); });
-    window.addEventListener('resize', place);
-    if (document.fonts) document.fonts.ready.then(place);
-    place();
+
+  function seat(it, o, f){
+    var lc = o.legs ? METAL : WOOD, lw = o.legs ? 3 : 4.5;
+    switch (it.v) {
+      case 'round': return P('fab', 'M150 262V188Q150 118 240 118Q330 118 330 188V262Z', f) + P('fab', rr(166, 212, 148, 40, 16), f) + P('fab', rr(156, 244, 168, 26, 13), f) + L('M176 270L168 300M304 270L312 300M224 270V296M256 270V296', lc, lw);
+      case 'wing': return P('fab', rr(178, 104, 124, 150, 14), f) + P('fab', 'M166 112L190 104V232H166Z', f) + P('fab', 'M314 112L290 104V232H314Z', f) + P('fab', rr(152, 196, 32, 72, 10), f) + P('fab', rr(296, 196, 32, 72, 10), f) + P('fab', rr(182, 214, 116, 36, 12), f) + P('fab', rr(160, 246, 160, 22, 8), f) + L('M172 268L166 300M308 268L314 300', lc, lw);
+      case 'chair': return P('fab', rr(196, 118, 88, 96, 14), f) + P('fab', rr(184, 212, 112, 24, 10), f) + L('M192 236L186 300M288 236L294 300M206 236L208 292M274 236L272 292', lc, lw);
+      case 'bar': return P('fab', rr(206, 120, 68, 54, 12), f) + P('fab', rr(194, 172, 92, 22, 9), f) + L('M204 194L190 300M276 194L290 300M214 194L210 292M266 194L270 292', lc, lw) + L('M197 256H283', lc, 3);
+      case 'shell': return P('fab', 'M156 236Q148 120 240 112Q332 120 324 236Z', f) + P('fab', 'M190 150V236M215 128V236M240 122V236M265 128V236M290 150V236'.replace(/V236/g, 'V230'), null) + P('fab', rr(170, 222, 140, 34, 14), f) + L('M240 256V292M206 300H274', lc, lw);
+      default: return P('fab', 'M186 222V160Q186 126 240 126Q294 126 294 160V222Z', f) + P('fab', rr(170, 196, 140, 30, 12), f) + P('fab', rr(178, 220, 124, 22, 10), f) + L('M188 242L182 300M292 242L298 300', lc, lw);
+    }
   }
-  seg($('.js-size'), function(v){
-    state.w = v; tween();
-    $('.js-dim-t').textContent = v * 10 + ' × 2000 мм';
-    var d = $('.js-dim'); var inset = 16 + (200 - v) / 60 * 7; d.style.left = inset + '%'; d.style.right = inset + '%';
-  });
-  seg($('.js-mech'), function(v){ state.lift = v; tween(); media.classList.toggle('has-lift', !!v); });
-  // ткани
-  var fsel = $('.fsel'), fbtn = $('.fsel__btn'), fl = $('.js-fabrics');
-  fl.innerHTML = FABRICS.map(function(f, i){ return '<button class="fsel__o" type="button" style="--j:' + i + '" aria-pressed="' + (i === 0) + '"><i style="--c:' + f.c + '"></i>' + f.short + '</button>'; }).join('');
-  fbtn.addEventListener('click', function(){ var o = !fsel.classList.contains('is-open'); fsel.classList.toggle('is-open', o); fbtn.setAttribute('aria-expanded', String(o)); });
-  fl.querySelectorAll('.fsel__o').forEach(function(o, i){
-    o.addEventListener('click', function(){
-      state.fab = i;
-      fl.querySelectorAll('.fsel__o').forEach(function(x, j){ x.setAttribute('aria-pressed', String(j === i)); });
-      $('.fsel__sw').style.setProperty('--c', FABRICS[i].c);
-      $('.js-f-code').textContent = FABRICS[i].code; $('.js-f-name').textContent = FABRICS[i].name;
-      paint();
-      railSvgs.forEach(function(sv){ sv.querySelectorAll('.fab').forEach(function(p){ p.style.fill = FABRICS[i].c; }); });
+
+  function pouf(it, o, f){
+    var s = o.s, legs = !!it.legs, lift = legs ? 26 : 0;
+    switch (it.v) {
+      case 'round': var rx = 78 * s, ry = 16 * s, h = 64 * s, yb = G - lift - ry, yt = yb - h;
+        return P('fab', 'M' + (CX - rx) + ' ' + yt + 'A' + rx + ' ' + ry + ' 0 0 0 ' + (CX + rx) + ' ' + yt + 'V' + yb + 'A' + rx + ' ' + ry + ' 0 0 1 ' + (CX - rx) + ' ' + yb + 'Z', f) +
+          P('top', 'M' + (CX - rx) + ' ' + yt + 'A' + rx + ' ' + ry + ' 0 0 1 ' + (CX + rx) + ' ' + yt + 'A' + rx + ' ' + ry + ' 0 0 1 ' + (CX - rx) + ' ' + yt + 'Z', f) +
+          (legs ? L('M' + (CX - rx * .6) + ' ' + (yb + ry * .6) + 'L' + (CX - rx * .7) + ' ' + G + 'M' + (CX + rx * .6) + ' ' + (yb + ry * .6) + 'L' + (CX + rx * .7) + ' ' + G + 'M' + CX + ' ' + (yb + ry) + 'V' + (G - 2), WOOD) : '');
+      case 'bench': var w = 270 * s, x = CX - w / 2;
+        return P('fab', rr(x, 214, w, 38, 14), f) + P('wood', rr(x + 8, 250, w - 16, 10, 3), WOOD) + L('M' + (x + 18) + ' 260L' + (x + 12) + ' ' + G + 'M' + (x + w - 18) + ' 260L' + (x + w - 12) + ' ' + G + 'M' + (x + 34) + ' 260L' + (x + 36) + ' ' + (G - 6) + 'M' + (x + w - 34) + ' 260L' + (x + w - 36) + ' ' + (G - 6), WOOD);
+      case 'cube': var a = 128 * s, cx0 = CX - a / 2, ty = G - 8 - a, pts = [];
+        for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) pts.push([cx0 + a * (c + 1) / 4, ty + a * (r + 1) / 4]);
+        return P('fab', rr(cx0, ty, a, a, 16), f) + P('dot', dots(pts)) + P('ln', 'M' + (cx0 + 14) + ' ' + G + 'h10M' + (cx0 + a - 24) + ' ' + G + 'h10');
+      default: var w2 = 260 * s, x2 = CX - w2 / 2;
+        return P('fab', rr(x2, 214, w2, 80, 12), f) + P('ln', 'M' + (x2 + 6) + ' 240H' + (x2 + w2 - 6)) + P('box', rr(CX - 26, 262, 52, 10, 5)) + P('ln', 'M' + (x2 + 14) + ' ' + G + 'h10M' + (x2 + w2 - 24) + ' ' + G + 'h10');
+    }
+  }
+
+  function table(cx, w, top, col){ return P('wood', rr(cx - w / 2, top, w, 10, 3), col) + L('M' + (cx - w / 2 + 12) + ' ' + (top + 10) + 'L' + (cx - w / 2 + 8) + ' ' + G + 'M' + (cx + w / 2 - 12) + ' ' + (top + 10) + 'L' + (cx + w / 2 - 8) + ' ' + G, col, 4); }
+  function lamp(cx, top){ return P('ln', 'M' + cx + ' ' + (top + 34) + 'V' + G + 'M' + (cx - 16) + ' ' + G + 'h32') + P('shade', 'M' + (cx - 26) + ' ' + (top + 36) + 'L' + (cx - 14) + ' ' + top + 'H' + (cx + 14) + 'L' + (cx + 26) + ' ' + (top + 36) + 'Z'); }
+  function pend(cx){ return P('ln', 'M' + cx + ' 30V78') + P('shade', 'M' + (cx - 24) + ' 98Q' + cx + ' 62 ' + (cx + 24) + ' 98Z'); }
+  function nights(cx){ return P('wood', rr(cx - 30, 226, 60, 56, 6), '#EDE6DC') + P('ln', 'M' + (cx - 30) + ' 254H' + (cx + 30) + 'M' + (cx - 6) + ' 240h12M' + (cx - 6) + ' 268h12M' + (cx - 24) + ' 282V' + G + 'M' + (cx + 24) + ' 282V' + G); }
+  function sc(tx, k, svg, op){ return '<g transform="translate(' + tx + ' 0) translate(' + CX + ' ' + G + ') scale(' + k + ') translate(' + (-CX) + ' ' + (-G) + ')"' + (op !== undefined ? ' opacity="' + op.toFixed(2) + '"' : '') + '>' + svg + '</g>'; }
+
+  function set(it, o, f){
+    var full = o.full;
+    switch (it.v) {
+      case 'living': return sc(-30, .66, sofa({v: 'modular'}, {w: 220, corner: 0}, f)) + table(340, 70, 252, WOOD) + sc(180, 1, lamp(CX, 150)) + (full > .01 ? sc(-170, .55, seat({v: 'round'}, {legs: 0}, f), full) : '');
+      case 'bedroom': return sc(0, .66, bed({v: 'blan'}, {w: 160, lift: 0}, f)) + nights(92) + nights(388) + (full > .01 ? '<g opacity="' + full.toFixed(2) + '">' + pend(92) + pend(388) + '</g>' : '');
+      case 'lounge': return sc(-82, .62, seat({v: 'round'}, {legs: 0}, f)) + sc(82, .62, seat({v: 'round'}, {legs: 0}, f)) + P('wood', 'M212 262a28 6 0 1 0 56 0a28 6 0 1 0-56 0Z', WOOD) + L('M240 268V300', WOOD, 4) + (full > .01 ? sc(-170, 1, lamp(CX, 130), full) : '');
+      default: return table(CX, 200, 236, WOOD) + sc(-130, .7, seat({v: 'chair'}, {legs: 0}, f)) + sc(130, .7, seat({v: 'chair'}, {legs: 0}, f)) + (full > .01 ? '<g opacity="' + full.toFixed(2) + '">' + pend(CX) + '</g>' : '');
+    }
+  }
+  var GEN = {bed: bed, sofa: sofa, seat: seat, pouf: pouf, set: set};
+  function drawItem(cat, it, cur, f){
+    var kind = it.k || cat.kind, o = {}, d = DEF[kind], k;
+    for (k in d) o[k] = d[k];
+    if (kind === cat.kind) for (k in cur) if (k in d) o[k] = cur[k];
+    return GEN[kind](it, o, it.c || f);
+  }
+
+  // ── перетаскивание мышью ──
+  function dragScroll(track, step){
+    var down = false, sx = 0, sl = 0, moved = false;
+    track.addEventListener('pointerdown', function(e){ if (e.pointerType !== 'mouse' || e.button !== 0) return; down = true; moved = false; sx = e.clientX; sl = track.scrollLeft; });
+    window.addEventListener('pointermove', function(e){
+      if (!down) return;
+      var dx = e.clientX - sx;
+      if (!moved && Math.abs(dx) > 6) { moved = true; track.classList.add('is-drag'); }
+      if (moved) { e.preventDefault(); track.scrollLeft = sl - dx; }
     });
-  });
+    window.addEventListener('pointerup', function(){
+      if (!down) return;
+      down = false;
+      if (moved) { var st = step(); track.classList.remove('is-drag'); track.scrollTo({left: Math.round(track.scrollLeft / st) * st, behavior: still.matches ? 'auto' : 'smooth'}); }
+    });
+    track.addEventListener('click', function(e){ if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    track.addEventListener('dragstart', function(e){ e.preventDefault(); });
+  }
 
-  // лента моделей
-  var rail = $('.js-brail'), total = BEDS.length;
-  $('.js-m-total').textContent = ('0' + total).slice(-2);
-  rail.innerHTML = BEDS.map(function(b, i){
-    return '<button class="bcd" type="button" style="--k:' + i + '" aria-pressed="' + (i === 0) + '"><span class="bcd__ph"><svg class="bed" viewBox="20 30 440 290" aria-hidden="true">' + svgFor(geo(b, pxw(160), 0)) + '</svg></span><span class="bcd__n">' + (b.name === 'Скоро в каталоге' ? b.desc : b.name) + '</span><span class="bcd__p">' + b.price + '</span></button>';
-  }).join('');
-  var cards = [].slice.call(rail.querySelectorAll('.bcd')), railSvgs = cards.map(function(c){ return c.querySelector('svg'); });
-  railSvgs.forEach(function(sv){ sv.querySelectorAll('.fab').forEach(function(p){ p.style.fill = FABRICS[0].c; }); });
-
-  function setText(el, html){ el.innerHTML = '<span class="roll">' + html + '</span>'; }
-  function select(i){
-    if (i === state.bed || i < 0 || i >= total) return;
-    cards.forEach(function(c, j){ c.setAttribute('aria-pressed', String(j === i)); });
-    var swap = function(){
-      state.bed = i;
-      var b = BEDS[i];
-      setText($('.js-name'), b.name === 'Скоро в каталоге' ? b.desc : b.name);
-      setText($('.js-price'), b.price);
-      setText($('.js-desc'), b.name === 'Скоро в каталоге' ? 'Новая модель, скоро в каталоге' : b.desc);
-      $('.js-m-name').textContent = b.name === 'Скоро в каталоге' ? 'Новая модель' : b.name;
-      $('.js-m-num').textContent = ('0' + (i + 1)).slice(-2);
-      var cs = root.querySelector('.bds__acts .cta small span'); if (cs) cs.textContent = b.name === 'Скоро в каталоге' ? 'о новой модели' : 'о кровати ' + b.name;
-      paint();
-    };
-    var wipe = $('.bds__wipe');
-    if (still.matches || !wipe.animate) { swap(); }
-    else {
-      wipe.animate([{transform: 'translateX(-101%)'}, {transform: 'translateX(0)'}], {duration: 340, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards'}).onfinish = function(){
-        swap();
-        wipe.animate([{transform: 'translateX(0)'}, {transform: 'translateX(101%)'}], {duration: 420, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards'});
-      };
+  // ── один раздел каталога ──
+  function initCat(cat){
+    var root = document.getElementById(cat.id);
+    if (!root) return;
+    var $ = function(q){ return root.querySelector(q); };
+    var draw = $('.js-draw'), media = $('.bds__media'), rail = $('.js-brail');
+    var state = {item: 0, fab: 0, opts: {}}, cur = {}, anim = 0;
+    cat.options.forEach(function(o){ var v = o.values[o.start || 0][0]; state.opts[o.key] = v; if (typeof v === 'number') cur[o.key] = v; });
+    function fabC(){ return FABRICS[state.fab].c; }
+    function paint(){ draw.innerHTML = drawItem(cat, cat.items[state.item], cur, fabC()); }
+    function tween(){
+      cancelAnimationFrame(anim);
+      var from = {}, k, t0 = performance.now(), dur = 700;
+      for (k in cur) from[k] = cur[k];
+      if (still.matches) { for (k in cur) cur[k] = state.opts[k]; paint(); return; }
+      (function step(now){
+        var p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3), eb = 1 + 2.2 * Math.pow(p - 1, 3) + 1.2 * Math.pow(p - 1, 2);
+        for (var key in cur) { var to = state.opts[key]; cur[key] = from[key] + (to - from[key]) * (to > from[key] && (key === 'lift' || key === 'corner') ? eb : e); }
+        paint();
+        if (p < 1) anim = requestAnimationFrame(step);
+      })(t0);
     }
-    cards[i].scrollIntoView({behavior: still.matches ? 'auto' : 'smooth', block: 'nearest', inline: 'nearest'});
-    syncRail();
-  }
-  cards.forEach(function(c, i){ c.addEventListener('click', function(){ select(i); }); });
+    function meta(){
+      var dimOpt = cat.options.filter(function(o){ return o.dim; })[0], dimT = $('.js-dim-t'), dimEl = $('.js-dim');
+      if (dimOpt) {
+        var v = state.opts[dimOpt.key];
+        dimT.textContent = dimOpt.dim.replace('{v}', v);
+        var lo = dimOpt.values[0][0], hi = dimOpt.values[dimOpt.values.length - 1][0], inset = 16 + (hi - v) / (hi - lo) * 10;
+        dimEl.style.left = inset + '%'; dimEl.style.right = inset + '%';
+      }
+      var badge = cat.options.filter(function(o){ return o.badge && state.opts[o.key]; })[0];
+      media.classList.toggle('has-badge', !!badge);
+      if (badge) $('.js-badge').textContent = badge.badge;
+    }
 
-  // стрелки листают ленту, линейка показывает положение
-  var bp = $('.js-bp'), bn = $('.js-bn'), fill = $('.js-bfill'), pos = $('.js-bpos');
-  function step(){ return cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : rail.clientWidth; }
-  function pad(n){ return ('0' + n).slice(-2); }
-  function syncRail(){
-    var max = rail.scrollWidth - rail.clientWidth, x = rail.scrollLeft;
-    bp.disabled = x < 4; bn.disabled = x > max - 4;
-    var vis = Math.max(1, Math.round(rail.clientWidth / step())), first = Math.min(total - vis, Math.round(x / step())) + 1;
-    pos.textContent = (vis > 1 ? pad(first) + '–' + pad(Math.min(total, first + vis - 1)) : pad(first)) + ' / ' + pad(total);
-    var w = rail.clientWidth / rail.scrollWidth;
-    fill.style.setProperty('--w', (w * 100).toFixed(2) + '%');
-    fill.style.setProperty('--a', (max > 0 ? x / max * (1 - w) * 100 : 0).toFixed(2) + '%');
+    // переключатели
+    root.querySelectorAll('.seg').forEach(function(el){
+      var ind = el.querySelector('.seg__ind'), btns = el.querySelectorAll('button'), key = el.dataset.key, opt = cat.options.filter(function(o){ return o.key === key; })[0];
+      function place(){ var b = el.querySelector('[aria-pressed="true"]'); ind.style.setProperty('--x', b.offsetLeft + 'px'); ind.style.setProperty('--w', b.offsetWidth + 'px'); }
+      btns.forEach(function(b){
+        b.addEventListener('click', function(){
+          btns.forEach(function(x){ x.setAttribute('aria-pressed', String(x === b)); }); place();
+          var raw = b.dataset.v, v = isNaN(+raw) ? raw : +raw;
+          state.opts[key] = v;
+          if (opt.filter) { filter(v); return; }
+          meta(); tween();
+        });
+      });
+      window.addEventListener('resize', place);
+      if (document.fonts) document.fonts.ready.then(place);
+      place();
+    });
+
+    // ткани
+    var fl = $('.js-fabrics');
+    if (fl) {
+      var fsel = $('.fsel'), fbtn = $('.fsel__btn');
+      fl.innerHTML = FABRICS.map(function(f, i){ return '<button class="fsel__o" type="button" style="--j:' + i + '" aria-pressed="' + (i === 0) + '"><i style="--c:' + f.c + '"></i>' + f.short + '</button>'; }).join('');
+      fbtn.addEventListener('click', function(){ var o = !fsel.classList.contains('is-open'); fsel.classList.toggle('is-open', o); fbtn.setAttribute('aria-expanded', String(o)); });
+      fl.querySelectorAll('.fsel__o').forEach(function(o, i){
+        o.addEventListener('click', function(){
+          state.fab = i;
+          fl.querySelectorAll('.fsel__o').forEach(function(x, j){ x.setAttribute('aria-pressed', String(j === i)); });
+          $('.fsel__sw').style.setProperty('--c', FABRICS[i].c);
+          $('.js-f-code').textContent = FABRICS[i].code; $('.js-f-name').textContent = FABRICS[i].name;
+          paint(); drawRail();
+        });
+      });
+    }
+
+    // лента
+    var total = cat.items.length;
+    rail.innerHTML = cat.items.map(function(it, i){
+      return '<button class="bcd" type="button" style="--k:' + i + '" aria-pressed="' + (i === 0) + '"><span class="bcd__ph"><svg class="bed" viewBox="20 30 440 290" aria-hidden="true"></svg></span><span class="bcd__n">' + it.name + '</span><span class="bcd__p">' + it.price + '</span></button>';
+    }).join('');
+    var cards = [].slice.call(rail.querySelectorAll('.bcd'));
+    function drawRail(){ cards.forEach(function(c, i){ c.querySelector('svg').innerHTML = drawItem(cat, cat.items[i], {}, fabC()); }); }
+    drawRail();
+
+    function setText(el, html){ el.innerHTML = '<span class="roll">' + html + '</span>'; }
+    function select(i){
+      if (i === state.item) return;
+      cards.forEach(function(c, j){ c.setAttribute('aria-pressed', String(j === i)); });
+      var swap = function(){
+        state.item = i;
+        var it = cat.items[i];
+        setText($('.js-name'), it.name); setText($('.js-price'), it.price); setText($('.js-desc'), it.desc);
+        $('.js-m-name').textContent = it.name;
+        $('.js-m-num').textContent = ('0' + (i + 1)).slice(-2);
+        var cs = root.querySelector('.bds__acts .cta small span'); if (cs) cs.textContent = 'о модели ' + it.name;
+        paint();
+      };
+      var wipe = $('.bds__wipe'), dir = root.classList.contains('bds--alt') ? -1 : 1;
+      if (still.matches || !wipe.animate) swap();
+      else wipe.animate([{transform: 'translateX(' + (-101 * dir) + '%)'}, {transform: 'translateX(0)'}], {duration: 340, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards'}).onfinish = function(){
+        swap();
+        wipe.animate([{transform: 'translateX(0)'}, {transform: 'translateX(' + (101 * dir) + '%)'}], {duration: 420, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards'});
+      };
+      var c = cards[i], max = rail.scrollWidth - rail.clientWidth;
+      if (c.offsetLeft < rail.scrollLeft || c.offsetLeft + c.offsetWidth > rail.scrollLeft + rail.clientWidth) rail.scrollTo({left: Math.min(max, c.offsetLeft), behavior: still.matches ? 'auto' : 'smooth'});
+    }
+    cards.forEach(function(c, i){ c.addEventListener('click', function(){ select(i); }); });
+
+    function filter(v){
+      var first = -1;
+      cards.forEach(function(c, i){ var show = v === 'all' || (cat.items[i].k || cat.kind) === v; c.hidden = !show; if (show && first < 0) first = i; });
+      rail.scrollTo({left: 0});
+      if (cards[state.item].hidden && first >= 0) select(first);
+      syncRail();
+    }
+
+    var bp = $('.js-bp'), bn = $('.js-bn'), fill = $('.js-bfill'), pos = $('.js-bpos');
+    function visible(){ return cards.filter(function(c){ return !c.hidden; }); }
+    function step(){ var v = visible(); return v.length > 1 ? v[1].offsetLeft - v[0].offsetLeft : rail.clientWidth; }
+    function pad(n){ return ('0' + n).slice(-2); }
+    function syncRail(){
+      var n = visible().length, max = rail.scrollWidth - rail.clientWidth, x = rail.scrollLeft;
+      bp.disabled = x < 4; bn.disabled = x > max - 4;
+      var vis = Math.max(1, Math.round(rail.clientWidth / step())), first = Math.max(0, Math.min(n - vis, Math.round(x / step()))) + 1;
+      pos.textContent = (vis > 1 && n > 1 ? pad(first) + '–' + pad(Math.min(n, first + vis - 1)) : pad(first)) + ' / ' + pad(n);
+      var w = Math.min(1, rail.clientWidth / rail.scrollWidth);
+      fill.style.setProperty('--w', (w * 100).toFixed(2) + '%');
+      fill.style.setProperty('--a', (max > 0 ? x / max * (1 - w) * 100 : 0).toFixed(2) + '%');
+    }
+    function kick(b){ b.classList.remove('is-kick'); void b.offsetWidth; b.classList.add('is-kick'); }
+    bp.addEventListener('click', function(){ kick(bp); rail.scrollBy({left: -step(), behavior: still.matches ? 'auto' : 'smooth'}); });
+    bn.addEventListener('click', function(){ kick(bn); rail.scrollBy({left: step(), behavior: still.matches ? 'auto' : 'smooth'}); });
+    var tk = false;
+    rail.addEventListener('scroll', function(){ if (!tk) { tk = true; requestAnimationFrame(function(){ tk = false; syncRail(); }); } }, {passive: true});
+    window.addEventListener('resize', syncRail);
+    dragScroll(rail, step);
+    meta(); paint(); syncRail();
   }
-  bp.addEventListener('click', function(){ rail.scrollBy({left: -step(), behavior: still.matches ? 'auto' : 'smooth'}); });
-  bn.addEventListener('click', function(){ rail.scrollBy({left: step(), behavior: still.matches ? 'auto' : 'smooth'}); });
-  var tk = false;
-  rail.addEventListener('scroll', function(){ if (!tk) { tk = true; requestAnimationFrame(function(){ tk = false; syncRail(); }); } }, {passive: true});
-  window.addEventListener('resize', syncRail);
-  syncRail(); paint();
+
+  // круглые стрелки: ободок-циркуль, заливка и сменяющаяся стрелка
+  document.querySelectorAll('.nv__arr').forEach(function(b){
+    var ico = b.querySelector('svg').outerHTML;
+    b.innerHTML = '<svg class="arr__ring" viewBox="0 0 58 58" aria-hidden="true"><circle class="b" cx="29" cy="29" r="28"/><circle class="d" cx="29" cy="29" r="28" pathLength="1"/></svg><span class="arr__fill"></span><span class="arr__ico">' + ico + ico + '</span>';
+    if (!b.classList.contains('js-bp') && !b.classList.contains('js-bn')) b.addEventListener('click', function(){ b.classList.remove('is-kick'); void b.offsetWidth; b.classList.add('is-kick'); });
+  });
+  CATS.forEach(initCat);
 })();
 </script>
